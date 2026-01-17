@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+
+{% block title %}Task - {{ task.order.order_number }} - Tailoring System{% endblock %}
+
+{% block page_title %}Task Details{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav>
+        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+            <li>
+                <a href="{% url 'task_list' %}" class="hover:text-brown-700 transition-colors">Tasks</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li class="text-brown-800 font-medium">{{ task.order.order_number }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-brown-600 to-brown-700">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-cream-100 rounded-full flex items-center justify-center">
+                        <svg class="w-7 h-7 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Task for Order #{{ task.order.order_number }}</h2>
+                        <p class="text-cream-200 text-sm">Assigned {{ task.assigned_date|date:"F j, Y" }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Status Badge -->
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if task.status == 'approved' %}
+                            bg-green-100 text-green-800
+                        {% elif task.status == 'completed' %}
+                            bg-orange-100 text-orange-800
+                        {% elif task.status == 'in_progress' %}
+                            bg-blue-100 text-blue-800
+                        {% else %}
+                            bg-yellow-100 text-yellow-800
+                        {% endif %}">
+                        {{ task.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-6 py-3 bg-brown-50 border-b border-brown-100 flex flex-wrap items-center gap-3">
+            <a href="{% url 'order_detail' task.order.pk %}"
+               class="inline-flex items-center px-4 py-2 bg-white border border-brown-200 text-brown-700 rounded-lg hover:bg-brown-50 transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                View Order
+            </a>
+            
+            {% if task.tailor == user or user.profile.is_admin %}
+                {% if task.status == 'assigned' %}
+                <form method="post" action="{% url 'task_update_status' task.pk %}" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="in_progress">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Start Working
+                    </button>
+                </form>
+                {% elif task.status == 'in_progress' %}
+                <form method="post" action="{% url 'task_update_status' task.pk %}" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="completed">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Mark Complete
+                    </button>
+                </form>
+                {% endif %}
+            {% endif %}
+            
+            {% if user.profile.is_admin and task.status == 'completed' %}
+            <a href="{% url 'task_approve' task.pk %}"
+               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Approve Task
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Task Info Grid -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Tailor -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-brown-100 rounded-lg">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Assigned Tailor</p>
+                        <p class="text-brown-800 font-medium">
+                            {% if task.tailor %}
+                                {{ task.tailor.get_full_name|default:task.tailor.username }}
+                            {% else %}
+                                <span class="text-brown-400">Unassigned</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Customer -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-blue-100 rounded-lg">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Customer</p>
+                        <a href="{% url 'customer_detail' task.order.customer.pk %}" class="text-brown-800 font-medium hover:text-brown-600">
+                            {{ task.order.customer.name }}
+                        </a>
+                        <p class="text-xs text-brown-400">{{ task.order.customer.contact_number }}</p>
+                    </div>
+                </div>
+
+                <!-- Garment -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-purple-100 rounded-lg">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Garment</p>
+                        <p class="text-brown-800 font-medium">{{ task.order.garment_type.name }}</p>
+                        <p class="text-xs text-brown-400">Qty: {{ task.order.quantity }}</p>
+                    </div>
+                </div>
+
+                <!-- Due Date -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-{% if task.order.due_date < today and task.status != 'approved' %}red{% else %}green{% endif %}-100 rounded-lg">
+                        <svg class="w-5 h-5 text-{% if task.order.due_date < today and task.status != 'approved' %}red{% else %}green{% endif %}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Due Date</p>
+                        <p class="text-brown-800 font-medium {% if task.order.due_date < today and task.status != 'approved' %}text-red-600{% endif %}">
+                            {{ task.order.due_date|date:"M j, Y"|default:"Not set" }}
+                        </p>
+                        {% if task.order.due_date < today and task.status != 'approved' %}
+                        <p class="text-xs text-red-500">Overdue</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Measurements -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h3 class="text-lg font-semibold text-brown-800">Measurements</h3>
+            </div>
+            <div class="p-6">
+                {% if task.order.measurements %}
+                <div class="grid grid-cols-2 gap-4">
+                    {% for key, value in task.order.measurements.items %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500 capitalize">{{ key|cut:"_" }}</span>
+                        <span class="text-brown-800 font-medium">{{ value }} cm</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-brown-500 text-center py-4">No measurements recorded</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Task Timeline -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h3 class="text-lg font-semibold text-brown-800">Timeline</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- Assigned -->
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-brown-800 font-medium">Task Assigned</p>
+                            <p class="text-sm text-brown-500">{{ task.assigned_date|date:"M j, Y - g:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Started -->
+                    {% if task.started_date %}
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-brown-800 font-medium">Work Started</p>
+                            <p class="text-sm text-brown-500">{{ task.started_date|date:"M j, Y - g:i A" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Completed -->
+                    {% if task.completed_date %}
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-brown-800 font-medium">Marked Complete</p>
+                            <p class="text-sm text-brown-500">{{ task.completed_date|date:"M j, Y - g:i A" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Approved -->
+                    {% if task.approved_date %}
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-brown-800 font-medium">Approved</p>
+                            <p class="text-sm text-brown-500">{{ task.approved_date|date:"M j, Y - g:i A" }}</p>
+                            {% if task.approved_by %}
+                            <p class="text-xs text-brown-400">by {{ task.approved_by.get_full_name|default:task.approved_by.username }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Instructions -->
+    {% if task.order.special_instructions or task.notes %}
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+            <h3 class="text-lg font-semibold text-brown-800">Instructions & Notes</h3>
+        </div>
+        <div class="p-6 space-y-4">
+            {% if task.order.special_instructions %}
+            <div>
+                <h4 class="text-sm font-medium text-brown-600 mb-2">Customer Instructions</h4>
+                <p class="text-brown-700 bg-cream-50 p-4 rounded-lg border border-cream-200">{{ task.order.special_instructions }}</p>
+            </div>
+            {% endif %}
+            {% if task.notes %}
+            <div>
+                <h4 class="text-sm font-medium text-brown-600 mb-2">Tailor Notes</h4>
+                <p class="text-brown-700 bg-cream-50 p-4 rounded-lg border border-cream-200">{{ task.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Update Notes Form (for tailor) -->
+    {% if task.tailor == user and task.status != 'approved' %}
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden" id="notes-form-container">
+        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+            <h3 class="text-lg font-semibold text-brown-800">Add Notes</h3>
+        </div>
+        <form method="post" 
+              action="{% url 'task_update_notes' task.pk %}" 
+              class="p-6"
+              hx-post="{% url 'task_update_notes' task.pk %}"
+              hx-target="#notes-form-container"
+              hx-swap="outerHTML">
+            {% csrf_token %}
+            <textarea name="notes"
+                      rows="3"
+                      class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400 resize-none"
+                      placeholder="Add any notes about this task...">{{ task.notes }}</textarea>
+            <div class="mt-4 flex justify-end">
+                <button type="submit"
+                        class="px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors font-medium">
+                    Save Notes
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

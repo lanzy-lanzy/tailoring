@@ -1,0 +1,1141 @@
+{% extends 'base.html' %}
+{% load tz %}
+
+{% block title %}Create Order - El Senior Original Tailoring{% endblock %}
+{% block page_title %}Create New Order{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Screen styles for receipt preview */
+    @media screen {
+        .receipt-page {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    }
+    
+    /* Print styles for A4 - Single Page */
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        
+        html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 11px !important;
+            background: white !important;
+        }
+        
+        /* Hide everything except receipt */
+        body * { 
+            visibility: hidden !important; 
+        }
+        
+        #deposit-receipt, 
+        #deposit-receipt * { 
+            visibility: visible !important; 
+        }
+        
+        .no-print,
+        aside,
+        header,
+        nav,
+        .lg\\:translate-x-0,
+        .lg\\:static {
+            display: none !important;
+        }
+        
+        #deposit-receipt { 
+            position: absolute !important; 
+            left: 0 !important; 
+            top: 0 !important; 
+            width: 210mm !important;
+            height: 297mm !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 8mm 12mm !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            background: white !important;
+        }
+        
+        /* Background colors */
+        .bg-brown-600 { background-color: #6D4A2A !important; }
+        .bg-brown-500 { background-color: #8B5E34 !important; }
+        .bg-brown-100 { background-color: #F0E6D8 !important; }
+        .bg-cream-100 { background-color: #FFF9E6 !important; }
+        .bg-cream-50 { background-color: #FFFDF7 !important; }
+        .bg-green-500 { background-color: #22c55e !important; }
+        .bg-green-50 { background-color: #f0fdf4 !important; }
+        .bg-green-100 { background-color: #dcfce7 !important; }
+        
+        /* Text colors */
+        .text-white { color: white !important; }
+        .text-cream-200 { color: #FFF3CC !important; }
+        .text-cream-100 { color: #FFF9E6 !important; }
+        .text-green-600 { color: #16a34a !important; }
+        .text-green-500 { color: #22c55e !important; }
+        .text-green-800 { color: #166534 !important; }
+        .text-red-600 { color: #dc2626 !important; }
+        
+        /* Border colors */
+        .border-green-500 { border-color: #22c55e !important; }
+        .border-brown-200 { border-color: #E0CCB0 !important; }
+        .border-brown-300 { border-color: #C9A97C !important; }
+        .border-brown-400 { border-color: #A67C52 !important; }
+    }
+    
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto" x-data="orderForm()">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+            <li>
+                <a href="{% url 'order_list' %}" class="hover:text-brown-700 transition-colors">Orders</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li class="text-brown-800 font-medium">Create New Order</li>
+        </ol>
+    </nav>
+
+    <form @submit.prevent="showConfirmation()" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Customer Selection -->
+        <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-gradient-to-r from-brown-50 to-cream-50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brown-100 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-brown-800">Customer Information</h2>
+                        <p class="text-sm text-brown-500">Select an existing customer or create a new one</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- Customer Selection Toggle -->
+                    <div class="flex items-center space-x-6 mb-4">
+                        <label class="inline-flex items-center cursor-pointer group">
+                            <input type="radio" name="customer_mode" value="existing" x-model="customerMode" 
+                                   class="w-4 h-4 text-brown-600 focus:ring-brown-400 border-brown-300">
+                            <span class="ml-2 text-brown-700 group-hover:text-brown-900 transition-colors">Select Existing Customer</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer group">
+                            <input type="radio" name="customer_mode" value="new" x-model="customerMode"
+                                   class="w-4 h-4 text-brown-600 focus:ring-brown-400 border-brown-300">
+                            <span class="ml-2 text-brown-700 group-hover:text-brown-900 transition-colors">Create New Customer</span>
+                        </label>
+                    </div>
+
+                    <!-- Existing Customer Select -->
+                    <div x-show="customerMode === 'existing'" x-transition>
+                        <label for="id_customer" class="block text-sm font-medium text-brown-700 mb-2">
+                            Select Customer <span class="text-red-500">*</span>
+                        </label>
+                        <select name="customer" id="id_customer" x-model="selectedCustomer"
+                                @change="updateCustomerInfo()"
+                                class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+                            <option value="">-- Select a customer --</option>
+                            {% for customer in customers %}
+                            <option value="{{ customer.pk }}" 
+                                    data-name="{{ customer.name }}" 
+                                    data-phone="{{ customer.contact_number }}"
+                                    data-email="{{ customer.email|default:'' }}">
+                                {{ customer.name }} - {{ customer.contact_number }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- New Customer Form -->
+                    <div x-show="customerMode === 'new'" x-transition class="space-y-4 p-5 bg-gradient-to-br from-cream-50 to-brown-50 rounded-xl border border-cream-200">
+                        <input type="hidden" name="create_new_customer" x-bind:value="customerMode === 'new' ? 'true' : 'false'">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-brown-700 mb-2">
+                                    Customer Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="new_customer_name" x-model="newCustomerName"
+                                       class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white"
+                                       placeholder="Enter customer name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-brown-700 mb-2">
+                                    Contact Number <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" name="new_customer_phone" x-model="newCustomerPhone"
+                                       class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white"
+                                       placeholder="09171234567">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Garment & Fabric Selection -->
+        <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-gradient-to-r from-brown-50 to-cream-50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brown-100 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-brown-800">Garment & Fabric</h2>
+                        <p class="text-sm text-brown-500">Select the garment type and fabric</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Garment Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Garment Type <span class="text-red-500">*</span>
+                        </label>
+                        <select name="garment_type" id="id_garment_type" x-model="selectedGarment" @change="updateGarmentInfo()"
+                                class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white" required>
+                            <option value="">-- Select garment --</option>
+                            {% for garment in garment_types %}
+                            <option value="{{ garment.pk }}" 
+                                    data-name="{{ garment.name }}"
+                                    data-fabric="{{ garment.estimated_fabric_meters }}"
+                                    data-price="{{ garment.base_price }}">
+                                {{ garment.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Fabric -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Fabric <span class="text-red-500">*</span>
+                        </label>
+                        <select name="fabric" id="id_fabric" x-model="selectedFabric" @change="updateFabricInfo()"
+                                class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white" required>
+                            <option value="">-- Select fabric --</option>
+                            {% for fabric in fabrics %}
+                            <option value="{{ fabric.pk }}" 
+                                    data-name="{{ fabric.name }} ({{ fabric.color }})"
+                                    data-stock="{{ fabric.stock_meters }}">
+                                {{ fabric.name }} ({{ fabric.color }}) - {{ fabric.stock_meters }}m
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Quantity <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="quantity" x-model.number="quantity" @input="calculateAll()"
+                               min="1" value="1" required
+                               class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white">
+                    </div>
+                </div>
+
+                <!-- Fabric Requirement Info -->
+                <div x-show="selectedGarment && selectedFabric" x-transition 
+                     class="p-4 rounded-lg" :class="hasSufficientStock ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <template x-if="hasSufficientStock">
+                                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </template>
+                            <template x-if="!hasSufficientStock">
+                                <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </template>
+                            <span :class="hasSufficientStock ? 'text-green-800' : 'text-red-800'" class="font-medium">
+                                Required: <span x-text="fabricRequired.toFixed(2)"></span>m
+                            </span>
+                        </div>
+                        <span :class="hasSufficientStock ? 'text-green-600' : 'text-red-600'" class="text-sm">
+                            Available: <span x-text="fabricAvailable.toFixed(2)"></span>m
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Measurements -->
+        <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-gradient-to-r from-brown-50 to-cream-50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brown-100 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-brown-800">Measurements</h2>
+                        <p class="text-sm text-brown-500">Enter customer measurements (in inches)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <template x-for="(field, key) in measurements" :key="key">
+                        <div>
+                            <label :for="'measure_' + key" class="block text-sm font-medium text-brown-700 mb-2 capitalize" x-text="key.replace('_', ' ')"></label>
+                            <div class="relative">
+                                <input type="number" :name="key" :id="'measure_' + key" x-model="measurements[key]"
+                                       step="0.25" min="0" placeholder="0"
+                                       class="w-full px-4 py-2 pr-12 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white">
+                                <span class="absolute right-3 top-2.5 text-brown-400 text-sm">in</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing & Schedule -->
+        <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-gradient-to-r from-brown-50 to-cream-50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brown-100 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-brown-800">Pricing & Schedule</h2>
+                        <p class="text-sm text-brown-500">Set the price and due date (50% deposit required)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Total Price -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Total Price <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-brown-500 font-medium">₱</span>
+                            <input type="number" name="total_price" x-model.number="totalPrice" @input="calculateDeposit()"
+                                   step="0.01" min="0" required
+                                   class="w-full pl-10 pr-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white text-lg font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- Deposit (50%) -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Deposit (50%) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-brown-500 font-medium">₱</span>
+                            <input type="number" name="deposit_amount" x-model.number="depositAmount" readonly
+                                   class="w-full pl-10 pr-4 py-3 border border-brown-200 rounded-lg bg-cream-50 text-lg font-semibold text-brown-700">
+                        </div>
+                    </div>
+
+                    <!-- Balance -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">Balance Due</label>
+                        <div class="px-4 py-3 bg-gradient-to-r from-cream-100 to-brown-50 border border-brown-200 rounded-lg">
+                            <span class="text-lg font-bold text-brown-800">₱<span x-text="balanceAmount.toFixed(2)">0.00</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Due Date <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="due_date" x-model="dueDate" required
+                               class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white">
+                    </div>
+                </div>
+
+                <!-- Special Instructions -->
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-brown-700 mb-2">Special Instructions</label>
+                    <textarea name="special_instructions" x-model="specialInstructions" rows="3"
+                              class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white resize-none"
+                              placeholder="Enter any special instructions, design preferences, or notes..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-between py-4">
+            <a href="{% url 'order_list' %}" class="px-6 py-3 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                Cancel
+            </a>
+            <button type="submit" :disabled="!canSubmit"
+                    :class="canSubmit ? 'bg-brown-600 hover:bg-brown-700' : 'bg-brown-300 cursor-not-allowed'"
+                    class="px-8 py-3 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Review & Create Order
+            </button>
+        </div>
+    </form>
+
+    <!-- ============================================== -->
+    <!-- CONFIRMATION MODAL -->
+    <!-- ============================================== -->
+    <div x-show="showConfirmModal" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showConfirmModal = false"></div>
+        
+        <!-- Modal Content -->
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-auto overflow-hidden"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95">
+                
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-brown-600 to-brown-700 px-6 py-5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Confirm Order</h3>
+                                <p class="text-cream-200 text-sm">Please review the order details before proceeding</p>
+                            </div>
+                        </div>
+                        <button @click="showConfirmModal = false" class="text-white/80 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 max-h-[60vh] overflow-y-auto">
+                    <!-- Order Summary -->
+                    <div class="space-y-4">
+                        <!-- Customer Info -->
+                        <div class="bg-cream-50 rounded-xl p-4 border border-cream-200">
+                            <div class="flex items-center mb-3">
+                                <svg class="w-5 h-5 text-brown-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                <h4 class="font-semibold text-brown-800">Customer</h4>
+                            </div>
+                            <p class="text-lg font-medium text-brown-900" x-text="getCustomerName()"></p>
+                            <p class="text-sm text-brown-600" x-text="getCustomerPhone()"></p>
+                        </div>
+
+                        <!-- Order Details -->
+                        <div class="bg-cream-50 rounded-xl p-4 border border-cream-200">
+                            <div class="flex items-center mb-3">
+                                <svg class="w-5 h-5 text-brown-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                </svg>
+                                <h4 class="font-semibold text-brown-800">Order Details</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-brown-500">Garment</p>
+                                    <p class="font-medium text-brown-900" x-text="garmentName"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-brown-500">Quantity</p>
+                                    <p class="font-medium text-brown-900" x-text="quantity"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-brown-500">Fabric</p>
+                                    <p class="font-medium text-brown-900" x-text="fabricName"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-brown-500">Due Date</p>
+                                    <p class="font-medium text-brown-900" x-text="formatDate(dueDate)"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventory Deduction Warning -->
+                        <div class="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-amber-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold text-amber-800 mb-1">Inventory Deduction</h4>
+                                    <p class="text-sm text-amber-700">The following will be deducted from inventory:</p>
+                                    <ul class="mt-2 space-y-1 text-sm text-amber-800">
+                                        <li class="flex items-center">
+                                            <span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                                            <span x-text="fabricName"></span>: <strong class="ml-1" x-text="fabricRequired.toFixed(2) + 'm'"></strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Summary -->
+                        <div class="bg-gradient-to-br from-brown-600 to-brown-700 rounded-xl p-5 text-white">
+                            <div class="flex items-center mb-4">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                <h4 class="font-semibold">Payment Details</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-cream-200">Total Price</span>
+                                    <span class="text-xl font-bold">₱<span x-text="totalPrice.toFixed(2)"></span></span>
+                                </div>
+                                <div class="border-t border-white/20 pt-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-cream-200">Deposit Required (50%)</span>
+                                        <span class="text-2xl font-bold text-cream-100">₱<span x-text="depositAmount.toFixed(2)"></span></span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-cream-300">Balance After Deposit</span>
+                                    <span class="text-cream-200">₱<span x-text="balanceAmount.toFixed(2)"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="bg-cream-50 px-6 py-4 border-t border-cream-200">
+                    <div class="flex items-center justify-between">
+                        <button @click="showConfirmModal = false" 
+                                class="px-6 py-3 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                            Cancel
+                        </button>
+                        <button @click="submitOrder()" :disabled="isSubmitting"
+                                class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center disabled:opacity-50">
+                            <template x-if="!isSubmitting">
+                                <span class="flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Confirm & Create Order
+                                </span>
+                            </template>
+                            <template x-if="isSubmitting">
+                                <span class="flex items-center">
+                                    <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Creating Order...
+                                </span>
+                            </template>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- DEPOSIT RECEIPT MODAL -->
+    <!-- ============================================== -->
+    <div x-show="showReceiptModal" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+        
+        <!-- Modal Content -->
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-auto overflow-hidden"
+                 x-transition:enter="transition ease-out duration-300 delay-100"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+                
+                <!-- Receipt Content (Printable A4) - Matching Claim Receipt Style -->
+                <div id="deposit-receipt" class="receipt-page bg-white">
+                    
+                    <!-- HEADER - Brown bar like claim receipt -->
+                    <div class="bg-brown-600 text-white px-6 py-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="w-10 h-10 text-cream-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                                </svg>
+                                <div class="ml-3">
+                                    <h1 class="text-2xl font-bold">El Senior Original Tailoring</h1>
+                                    <p class="text-cream-200 text-xs">San Pablo, Dumingag, Zamboanga del Sur</p>
+                                </div>
+                            </div>
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                                <span class="font-bold text-lg">DEPOSIT PAID</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TITLE BAR - Cream like claim receipt -->
+                    <div class="bg-cream-100 border-b border-brown-300 px-6 py-2 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-brown-800">DEPOSIT RECEIPT</h2>
+                            <p class="text-brown-600 text-sm">Order #<span x-text="createdOrderNumber"></span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-brown-500">Order Date</p>
+                            <p class="font-bold text-brown-800" x-text="formatDate(new Date())"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- MAIN CONTENT -->
+                    <div class="px-6 py-3">
+                        
+                        <!-- Customer & Order Info - Compact like claim receipt -->
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div class="border border-brown-200 rounded overflow-hidden">
+                                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                    <h3 class="font-bold text-brown-700 uppercase text-xs">Customer Information</h3>
+                                </div>
+                                <div class="p-2 text-sm space-y-1">
+                                    <div class="flex"><span class="text-brown-500 w-16">Name:</span><span class="font-semibold text-brown-800" x-text="getCustomerName()"></span></div>
+                                    <div class="flex"><span class="text-brown-500 w-16">Phone:</span><span class="text-brown-800" x-text="getCustomerPhone()"></span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-brown-200 rounded overflow-hidden">
+                                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                    <h3 class="font-bold text-brown-700 uppercase text-xs">Order Information</h3>
+                                </div>
+                                <div class="p-2 text-sm space-y-1">
+                                    <div class="flex"><span class="text-brown-500 w-20">Order #:</span><span class="font-mono font-bold text-brown-800" x-text="createdOrderNumber"></span></div>
+                                    <div class="flex"><span class="text-brown-500 w-20">Due Date:</span><span class="text-brown-800 font-medium" x-text="formatDate(dueDate)"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Garment Details - Compact like claim receipt -->
+                        <div class="border border-brown-200 rounded overflow-hidden mb-3">
+                            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                <h3 class="font-bold text-brown-700 uppercase text-xs">Garment Details</h3>
+                            </div>
+                            <div class="p-2">
+                                <div class="grid grid-cols-4 gap-3 text-sm">
+                                    <div>
+                                        <span class="text-brown-500 text-xs block">Garment Type</span>
+                                        <p class="font-bold text-brown-800" x-text="garmentName"></p>
+                                    </div>
+                                    <div>
+                                        <span class="text-brown-500 text-xs block">Fabric</span>
+                                        <p class="font-semibold text-brown-800" x-text="fabricName"></p>
+                                    </div>
+                                    <div>
+                                        <span class="text-brown-500 text-xs block">Fabric Used</span>
+                                        <p class="font-semibold text-brown-800"><span x-text="fabricRequired.toFixed(2)"></span> meters</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-brown-500 text-xs block">Quantity</span>
+                                        <p class="font-bold text-brown-800" x-text="quantity"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Section - Two Columns like claim receipt -->
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <!-- Payment Details -->
+                            <div class="border border-brown-200 rounded overflow-hidden">
+                                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                    <h3 class="font-bold text-brown-700 uppercase text-xs">Payment Details</h3>
+                                </div>
+                                <div class="p-2">
+                                    <table class="w-full text-xs">
+                                        <thead class="bg-cream-100">
+                                            <tr>
+                                                <th class="px-2 py-1 text-left text-brown-600">Description</th>
+                                                <th class="px-2 py-1 text-right text-brown-600">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-cream-200">
+                                            <tr>
+                                                <td class="px-2 py-1 text-brown-700">Deposit Payment (50%)</td>
+                                                <td class="px-2 py-1 text-right font-semibold text-green-600">P<span x-text="depositAmount.toFixed(2)"></span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Summary -->
+                            <div class="border border-brown-200 rounded overflow-hidden">
+                                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                    <h3 class="font-bold text-brown-700 uppercase text-xs">Payment Summary</h3>
+                                </div>
+                                <div class="p-2 space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-brown-600">Total Amount:</span>
+                                        <span class="text-brown-800 font-medium">P<span x-text="totalPrice.toFixed(2)"></span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-brown-700">Deposit Paid:</span>
+                                        <span class="text-green-600 font-semibold">P<span x-text="depositAmount.toFixed(2)"></span></span>
+                                    </div>
+                                    <div class="flex justify-between pt-1 border-t-2 border-brown-300">
+                                        <span class="font-bold text-brown-800">Balance Due:</span>
+                                        <span class="text-red-600 font-bold text-lg">P<span x-text="balanceAmount.toFixed(2)"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FOOTER - Like claim receipt -->
+                    <div class="border-t-2 border-brown-300 bg-cream-50 px-6 py-3">
+                        
+                        <!-- Stamp + Signatures Row -->
+                        <div class="flex items-center justify-between mb-3">
+                            <!-- Customer Signature -->
+                            <div class="text-center flex-1">
+                                <div class="border-b-2 border-brown-400 mb-1 h-10 mx-4"></div>
+                                <p class="font-semibold text-brown-700 text-sm">Customer Signature</p>
+                                <p class="text-xs text-brown-500" x-text="getCustomerName()"></p>
+                            </div>
+                            
+                            <!-- Deposit Stamp -->
+                            <div class="flex-shrink-0 mx-6">
+                                <div class="border-4 border-green-500 rounded-lg px-6 py-2 transform -rotate-3 bg-green-50">
+                                    <p class="text-green-600 font-bold text-xl tracking-wider text-center">DEPOSIT PAID</p>
+                                    <p class="text-green-500 text-xs text-center" x-text="formatDate(new Date())"></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Authorized Signature -->
+                            <div class="text-center flex-1">
+                                <div class="border-b-2 border-brown-400 mb-1 h-10 mx-4"></div>
+                                <p class="font-semibold text-brown-700 text-sm">Authorized Signature</p>
+                                <p class="text-xs text-brown-500">El Senior Original Tailoring</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Thank You -->
+                        <div class="text-center bg-brown-100 rounded py-2 px-4 mb-3">
+                            <p class="text-brown-700 font-bold">Thank you for choosing El Senior Original Tailoring!</p>
+                            <p class="text-brown-600 text-xs">Expected completion: <span class="font-semibold" x-text="formatDate(dueDate)"></span></p>
+                        </div>
+                        
+                        <!-- Terms & Contact - Compact -->
+                        <div class="grid grid-cols-2 gap-4 text-xs text-brown-600 border-t border-brown-200 pt-2">
+                            <div>
+                                <p class="font-bold text-brown-700 mb-1">Terms & Conditions:</p>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>Balance due upon pickup</li>
+                                    <li>Present this receipt when claiming</li>
+                                    <li>Keep this receipt for reference</li>
+                                </ul>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-brown-700 mb-1">Contact:</p>
+                                <p>San Pablo, Dumingag</p>
+                                <p>Zamboanga del Sur</p>
+                                <p class="mt-1 text-brown-400">Receipt #<span x-text="createdOrderNumber"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons (no-print) -->
+                <div class="bg-cream-50 px-6 py-4 border-t border-cream-200 no-print">
+                    <div class="flex items-center justify-between gap-4">
+                        <a :href="'/orders/' + createdOrderId + '/'" 
+                           class="flex-1 px-6 py-3 text-center text-brown-600 border border-brown-300 rounded-xl hover:bg-brown-50 font-medium transition-colors">
+                            View Order
+                        </a>
+                        <button @click="printReceipt()" 
+                                class="flex-1 px-6 py-3 bg-brown-600 hover:bg-brown-700 text-white rounded-xl font-semibold transition-colors flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                            Print Receipt
+                        </button>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'order_create' %}" 
+                           class="block w-full text-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors">
+                            <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Create Another Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function orderForm() {
+    return {
+        // Customer
+        customerMode: 'existing',
+        selectedCustomer: '',
+        newCustomerName: '',
+        newCustomerPhone: '',
+        customerName: '',
+        customerPhone: '',
+        
+        // Garment & Fabric
+        selectedGarment: '',
+        selectedFabric: '',
+        garmentName: '',
+        fabricName: '',
+        quantity: 1,
+        
+        // Fabric requirements
+        fabricPerUnit: 0,
+        fabricRequired: 0,
+        fabricAvailable: 0,
+        hasSufficientStock: true,
+        
+        // Measurements
+        measurements: {
+            chest: '',
+            waist: '',
+            hips: '',
+            shoulder: '',
+            sleeve_length: '',
+            body_length: '',
+            inseam: '',
+            neck: ''
+        },
+        
+        // Pricing
+        totalPrice: 0,
+        depositAmount: 0,
+        balanceAmount: 0,
+        
+        // Schedule
+        dueDate: '',
+        specialInstructions: '',
+        
+        // Modal states
+        showConfirmModal: false,
+        showReceiptModal: false,
+        isSubmitting: false,
+        
+        // Created order info
+        createdOrderId: null,
+        createdOrderNumber: '',
+        
+        get canSubmit() {
+            const hasCustomer = this.customerMode === 'existing' ? this.selectedCustomer : (this.newCustomerName && this.newCustomerPhone);
+            return hasCustomer && this.selectedGarment && this.selectedFabric && this.totalPrice > 0 && this.dueDate && this.hasSufficientStock;
+        },
+        
+        updateCustomerInfo() {
+            const select = document.getElementById('id_customer');
+            if (select && select.selectedOptions[0]) {
+                this.customerName = select.selectedOptions[0].dataset.name || '';
+                this.customerPhone = select.selectedOptions[0].dataset.phone || '';
+            }
+        },
+        
+        updateGarmentInfo() {
+            const select = document.getElementById('id_garment_type');
+            if (select && select.selectedOptions[0] && this.selectedGarment) {
+                this.garmentName = select.selectedOptions[0].dataset.name || '';
+                this.fabricPerUnit = parseFloat(select.selectedOptions[0].dataset.fabric) || 0;
+                const basePrice = parseFloat(select.selectedOptions[0].dataset.price) || 0;
+                this.totalPrice = basePrice * this.quantity;
+                this.calculateAll();
+            }
+        },
+        
+        updateFabricInfo() {
+            const select = document.getElementById('id_fabric');
+            if (select && select.selectedOptions[0] && this.selectedFabric) {
+                this.fabricName = select.selectedOptions[0].dataset.name || '';
+                this.fabricAvailable = parseFloat(select.selectedOptions[0].dataset.stock) || 0;
+                this.checkStock();
+            }
+        },
+        
+        calculateAll() {
+            this.fabricRequired = this.fabricPerUnit * this.quantity;
+            this.checkStock();
+            this.calculateDeposit();
+        },
+        
+        checkStock() {
+            this.hasSufficientStock = this.fabricAvailable >= this.fabricRequired;
+        },
+        
+        calculateDeposit() {
+            this.depositAmount = Math.round(this.totalPrice * 0.5 * 100) / 100;
+            this.balanceAmount = Math.round((this.totalPrice - this.depositAmount) * 100) / 100;
+        },
+        
+        getCustomerName() {
+            if (this.customerMode === 'new') {
+                return this.newCustomerName || 'New Customer';
+            }
+            return this.customerName || 'Selected Customer';
+        },
+        
+        getCustomerPhone() {
+            if (this.customerMode === 'new') {
+                return this.newCustomerPhone || '';
+            }
+            return this.customerPhone || '';
+        },
+        
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        },
+        
+        showConfirmation() {
+            if (!this.canSubmit) {
+                alert('Please fill in all required fields and ensure sufficient stock.');
+                return;
+            }
+            this.updateCustomerInfo();
+            this.showConfirmModal = true;
+        },
+        
+        async submitOrder() {
+            this.isSubmitting = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                // Customer
+                if (this.customerMode === 'new') {
+                    formData.append('create_new_customer', 'true');
+                    formData.append('new_customer_name', this.newCustomerName);
+                    formData.append('new_customer_phone', this.newCustomerPhone);
+                } else {
+                    formData.append('customer', this.selectedCustomer);
+                }
+                
+                // Order details
+                formData.append('garment_type', this.selectedGarment);
+                formData.append('fabric', this.selectedFabric);
+                formData.append('quantity', this.quantity);
+                formData.append('total_price', this.totalPrice);
+                formData.append('due_date', this.dueDate);
+                formData.append('special_instructions', this.specialInstructions);
+                
+                // Measurements
+                for (const [key, value] of Object.entries(this.measurements)) {
+                    if (value) formData.append(key, value);
+                }
+                
+                const response = await fetch('{% url "order_create" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.createdOrderId = data.order_id;
+                    this.createdOrderNumber = data.order_number;
+                    this.showConfirmModal = false;
+                    this.showReceiptModal = true;
+                } else {
+                    alert(data.error || 'Failed to create order. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+        
+        printReceipt() {
+            const receiptContent = document.getElementById('deposit-receipt').innerHTML;
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deposit Receipt - El Senior Original Tailoring</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#FFFDF7',
+                            100: '#FFF9E6',
+                            200: '#FFF3CC',
+                            300: '#FFECB3',
+                        },
+                        brown: {
+                            50: '#FAF6F1',
+                            100: '#F0E6D8',
+                            200: '#E0CCB0',
+                            300: '#C9A97C',
+                            400: '#A67C52',
+                            500: '#8B5E34',
+                            600: '#6D4A2A',
+                            700: '#553A21',
+                            800: '#3D2A18',
+                            900: '#2A1D10',
+                        }
+                    }
+                }
+            }
+        }
+    <\/script>
+    <style>
+        @media print {
+            @page { 
+                size: A4 portrait; 
+                margin: 0; 
+            }
+            
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            html, body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 11px !important;
+                background: white !important;
+            }
+            
+            .receipt-page {
+                width: 210mm !important;
+                height: 297mm !important;
+                padding: 8mm 12mm !important;
+                box-sizing: border-box !important;
+            }
+            
+            .no-print { display: none !important; }
+            
+            /* Background colors */
+            .bg-brown-600 { background-color: #6D4A2A !important; }
+            .bg-brown-500 { background-color: #8B5E34 !important; }
+            .bg-brown-100 { background-color: #F0E6D8 !important; }
+            .bg-cream-100 { background-color: #FFF9E6 !important; }
+            .bg-cream-50 { background-color: #FFFDF7 !important; }
+            .bg-green-500 { background-color: #22c55e !important; }
+            .bg-green-50 { background-color: #f0fdf4 !important; }
+            .bg-green-100 { background-color: #dcfce7 !important; }
+            
+            /* Text colors */
+            .text-white { color: white !important; }
+            .text-cream-200 { color: #FFF3CC !important; }
+            .text-cream-100 { color: #FFF9E6 !important; }
+            .text-green-600 { color: #16a34a !important; }
+            .text-green-500 { color: #22c55e !important; }
+            .text-green-800 { color: #166534 !important; }
+            .text-red-600 { color: #dc2626 !important; }
+            
+            /* Border colors */
+            .border-green-500 { border-color: #22c55e !important; }
+            .border-brown-200 { border-color: #E0CCB0 !important; }
+            .border-brown-300 { border-color: #C9A97C !important; }
+            .border-brown-400 { border-color: #A67C52 !important; }
+        }
+        
+        /* Screen preview styles */
+        body {
+            background: #f3f4f6;
+            padding: 20px;
+        }
+        .receipt-page {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-page bg-white">
+        ${receiptContent}
+    </div>
+    <script>
+        // Wait for Tailwind to load, then print
+        setTimeout(function() {
+            window.print();
+            window.onafterprint = function() {
+                window.close();
+            };
+        }, 500);
+    <\/script>
+</body>
+</html>
+            `);
+            printWindow.document.close();
+        }
+    }
+}
+</script>
+{% endblock %}

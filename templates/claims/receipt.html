@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+
+{% block title %}Claim Receipt - {{ order.order_number }} - El Senior Original Tailoring{% endblock %}
+
+{% block page_title %}Claim Receipt{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Screen styles */
+    @media screen {
+        .receipt-page {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    }
+    
+    /* Print styles for A4 - Single Page */
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        
+        html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 11px !important;
+            background: white !important;
+        }
+        
+        .no-print,
+        aside,
+        header,
+        nav,
+        .lg\\:translate-x-0,
+        .lg\\:static {
+            display: none !important;
+        }
+        
+        main {
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+        }
+        
+        .flex.h-screen,
+        .flex-1.flex.flex-col,
+        .flex-1.overflow-y-auto {
+            display: block !important;
+            height: auto !important;
+            overflow: visible !important;
+            padding: 0 !important;
+        }
+        
+        .receipt-page {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 8mm 12mm !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+        }
+        
+        /* Background colors */
+        .bg-brown-600 { background-color: #6D4A2A !important; }
+        .bg-brown-500 { background-color: #8B5E34 !important; }
+        .bg-brown-100 { background-color: #F0E6D8 !important; }
+        .bg-cream-100 { background-color: #FFF9E6 !important; }
+        .bg-cream-50 { background-color: #FFFDF7 !important; }
+        .bg-green-500 { background-color: #22c55e !important; }
+        .bg-green-50 { background-color: #f0fdf4 !important; }
+        .bg-blue-100 { background-color: #dbeafe !important; }
+        .bg-green-100 { background-color: #dcfce7 !important; }
+        
+        /* Text colors */
+        .text-white { color: white !important; }
+        .text-cream-200 { color: #FFF3CC !important; }
+        .text-green-600 { color: #16a34a !important; }
+        .text-blue-700 { color: #1d4ed8 !important; }
+        
+        /* Border colors */
+        .border-green-500 { border-color: #22c55e !important; }
+        .border-brown-200 { border-color: #E0CCB0 !important; }
+        .border-brown-300 { border-color: #C9A97C !important; }
+    }
+    
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Action Buttons (no-print) -->
+<div class="max-w-4xl mx-auto mb-4 flex justify-between items-center no-print">
+    <a href="{% url 'claims_list' %}" class="inline-flex items-center text-brown-600 hover:text-brown-800">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Claims
+    </a>
+    
+    <button onclick="window.print()" 
+            class="inline-flex items-center px-6 py-3 bg-brown-500 text-white font-medium rounded-lg hover:bg-brown-600 transition-colors shadow-lg">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print A4 Receipt
+    </button>
+</div>
+
+<!-- A4 Receipt Page -->
+<div class="receipt-page bg-white rounded-xl border border-brown-200 overflow-hidden">
+    
+    <!-- HEADER -->
+    <div class="bg-brown-600 text-white px-6 py-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-10 h-10 text-cream-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                </svg>
+                <div class="ml-3">
+                    <h1 class="text-2xl font-bold">El Senior Original Tailoring</h1>
+                    <p class="text-cream-200 text-xs">San Pablo, Dumingag, Zamboanga del Sur</p>
+                </div>
+            </div>
+            <div class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                <span class="font-bold text-lg">DELIVERED</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TITLE BAR -->
+    <div class="bg-cream-100 border-b border-brown-300 px-6 py-2 flex justify-between items-center">
+        <div>
+            <h2 class="text-xl font-bold text-brown-800">DELIVERY RECEIPT</h2>
+            <p class="text-brown-600 text-sm">Order #{{ order.order_number }}</p>
+        </div>
+        <div class="text-right">
+            <p class="text-xs text-brown-500">Claim Date</p>
+            <p class="font-bold text-brown-800">{{ claim_date|date:"F d, Y" }} - {{ claim_date|time:"g:i A" }}</p>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT -->
+    <div class="px-6 py-3">
+        
+        <!-- Customer & Order Info - Compact -->
+        <div class="grid grid-cols-2 gap-4 mb-3">
+            <div class="border border-brown-200 rounded overflow-hidden">
+                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                    <h3 class="font-bold text-brown-700 uppercase text-xs">Customer Information</h3>
+                </div>
+                <div class="p-2 text-sm space-y-1">
+                    <div class="flex"><span class="text-brown-500 w-16">Name:</span><span class="font-semibold text-brown-800">{{ order.customer.name }}</span></div>
+                    <div class="flex"><span class="text-brown-500 w-16">Phone:</span><span class="text-brown-800">{{ order.customer.phone }}</span></div>
+                    {% if order.customer.email %}<div class="flex"><span class="text-brown-500 w-16">Email:</span><span class="text-brown-800 text-xs">{{ order.customer.email }}</span></div>{% endif %}
+                    {% if order.customer.address %}<div class="flex"><span class="text-brown-500 w-16">Address:</span><span class="text-brown-800 text-xs">{{ order.customer.address }}</span></div>{% endif %}
+                </div>
+            </div>
+            
+            <div class="border border-brown-200 rounded overflow-hidden">
+                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                    <h3 class="font-bold text-brown-700 uppercase text-xs">Order Information</h3>
+                </div>
+                <div class="p-2 text-sm space-y-1">
+                    <div class="flex"><span class="text-brown-500 w-24">Order Date:</span><span class="text-brown-800">{{ order.created_at|date:"M d, Y" }}</span></div>
+                    {% if order.due_date %}<div class="flex"><span class="text-brown-500 w-24">Due Date:</span><span class="text-brown-800">{{ order.due_date|date:"M d, Y" }}</span></div>{% endif %}
+                    {% if order.completed_date %}<div class="flex"><span class="text-brown-500 w-24">Completed:</span><span class="text-brown-800">{{ order.completed_date|date:"M d, Y" }}</span></div>{% endif %}
+                    {% if task %}<div class="flex"><span class="text-brown-500 w-24">Tailor:</span><span class="text-brown-800">{{ task.tailor.get_full_name|default:task.tailor.username }}</span></div>{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Garment Details - Compact -->
+        <div class="border border-brown-200 rounded overflow-hidden mb-3">
+            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                <h3 class="font-bold text-brown-700 uppercase text-xs">Garment Details</h3>
+            </div>
+            <div class="p-2">
+                <div class="grid grid-cols-4 gap-3 text-sm">
+                    <div>
+                        <span class="text-brown-500 text-xs block">Garment Type</span>
+                        <p class="font-bold text-brown-800">{{ order.garment_type.name }}</p>
+                    </div>
+                    <div>
+                        <span class="text-brown-500 text-xs block">Fabric</span>
+                        <p class="font-semibold text-brown-800">{{ order.fabric.name }} ({{ order.fabric.color }})</p>
+                    </div>
+                    <div>
+                        <span class="text-brown-500 text-xs block">Fabric Used</span>
+                        <p class="font-semibold text-brown-800">{{ order.fabric_amount }} meters</p>
+                    </div>
+                    <div>
+                        <span class="text-brown-500 text-xs block">Accessories</span>
+                        {% if order.order_accessories.all %}
+                        <p class="text-brown-800 text-xs">{% for oa in order.order_accessories.all %}{{ oa.accessory.name }}({{ oa.quantity }}){% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                        {% else %}<p class="text-brown-400 text-xs">None</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Measurements - Compact Grid -->
+        {% if order.measurements %}
+        <div class="border border-brown-200 rounded overflow-hidden mb-3">
+            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                <h3 class="font-bold text-brown-700 uppercase text-xs">Measurements</h3>
+            </div>
+            <div class="p-2">
+                <div class="grid grid-cols-8 gap-2 text-sm">
+                    {% if order.measurements.chest %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Chest</span><span class="font-bold text-brown-800">{{ order.measurements.chest }}"</span></div>{% endif %}
+                    {% if order.measurements.waist %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Waist</span><span class="font-bold text-brown-800">{{ order.measurements.waist }}"</span></div>{% endif %}
+                    {% if order.measurements.hips %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Hips</span><span class="font-bold text-brown-800">{{ order.measurements.hips }}"</span></div>{% endif %}
+                    {% if order.measurements.shoulder %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Shoulder</span><span class="font-bold text-brown-800">{{ order.measurements.shoulder }}"</span></div>{% endif %}
+                    {% if order.measurements.sleeve_length %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Sleeve</span><span class="font-bold text-brown-800">{{ order.measurements.sleeve_length }}"</span></div>{% endif %}
+                    {% if order.measurements.body_length %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Length</span><span class="font-bold text-brown-800">{{ order.measurements.body_length }}"</span></div>{% endif %}
+                    {% if order.measurements.inseam %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Inseam</span><span class="font-bold text-brown-800">{{ order.measurements.inseam }}"</span></div>{% endif %}
+                    {% if order.measurements.neck %}<div class="bg-cream-50 p-1 rounded text-center"><span class="text-brown-500 text-xs block">Neck</span><span class="font-bold text-brown-800">{{ order.measurements.neck }}"</span></div>{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Payment Section - Two Columns -->
+        <div class="grid grid-cols-2 gap-4 mb-3">
+            <!-- Payment History -->
+            <div class="border border-brown-200 rounded overflow-hidden">
+                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                    <h3 class="font-bold text-brown-700 uppercase text-xs">Payment History</h3>
+                </div>
+                <table class="w-full text-xs">
+                    <thead class="bg-cream-100">
+                        <tr>
+                            <th class="px-2 py-1 text-left text-brown-600">Date</th>
+                            <th class="px-2 py-1 text-left text-brown-600">Type</th>
+                            <th class="px-2 py-1 text-left text-brown-600">Method</th>
+                            <th class="px-2 py-1 text-right text-brown-600">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-cream-200">
+                        {% for payment in order.payments.all %}
+                        <tr>
+                            <td class="px-2 py-1 text-brown-700">{{ payment.created_at|date:"M d" }}</td>
+                            <td class="px-2 py-1">
+                                <span class="px-1 py-0.5 text-xs rounded {% if payment.payment_type == 'deposit' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                    {{ payment.get_payment_type_display }}
+                                </span>
+                            </td>
+                            <td class="px-2 py-1 text-brown-700 capitalize">{{ payment.payment_method }}</td>
+                            <td class="px-2 py-1 text-right font-semibold text-green-600">P{{ payment.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-2 py-2 text-center text-brown-400">No payments</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Payment Summary -->
+            <div class="border border-brown-200 rounded overflow-hidden">
+                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                    <h3 class="font-bold text-brown-700 uppercase text-xs">Payment Summary</h3>
+                </div>
+                <div class="p-2 space-y-1 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-brown-600">Service Charge:</span>
+                        <span class="text-brown-800">P{{ order.service_charge|floatformat:2 }}</span>
+                    </div>
+                    {% if order.additional_charges %}
+                    <div class="flex justify-between">
+                        <span class="text-brown-600">Additional:</span>
+                        <span class="text-brown-800">P{{ order.additional_charges|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between pt-1 border-t border-brown-200">
+                        <span class="font-semibold text-brown-700">Total Amount:</span>
+                        <span class="font-bold text-brown-800">P{{ order.total_amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-brown-700">Total Paid:</span>
+                        <span class="text-green-600 font-semibold">P{{ order.total_paid|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between pt-1 border-t-2 border-brown-300">
+                        <span class="font-bold text-brown-800">Balance:</span>
+                        {% if order.remaining_balance > 0 %}
+                        <span class="text-red-600 font-bold text-lg">P{{ order.remaining_balance|floatformat:2 }}</span>
+                        {% else %}
+                        <span class="text-green-600 font-bold">FULLY PAID</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notes -->
+        {% if order.notes %}
+        <div class="border border-brown-200 rounded overflow-hidden mb-3">
+            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                <h3 class="font-bold text-brown-700 uppercase text-xs">Notes</h3>
+            </div>
+            <div class="p-2 text-sm text-brown-700">{{ order.notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- FOOTER -->
+    <div class="border-t-2 border-brown-300 bg-cream-50 px-6 py-3">
+        
+        <!-- Stamp + Signatures Row -->
+        <div class="flex items-center justify-between mb-3">
+            <!-- Customer Signature -->
+            <div class="text-center flex-1">
+                <div class="border-b-2 border-brown-400 mb-1 h-10 mx-4"></div>
+                <p class="font-semibold text-brown-700 text-sm">Customer Signature</p>
+                <p class="text-xs text-brown-500">{{ order.customer.name }}</p>
+            </div>
+            
+            <!-- Delivered Stamp -->
+            <div class="flex-shrink-0 mx-6">
+                <div class="border-4 border-green-500 rounded-lg px-6 py-2 transform -rotate-3 bg-green-50">
+                    <p class="text-green-600 font-bold text-xl tracking-wider text-center">DELIVERED</p>
+                    <p class="text-green-500 text-xs text-center">{{ claim_date|date:"M d, Y g:i A" }}</p>
+                </div>
+            </div>
+            
+            <!-- Authorized Signature -->
+            <div class="text-center flex-1">
+                <div class="border-b-2 border-brown-400 mb-1 h-10 mx-4"></div>
+                <p class="font-semibold text-brown-700 text-sm">Authorized Signature</p>
+                <p class="text-xs text-brown-500">El Senior Original Tailoring</p>
+            </div>
+        </div>
+        
+        <!-- Thank You -->
+        <div class="text-center bg-brown-100 rounded py-2 px-4 mb-3">
+            <p class="text-brown-700 font-bold">Thank you for choosing El Senior Original Tailoring!</p>
+            <p class="text-brown-600 text-xs">We appreciate your business and look forward to serving you again.</p>
+        </div>
+        
+        <!-- Terms & Contact - Compact -->
+        <div class="grid grid-cols-2 gap-4 text-xs text-brown-600 border-t border-brown-200 pt-2">
+            <div>
+                <p class="font-bold text-brown-700 mb-1">Terms & Conditions:</p>
+                <ul class="list-disc list-inside space-y-0.5">
+                    <li>Check garment thoroughly before leaving</li>
+                    <li>Alteration claims within 7 days only</li>
+                    <li>Keep this receipt for reference</li>
+                </ul>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-brown-700 mb-1">Contact:</p>
+                <p>San Pablo, Dumingag</p>
+                <p>Zamboanga del Sur</p>
+                <p class="mt-1 text-brown-400">Receipt #{{ order.order_number }}-{{ claim_date|date:"Ymd" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Logs - Tailoring System{% endblock %}
+
+{% block page_title %}Inventory Logs{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <p class="text-brown-600">History of all inventory changes and stock movements</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- Back to Dashboard -->
+            <a href="{% url 'inventory_dashboard' %}"
+               class="inline-flex items-center px-4 py-2 text-brown-600 hover:text-brown-800 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                </svg>
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 p-4">
+        <form method="get" class="flex flex-wrap gap-4 items-end">
+            <!-- Item Type Filter -->
+            <div class="flex-1 min-w-[150px]">
+                <label for="item_type" class="block text-sm font-medium text-brown-700 mb-1">Item Type</label>
+                <select name="item_type" id="item_type"
+                        class="w-full px-3 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+                    <option value="">All Items</option>
+                    <option value="fabric" {% if request.GET.item_type == 'fabric' %}selected{% endif %}>Fabrics</option>
+                    <option value="accessory" {% if request.GET.item_type == 'accessory' %}selected{% endif %}>Accessories</option>
+                </select>
+            </div>
+
+            <!-- Action Filter -->
+            <div class="flex-1 min-w-[150px]">
+                <label for="action" class="block text-sm font-medium text-brown-700 mb-1">Action</label>
+                <select name="action" id="action"
+                        class="w-full px-3 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+                    <option value="">All Actions</option>
+                    <option value="add" {% if request.GET.action == 'add' %}selected{% endif %}>Stock Added</option>
+                    <option value="remove" {% if request.GET.action == 'remove' %}selected{% endif %}>Stock Removed</option>
+                    <option value="adjust" {% if request.GET.action == 'adjust' %}selected{% endif %}>Adjustment</option>
+                    <option value="order" {% if request.GET.action == 'order' %}selected{% endif %}>Order Usage</option>
+                </select>
+            </div>
+
+            <!-- Date Range -->
+            <div class="flex-1 min-w-[150px]">
+                <label for="date_from" class="block text-sm font-medium text-brown-700 mb-1">From Date</label>
+                <input type="date" name="date_from" id="date_from" value="{{ request.GET.date_from }}"
+                       class="w-full px-3 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+            </div>
+            <div class="flex-1 min-w-[150px]">
+                <label for="date_to" class="block text-sm font-medium text-brown-700 mb-1">To Date</label>
+                <input type="date" name="date_to" id="date_to" value="{{ request.GET.date_to }}"
+                       class="w-full px-3 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+            </div>
+
+            <!-- Filter Button -->
+            <button type="submit"
+                    class="px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm">
+                <svg class="w-5 h-5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                Filter
+            </button>
+            {% if request.GET %}
+            <a href="{% url 'inventory_logs' %}" class="px-4 py-2 text-brown-600 hover:text-brown-800 transition-colors">
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-brown-100">
+                <thead class="bg-brown-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            Date & Time
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            Item
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            Action
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            Change
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            Stock Level
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            User
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">
+                            Notes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-brown-100">
+                    {% for log in logs %}
+                    <tr class="hover:bg-cream-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-brown-800">{{ log.created_at|date:"M d, Y" }}</div>
+                            <div class="text-xs text-brown-500">{{ log.created_at|time:"H:i" }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center
+                                    {% if log.item_type == 'fabric' %}bg-brown-100{% else %}bg-blue-100{% endif %}">
+                                    {% if log.item_type == 'fabric' %}
+                                    <svg class="w-4 h-4 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    {% else %}
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-brown-800">
+                                        {% if log.fabric %}{{ log.fabric.name }}{% else %}{{ log.accessory.name }}{% endif %}
+                                    </div>
+                                    <div class="text-xs text-brown-500">{{ log.get_item_type_display }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if log.action == 'add' %}bg-green-100 text-green-800
+                                {% elif log.action == 'remove' %}bg-red-100 text-red-800
+                                {% elif log.action == 'order' %}bg-purple-100 text-purple-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-semibold
+                                {% if log.action == 'add' %}text-green-600{% elif log.action == 'remove' or log.action == 'order' %}text-red-600{% else %}text-blue-600{% endif %}">
+                                {% if log.action == 'add' %}+{% elif log.action == 'remove' or log.action == 'order' %}-{% endif %}{{ log.quantity }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-brown-800">
+                                {{ log.previous_stock }} &rarr; {{ log.new_stock }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-brown-700">
+                                {% if log.created_by %}
+                                    {{ log.created_by.get_full_name|default:log.created_by.username }}
+                                {% else %}
+                                    <span class="text-brown-400">System</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-brown-600 max-w-xs truncate">
+                                {% if log.order %}
+                                    <a href="{% url 'order_detail' log.order.pk %}" class="text-brown-600 hover:text-brown-800 underline">
+                                        Order #{{ log.order.pk }}
+                                    </a>
+                                {% endif %}
+                                {% if log.notes %}
+                                    {{ log.notes|truncatechars:50 }}
+                                {% elif not log.order %}
+                                    <span class="text-brown-400">-</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <svg class="w-12 h-12 mx-auto text-brown-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-brown-500 mb-2">No inventory logs found</p>
+                            <p class="text-brown-400 text-sm">Stock changes will appear here when items are added or removed</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-brown-100 bg-cream-50">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-brown-600">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} logs
+                </p>
+                <nav class="flex items-center space-x-1">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                       class="px-3 py-1 rounded-lg text-brown-600 hover:bg-brown-100 transition-colors">
+                        Previous
+                    </a>
+                    {% endif %}
+                    <span class="px-3 py-1 bg-brown-600 text-white rounded-lg">{{ page_obj.number }}</span>
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                       class="px-3 py-1 rounded-lg text-brown-600 hover:bg-brown-100 transition-colors">
+                        Next
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

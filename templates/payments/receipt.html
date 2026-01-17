@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Receipt #{{ payment.payment_number }} - El Senior Original Tailoring{% endblock %}
+{% block page_title %}Payment Receipt{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Screen styles */
+    @media screen {
+        .receipt-page {
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+    }
+    
+    /* Print styles for A4 */
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        
+        html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 12px !important;
+            background: white !important;
+        }
+        
+        .no-print,
+        aside,
+        header,
+        nav,
+        .lg\\:translate-x-0,
+        .lg\\:static {
+            display: none !important;
+        }
+        
+        main {
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+        }
+        
+        .flex.h-screen,
+        .flex-1.flex.flex-col,
+        .flex-1.overflow-y-auto {
+            display: block !important;
+            height: auto !important;
+            overflow: visible !important;
+            padding: 0 !important;
+        }
+        
+        .receipt-page {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 12mm 15mm !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Background colors */
+        .bg-gradient-to-br, .from-green-500, .to-green-600 { background: #22c55e !important; }
+        .bg-brown-100 { background-color: #F0E6D8 !important; }
+        .bg-cream-50 { background-color: #FFFDF7 !important; }
+        .bg-green-50 { background-color: #f0fdf4 !important; }
+        .bg-green-100 { background-color: #dcfce7 !important; }
+        .bg-amber-50 { background-color: #fffbeb !important; }
+        
+        /* Text colors */
+        .text-white { color: white !important; }
+        .text-green-100 { color: #dcfce7 !important; }
+        .text-green-600, .text-green-700 { color: #16a34a !important; }
+    }
+    
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Action Buttons (no-print) -->
+<div class="max-w-4xl mx-auto mb-4 flex items-center justify-between no-print">
+    <a href="{% url 'order_detail' payment.order.pk %}" class="text-brown-600 hover:text-brown-800 font-medium transition-colors flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Order
+    </a>
+    <button onclick="window.print()"
+            class="inline-flex items-center px-6 py-3 bg-brown-600 text-white rounded-xl hover:bg-brown-700 transition-colors shadow-lg font-semibold">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print A4 Receipt
+    </button>
+</div>
+
+<!-- A4 Receipt Page -->
+<div class="receipt-page bg-white rounded-2xl shadow-xl overflow-hidden">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-br from-green-500 to-green-600 px-8 py-6 text-center">
+        <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-white">Payment Received</h2>
+        <p class="text-green-100">{{ payment.payment_date|date:"F j, Y - g:i A" }}</p>
+    </div>
+
+    <div class="p-8">
+        <!-- Shop Info -->
+        <div class="text-center border-b-2 border-dashed border-brown-300 pb-6 mb-6">
+            <div class="flex items-center justify-center mb-2">
+                <svg class="w-10 h-10 text-brown-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                </svg>
+                <h1 class="text-3xl font-bold text-brown-800">El Senior Original Tailoring</h1>
+            </div>
+            <p class="text-brown-600">Professional Tailoring Services</p>
+            <p class="text-sm text-brown-500 mt-1">San Pablo, Dumingag, Zamboanga del Sur</p>
+        </div>
+
+        <!-- Receipt Number -->
+        <div class="text-center mb-6">
+            <span class="inline-block bg-brown-100 text-brown-800 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wide">
+                {{ payment.get_payment_type_display }} Receipt
+            </span>
+            <p class="text-2xl font-mono font-bold text-brown-800 mt-2">{{ payment.payment_number }}</p>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-2 gap-6 mb-6">
+            <div class="border border-brown-200 rounded-lg overflow-hidden">
+                <div class="bg-brown-100 px-4 py-2 border-b border-brown-200">
+                    <h3 class="font-bold text-brown-700 uppercase text-xs">Payment Details</h3>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-brown-500">Order Number:</span>
+                        <span class="font-mono font-semibold text-brown-800">{{ payment.order.order_number }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-brown-500">Payment Method:</span>
+                        <span class="text-brown-800 capitalize">{{ payment.payment_method }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-brown-500">Received By:</span>
+                        <span class="text-brown-800">{{ payment.received_by.first_name|default:payment.received_by.username }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border border-brown-200 rounded-lg overflow-hidden">
+                <div class="bg-brown-100 px-4 py-2 border-b border-brown-200">
+                    <h3 class="font-bold text-brown-700 uppercase text-xs">Customer Information</h3>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-brown-500">Name:</span>
+                        <span class="font-medium text-brown-800">{{ payment.order.customer.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-brown-500">Phone:</span>
+                        <span class="text-brown-800">{{ payment.order.customer.phone }}</span>
+                    </div>
+                    {% if payment.order.customer.email %}
+                    <div class="flex justify-between">
+                        <span class="text-brown-500">Email:</span>
+                        <span class="text-brown-800 text-sm">{{ payment.order.customer.email }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Amount Paid - Large Display -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 text-center mb-6 border-2 border-green-200">
+            <p class="text-sm text-green-700 uppercase tracking-wider mb-2 font-semibold">Amount Paid</p>
+            <p class="text-5xl font-bold text-green-700">P{{ payment.amount|floatformat:2 }}</p>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="border border-brown-200 rounded-lg overflow-hidden mb-6">
+            <div class="bg-brown-100 px-4 py-2 border-b border-brown-200">
+                <h3 class="font-bold text-brown-700 uppercase text-xs">Order Summary</h3>
+            </div>
+            <div class="p-4 space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-brown-600">Total Order Amount:</span>
+                    <span class="text-brown-800 font-medium">P{{ payment.order.total_price|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-brown-600">Total Paid:</span>
+                    <span class="text-green-600 font-semibold">P{{ payment.order.total_paid|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between pt-3 border-t-2 border-brown-200">
+                    <span class="font-bold text-brown-800 text-lg">Remaining Balance:</span>
+                    {% if payment.order.remaining_balance > 0 %}
+                    <span class="font-bold text-red-600 text-xl">P{{ payment.order.remaining_balance|floatformat:2 }}</span>
+                    {% else %}
+                    <span class="font-bold text-green-600 text-xl">FULLY PAID</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if payment.notes %}
+        <div class="mb-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <p class="text-xs text-amber-600 uppercase tracking-wide font-semibold mb-1">Notes</p>
+            <p class="text-amber-800">{{ payment.notes }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Signatures -->
+        <div class="grid grid-cols-2 gap-12 mb-6 mt-8">
+            <div class="text-center">
+                <div class="border-b-2 border-brown-400 mb-2 h-12"></div>
+                <p class="font-semibold text-brown-700">Customer Signature</p>
+            </div>
+            <div class="text-center">
+                <div class="border-b-2 border-brown-400 mb-2 h-12"></div>
+                <p class="font-semibold text-brown-700">Authorized Signature</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center pt-6 border-t-2 border-dashed border-brown-300">
+            <div class="bg-brown-100 rounded-lg py-3 px-4 mb-4">
+                <p class="text-brown-700 font-semibold">Thank you for your payment!</p>
+            </div>
+            <p class="text-brown-500 text-sm">Please keep this receipt for your records.</p>
+            <p class="text-brown-400 text-xs mt-2">El Senior Original Tailoring | San Pablo, Dumingag, Zamboanga del Sur</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

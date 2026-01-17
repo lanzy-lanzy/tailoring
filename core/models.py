@@ -1,0 +1,476 @@
+from django.db import models
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
+from decimal import Decimal
+import uuid
+
+
+class UserProfile(models.Model):
+    """Extended user profile with role"""
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('tailor', 'Tailor'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='tailor')
+    phone = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user.get_full_name() or self.user.username} ({self.role})"
+    
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
+    
+    @property
+    def is_tailor(self):
+        return self.role == 'tailor'
+
+
+class Customer(models.Model):
+    """Customer model for storing customer information"""
+    name = models.CharField(max_length=200)
+    contact_number = models.CharField(max_length=20)
+    address = models.TextField(blank=True)
+    email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.contact_number}"
+
+
+class Fabric(models.Model):
+    """Fabric inventory"""
+    name = models.CharField(max_length=200)
+    color = models.CharField(max_length=100, blank=True)
+    stock_meters = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        validators=[MinValueValidator(Decimal('0'))]
+    )
+    price_per_meter = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0
+    )
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name']
+    
+    def __str__(self):
+        return f"{self.name} ({self.color}) - {self.stock_meters}m"
+    
+    def has_sufficient_stock(self, required_meters):
+        return self.stock_meters >= Decimal(str(required_meters))
+    
+    def deduct_stock(self, meters):
+        if self.has_sufficient_stock(meters):
+            self.stock_meters -= Decimal(str(meters))
+            self.save()
+            return True
+        return False
+
+
+class Accessory(models.Model):
+    """Accessories inventory (buttons, zippers, threads, etc.)"""
+    UNIT_CHOICES = [
+        ('pcs', 'Pieces'),
+        ('meters', 'Meters'),
+        ('yards', 'Yards'),
+        ('rolls', 'Rolls'),
+        ('packs', 'Packs'),
+    ]
+    
+    name = models.CharField(max_length=200)
+    unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='pcs')
+    stock_quantity = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        validators=[MinValueValidator(Decimal('0'))]
+    )
+    price_per_unit = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0
+    )
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name_plural = "Accessories"
+        ordering = ['name']
+    
+    def __str__(self):
+        return f"{self.name} - {self.stock_quantity} {self.unit}"
+    
+    def has_sufficient_stock(self, required_quantity):
+        return self.stock_quantity >= Decimal(str(required_quantity))
+    
+    def deduct_stock(self, quantity):
+        if self.has_sufficient_stock(quantity):
+            self.stock_quantity -= Decimal(str(quantity))
+            self.save()
+            return True
+        return False
+
+
+class GarmentType(models.Model):
+    """Types of garments with fabric and accessory requirements"""
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    estimated_fabric_meters = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2,
+        help_text="Estimated fabric meters required per garment"
+    )
+    base_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Base tailoring price"
+    )
+    default_tailor = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='specialized_garments',
+        help_text="Default tailor for this garment type"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
+class GarmentTypeAccessory(models.Model):
+    """Required accessories for each garment type"""
+    garment_type = models.ForeignKey(
+        GarmentType, 
+        on_delete=models.CASCADE, 
+        related_name='required_accessories'
+    )
+    accessory = models.ForeignKey(
+        Accessory, 
+        on_delete=models.CASCADE
+    )
+    quantity_required = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=1
+    )
+    
+    class Meta:
+        unique_together = ['garment_type', 'accessory']
+        verbose_name_plural = "Garment Type Accessories"
+    
+    def __str__(self):
+        return f"{self.garment_type.name} - {self.accessory.name} x {self.quantity_required}"
+
+
+class Order(models.Model):
+    """Main order model"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    order_number = models.CharField(max_length=50, unique=True, editable=False)
+    customer = models.ForeignKey(
+        Customer, 
+        on_delete=models.PROTECT, 
+        related_name='orders'
+    )
+    garment_type = models.ForeignKey(
+        GarmentType, 
+        on_delete=models.PROTECT
+    )
+    fabric = models.ForeignKey(
+        Fabric, 
+        on_delete=models.PROTECT
+    )
+    quantity = models.PositiveIntegerField(default=1)
+    fabric_meters_used = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2
+    )
+    
+    # Measurements stored as JSON
+    measurements = models.JSONField(default=dict, blank=True)
+    special_instructions = models.TextField(blank=True)
+    
+    # Pricing
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    balance_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Dates
+    order_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateField(null=True, blank=True)
+    completed_date = models.DateTimeField(null=True, blank=True)
+    
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='created_orders'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.order_number} - {self.customer.name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            # Generate unique order number
+            self.order_number = f"ORD-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+    
+    @property
+    def payment_status(self):
+        total_paid = sum(p.amount for p in self.payments.filter(status='completed'))
+        if total_paid >= self.total_price:
+            return 'fully_paid'
+        elif total_paid > 0:
+            return 'partial'
+        return 'unpaid'
+    
+    @property
+    def total_paid(self):
+        return sum(p.amount for p in self.payments.filter(status='completed'))
+    
+    @property
+    def remaining_balance(self):
+        return self.total_price - self.total_paid
+
+
+class OrderAccessory(models.Model):
+    """Accessories used in an order"""
+    order = models.ForeignKey(
+        Order, 
+        on_delete=models.CASCADE, 
+        related_name='order_accessories'
+    )
+    accessory = models.ForeignKey(
+        Accessory, 
+        on_delete=models.PROTECT
+    )
+    quantity_used = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        unique_together = ['order', 'accessory']
+    
+    def __str__(self):
+        return f"{self.order.order_number} - {self.accessory.name}"
+
+
+class TailoringTask(models.Model):
+    """Task assigned to tailors"""
+    STATUS_CHOICES = [
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('approved', 'Approved'),
+    ]
+    
+    order = models.OneToOneField(
+        Order, 
+        on_delete=models.CASCADE, 
+        related_name='tailoring_task'
+    )
+    tailor = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='assigned_tasks'
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='assigned')
+    notes = models.TextField(blank=True)
+    
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    started_date = models.DateTimeField(null=True, blank=True)
+    completed_date = models.DateTimeField(null=True, blank=True)
+    approved_date = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='approved_tasks'
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Task for {self.order.order_number} - {self.tailor}"
+
+
+class Payment(models.Model):
+    """Payment records for orders"""
+    PAYMENT_TYPE_CHOICES = [
+        ('deposit', 'Deposit'),
+        ('balance', 'Balance Payment'),
+        ('full', 'Full Payment'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    payment_number = models.CharField(max_length=50, unique=True, editable=False)
+    order = models.ForeignKey(
+        Order, 
+        on_delete=models.CASCADE, 
+        related_name='payments'
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES)
+    payment_method = models.CharField(max_length=20, default='cash')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='completed')
+    
+    notes = models.TextField(blank=True)
+    received_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='received_payments'
+    )
+    
+    payment_date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.payment_number} - {self.order.order_number} - {self.amount}"
+    
+    def save(self, *args, **kwargs):
+        if not self.payment_number:
+            self.payment_number = f"PAY-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+
+class InventoryLog(models.Model):
+    """Log for inventory changes"""
+    ACTION_CHOICES = [
+        ('add', 'Stock Added'),
+        ('deduct', 'Stock Deducted'),
+        ('adjust', 'Stock Adjusted'),
+    ]
+    
+    ITEM_TYPE_CHOICES = [
+        ('fabric', 'Fabric'),
+        ('accessory', 'Accessory'),
+    ]
+    
+    item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES)
+    fabric = models.ForeignKey(
+        Fabric, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    accessory = models.ForeignKey(
+        Accessory, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    previous_stock = models.DecimalField(max_digits=10, decimal_places=2)
+    new_stock = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    order = models.ForeignKey(
+        Order, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        help_text="Related order if deduction was for an order"
+    )
+    notes = models.TextField(blank=True)
+    
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = "Inventory Logs"
+    
+    def __str__(self):
+        item = self.fabric or self.accessory
+        return f"{self.action} - {item} - {self.quantity}"
+
+
+class SMSLog(models.Model):
+    """Log for SMS notifications sent"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('failed', 'Failed'),
+    ]
+    
+    customer = models.ForeignKey(
+        Customer, 
+        on_delete=models.SET_NULL, 
+        null=True
+    )
+    order = models.ForeignKey(
+        Order, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    phone_number = models.CharField(max_length=20)
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    response = models.TextField(blank=True)
+    
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "SMS Log"
+        verbose_name_plural = "SMS Logs"
+    
+    def __str__(self):
+        return f"SMS to {self.phone_number} - {self.status}"

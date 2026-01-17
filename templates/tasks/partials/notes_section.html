@@ -1,0 +1,24 @@
+<!-- Notes Section -->
+<div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+        <h3 class="text-lg font-semibold text-brown-800">Add Notes</h3>
+    </div>
+    <form method="post" 
+          action="{% url 'task_update_notes' task.pk %}" 
+          class="p-6"
+          hx-post="{% url 'task_update_notes' task.pk %}"
+          hx-target="#notes-form-container"
+          hx-swap="outerHTML">
+        {% csrf_token %}
+        <textarea name="notes"
+                  rows="3"
+                  class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400 resize-none"
+                  placeholder="Add any notes about this task...">{{ task.notes }}</textarea>
+        <div class="mt-4 flex justify-end">
+            <button type="submit"
+                    class="px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors font-medium">
+                Save Notes
+            </button>
+        </div>
+    </form>
+</div>

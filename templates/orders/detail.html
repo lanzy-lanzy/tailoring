@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.order_number }} - El Senior Original Tailoring{% endblock %}
+
+{% block page_title %}Order Details{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav>
+        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+            <li>
+                <a href="{% url 'order_list' %}" class="hover:text-brown-700 transition-colors">Orders</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li class="text-brown-800 font-medium">#{{ order.order_number }}</li>
+        </ol>
+    </nav>
+
+    <!-- Order Header Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-brown-600 to-brown-700">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-cream-100 rounded-full flex items-center justify-center">
+                        <svg class="w-7 h-7 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Order #{{ order.order_number }}</h2>
+                        <p class="text-cream-200 text-sm">Placed on {{ order.order_date|date:"F j, Y" }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Status Badge -->
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if order.status == 'completed' or order.status == 'delivered' %}
+                            bg-green-100 text-green-800
+                        {% elif order.status == 'in_progress' %}
+                            bg-blue-100 text-blue-800
+                        {% elif order.status == 'pending' or order.status == 'confirmed' %}
+                            bg-yellow-100 text-yellow-800
+                        {% elif order.status == 'cancelled' %}
+                            bg-red-100 text-red-800
+                        {% else %}
+                            bg-gray-100 text-gray-800
+                        {% endif %}">
+                        {{ order.get_status_display|default:order.status|title }}
+                    </span>
+                    <!-- Payment Status Badge -->
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if order.payment_status == 'fully_paid' %}
+                            bg-green-100 text-green-800
+                        {% elif order.payment_status == 'partial' %}
+                            bg-yellow-100 text-yellow-800
+                        {% else %}
+                            bg-red-100 text-red-800
+                        {% endif %}">
+                        {% if order.payment_status == 'fully_paid' %}Paid
+                        {% elif order.payment_status == 'partial' %}Partial
+                        {% else %}Unpaid{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-6 py-3 bg-brown-50 border-b border-brown-100 flex flex-wrap items-center gap-3 no-print">
+            {% if order.status != 'cancelled' and order.status != 'delivered' %}
+            <a href="{% url 'order_edit' order.pk %}"
+               class="inline-flex items-center px-4 py-2 bg-white border border-brown-200 text-brown-700 rounded-lg hover:bg-brown-50 transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Edit Order
+            </a>
+            {% endif %}
+            <button onclick="window.print()"
+                    class="inline-flex items-center px-4 py-2 bg-white border border-brown-200 text-brown-700 rounded-lg hover:bg-brown-50 transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print Receipt
+            </button>
+            {% if order.status != 'cancelled' and order.status != 'delivered' %}
+            <a href="{% url 'order_cancel' order.pk %}"
+               class="inline-flex items-center px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancel Order
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Order Info Grid -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Customer -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-brown-100 rounded-lg">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Customer</p>
+                        <a href="{% url 'customer_detail' order.customer.pk %}" class="text-brown-800 font-medium hover:text-brown-600 transition-colors">
+                            {{ order.customer.name }}
+                        </a>
+                        <p class="text-xs text-brown-400">{{ order.customer.contact_number }}</p>
+                    </div>
+                </div>
+
+                <!-- Garment Type -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-brown-100 rounded-lg">
+                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Garment</p>
+                        <p class="text-brown-800 font-medium">{{ order.garment_type.name }}</p>
+                        <p class="text-xs text-brown-400">Qty: {{ order.quantity }}</p>
+                    </div>
+                </div>
+
+                <!-- Due Date -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-{% if order.is_overdue %}red{% else %}brown{% endif %}-100 rounded-lg">
+                        <svg class="w-5 h-5 text-{% if order.is_overdue %}red{% else %}brown{% endif %}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Due Date</p>
+                        <p class="text-brown-800 font-medium {% if order.is_overdue %}text-red-600{% endif %}">
+                            {{ order.due_date|date:"M j, Y" }}
+                        </p>
+                        {% if order.is_overdue %}
+                        <p class="text-xs text-red-500">Overdue</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-brown-500">Total</p>
+                        <p class="text-brown-800 font-medium">${{ order.total_price }}</p>
+                        <p class="text-xs text-brown-400">Balance: ${{ order.balance_amount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Measurements -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h3 class="text-lg font-semibold text-brown-800">Measurements</h3>
+            </div>
+            <div class="p-6">
+                {% if order.measurements %}
+                <div class="grid grid-cols-2 gap-4">
+                    {% if order.measurements.chest %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Chest</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.chest }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.waist %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Waist</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.waist }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.hips %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Hips</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.hips }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.shoulder %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Shoulder</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.shoulder }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.sleeve_length %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Sleeve Length</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.sleeve_length }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.body_length %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Body Length</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.body_length }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.inseam %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Inseam</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.inseam }} cm</span>
+                    </div>
+                    {% endif %}
+                    {% if order.measurements.neck %}
+                    <div class="flex justify-between py-2 border-b border-brown-100">
+                        <span class="text-brown-500">Neck</span>
+                        <span class="text-brown-800 font-medium">{{ order.measurements.neck }} cm</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-brown-500 text-center py-4">No measurements recorded</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Fabric & Accessories -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h3 class="text-lg font-semibold text-brown-800">Materials Used</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Fabric -->
+                <div>
+                    <h4 class="text-sm font-medium text-brown-600 mb-2">Fabric</h4>
+                    <div class="bg-cream-50 rounded-lg p-4 border border-cream-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-brown-800 font-medium">{{ order.fabric.name }}</p>
+                                <p class="text-sm text-brown-500">{{ order.fabric.color }} - {{ order.fabric.fabric_type }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-brown-800 font-medium">{{ order.fabric_meters_used|default:"N/A" }} m</p>
+                                <p class="text-xs text-brown-500">used</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accessories -->
+                {% if order.accessories.all %}
+                <div>
+                    <h4 class="text-sm font-medium text-brown-600 mb-2">Accessories</h4>
+                    <div class="space-y-2">
+                        {% for accessory in order.accessories.all %}
+                        <div class="bg-cream-50 rounded-lg p-3 border border-cream-200 flex items-center justify-between">
+                            <span class="text-brown-800">{{ accessory.name }}</span>
+                            <span class="text-brown-500 text-sm">{{ accessory.quantity_used|default:"1" }} pcs</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Instructions -->
+    {% if order.special_instructions %}
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+            <h3 class="text-lg font-semibold text-brown-800">Special Instructions</h3>
+        </div>
+        <div class="p-6">
+            <p class="text-brown-700 whitespace-pre-wrap">{{ order.special_instructions }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tailoring Tasks -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-brown-800">Tailoring Tasks</h3>
+            {% if order.status != 'cancelled' and order.status != 'delivered' %}
+            <a href="{% url 'task_create' %}?order={{ order.pk }}"
+               class="text-sm text-brown-600 hover:text-brown-800 font-medium transition-colors no-print">
+                + Assign Task
+            </a>
+            {% endif %}
+        </div>
+        {% if order.tasks.all %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-cream-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Task</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Assigned To</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Due</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brown-100">
+                    {% for task in order.tasks.all %}
+                    <tr class="hover:bg-cream-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'task_detail' task.pk %}" class="text-brown-800 font-medium hover:text-brown-600">
+                                {{ task.description|truncatechars:40 }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-brown-600">
+                            {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if task.status == 'completed' %}
+                                    bg-green-100 text-green-800
+                                {% elif task.status == 'in_progress' %}
+                                    bg-blue-100 text-blue-800
+                                {% else %}
+                                    bg-yellow-100 text-yellow-800
+                                {% endif %}">
+                                {{ task.get_status_display|default:task.status|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-brown-600">
+                            {{ task.due_date|date:"M j"|default:"-" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-12 text-center">
+            <svg class="w-12 h-12 mx-auto text-brown-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-brown-800">No tasks assigned</h3>
+            <p class="mt-1 text-sm text-brown-500">Assign tailoring tasks to get started</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Payment History -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden" x-data="{ showPaymentForm: false }">
+        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-brown-800">Payment History</h3>
+            {% if order.balance_amount > 0 and order.status != 'cancelled' %}
+            <button @click="showPaymentForm = !showPaymentForm"
+                    class="text-sm text-brown-600 hover:text-brown-800 font-medium transition-colors no-print">
+                <span x-show="!showPaymentForm">+ Add Payment</span>
+                <span x-show="showPaymentForm" x-cloak>Cancel</span>
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Payment Form -->
+        <div x-show="showPaymentForm" x-cloak class="p-6 bg-cream-50 border-b border-brown-100 no-print">
+            <form method="post" action="{% url 'payment_create' order.pk %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="order" value="{{ order.pk }}">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-1">Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-brown-500">$</span>
+                            <input type="number"
+                                   name="amount"
+                                   required
+                                   step="0.01"
+                                   min="0.01"
+                                   max="{{ order.balance_amount }}"
+                                   class="w-full pl-8 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.00">
+                        </div>
+                        <p class="mt-1 text-xs text-brown-500">Max: ${{ order.balance_amount }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-1">Payment Method</label>
+                        <select name="payment_method"
+                                required
+                                class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="mobile_money">Mobile Money</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit"
+                                class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                            Record Payment
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="p-6 bg-cream-50 border-b border-brown-100">
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <p class="text-sm text-brown-500">Total Amount</p>
+                    <p class="text-xl font-bold text-brown-800">${{ order.total_price }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-brown-500">Amount Paid</p>
+                    <p class="text-xl font-bold text-green-600">${{ order.amount_paid|default:"0.00" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-brown-500">Balance Due</p>
+                    <p class="text-xl font-bold text-{% if order.balance_amount > 0 %}red{% else %}green{% endif %}-600">
+                        ${{ order.balance_amount }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {% if order.payments.all %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-cream-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Receipt #</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Method</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-brown-600 uppercase tracking-wider">Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brown-100">
+                    {% for payment in order.payments.all %}
+                    <tr class="hover:bg-cream-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-brown-600">
+                            {{ payment.payment_date|date:"M j, Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-brown-800 font-medium">
+                            {{ payment.receipt_number|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-brown-600">
+                            {{ payment.get_payment_method_display|default:payment.payment_method|title }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-brown-800 font-medium text-right">
+                            ${{ payment.amount }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-8 text-center">
+            <p class="text-brown-500">No payments recorded yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Print Receipt Section (Hidden on screen, visible on print) -->
+<div class="print-only">
+    <div class="text-center border-b-2 border-brown-800 pb-4 mb-4">
+        <h1 class="text-2xl font-bold">El Senior Original Tailoring</h1>
+        <p class="text-sm">Order Receipt</p>
+        <p class="text-xs">San Pablo, Dumingag, Zamboanga del Sur</p>
+    </div>
+    <div class="mb-4">
+        <p><strong>Order #:</strong> {{ order.order_number }}</p>
+        <p><strong>Date:</strong> {{ order.order_date|date:"F j, Y" }}</p>
+        <p><strong>Customer:</strong> {{ order.customer.name }}</p>
+        <p><strong>Phone:</strong> {{ order.customer.contact_number }}</p>
+    </div>
+    <div class="mb-4">
+        <p><strong>Garment:</strong> {{ order.garment_type.name }} x {{ order.quantity }}</p>
+        <p><strong>Fabric:</strong> {{ order.fabric.name }}</p>
+        <p><strong>Due Date:</strong> {{ order.due_date|date:"F j, Y" }}</p>
+    </div>
+    <div class="border-t-2 border-brown-800 pt-4">
+        <p><strong>Total:</strong> ${{ order.total_price }}</p>
+        <p><strong>Deposit:</strong> ${{ order.deposit_amount }}</p>
+        <p><strong>Balance:</strong> ${{ order.balance_amount }}</p>
+    </div>
+</div>
+{% endblock %}

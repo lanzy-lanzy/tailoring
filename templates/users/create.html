@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Add User - Tailoring System{% endblock %}
+
+{% block page_title %}Add New User{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+            <li>
+                <a href="{% url 'user_list' %}" class="hover:text-brown-700 transition-colors">Users</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li class="text-brown-800 font-medium">Add New</li>
+        </ol>
+    </nav>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+            <h2 class="text-lg font-semibold text-brown-800">User Information</h2>
+            <p class="text-sm text-brown-500 mt-1">Create a new user account</p>
+        </div>
+
+        <form method="post" action="{% url 'user_create' %}" class="p-6 space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- First Name -->
+                <div>
+                    <label for="id_first_name" class="block text-sm font-medium text-brown-700 mb-2">
+                        First Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text"
+                           name="first_name"
+                           id="id_first_name"
+                           required
+                           maxlength="150"
+                           value="{{ form.first_name.value|default:'' }}"
+                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           placeholder="John">
+                    {% if form.first_name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label for="id_last_name" class="block text-sm font-medium text-brown-700 mb-2">
+                        Last Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text"
+                           name="last_name"
+                           id="id_last_name"
+                           required
+                           maxlength="150"
+                           value="{{ form.last_name.value|default:'' }}"
+                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           placeholder="Doe">
+                    {% if form.last_name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div>
+                <label for="id_username" class="block text-sm font-medium text-brown-700 mb-2">
+                    Username <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-brown-400">@</span>
+                    <input type="text"
+                           name="username"
+                           id="id_username"
+                           required
+                           maxlength="150"
+                           value="{{ form.username.value|default:'' }}"
+                           class="w-full pl-8 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           placeholder="johndoe">
+                </div>
+                <p class="mt-1 text-xs text-brown-500">Letters, digits and @/./+/-/_ only</p>
+                {% if form.username.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="id_email" class="block text-sm font-medium text-brown-700 mb-2">
+                    Email Address <span class="text-red-500">*</span>
+                </label>
+                <input type="email"
+                       name="email"
+                       id="id_email"
+                       required
+                       maxlength="254"
+                       value="{{ form.email.value|default:'' }}"
+                       class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       placeholder="john@example.com">
+                {% if form.email.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Password -->
+                <div>
+                    <label for="id_password" class="block text-sm font-medium text-brown-700 mb-2">
+                        Password <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password"
+                           name="password"
+                           id="id_password"
+                           required
+                           minlength="8"
+                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           placeholder="Min. 8 characters">
+                    {% if form.password.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label for="id_password_confirm" class="block text-sm font-medium text-brown-700 mb-2">
+                        Confirm Password <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password"
+                           name="password_confirm"
+                           id="id_password_confirm"
+                           required
+                           minlength="8"
+                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           placeholder="Repeat password">
+                    {% if form.password_confirm.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.password_confirm.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <div>
+                <label class="block text-sm font-medium text-brown-700 mb-3">
+                    Role <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="relative flex items-center p-4 border-2 border-brown-200 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors">
+                        <input type="radio" name="role" value="tailor" class="sr-only" checked>
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="block font-medium text-brown-800">Tailor</span>
+                                <span class="block text-sm text-brown-500">Can work on assigned tasks</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="relative flex items-center p-4 border-2 border-brown-200 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors">
+                        <input type="radio" name="role" value="admin" class="sr-only">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-purple-100 rounded-lg mr-3">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="block font-medium text-brown-800">Admin</span>
+                                <span class="block text-sm text-brown-500">Full system access</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                {% if form.role.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.role.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Phone -->
+            <div>
+                <label for="id_phone" class="block text-sm font-medium text-brown-700 mb-2">
+                    Phone Number
+                </label>
+                <input type="tel"
+                       name="phone"
+                       id="id_phone"
+                       maxlength="20"
+                       value="{{ form.phone.value|default:'' }}"
+                       class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       placeholder="+1 234 567 8900">
+                {% if form.phone.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-brown-100">
+                <a href="{% url 'user_list' %}"
+                   class="px-4 py-2 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="px-6 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm font-medium">
+                    <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    Create User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Role selection styling
+    document.querySelectorAll('input[name="role"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('input[name="role"]').forEach(r => {
+                r.closest('label').classList.remove('border-brown-600', 'bg-cream-50');
+                r.closest('label').classList.add('border-brown-200');
+            });
+            if (this.checked) {
+                this.closest('label').classList.remove('border-brown-200');
+                this.closest('label').classList.add('border-brown-600', 'bg-cream-50');
+            }
+        });
+        // Set initial state
+        if (radio.checked) {
+            radio.closest('label').classList.remove('border-brown-200');
+            radio.closest('label').classList.add('border-brown-600', 'bg-cream-50');
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

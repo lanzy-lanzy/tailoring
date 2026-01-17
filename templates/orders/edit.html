@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% load tz %}
+
+{% block title %}Edit Order - Tailoring System{% endblock %}
+
+{% block page_title %}Edit Order{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto" x-data="orderForm()">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+            <li>
+                <a href="{% url 'order_list' %}" class="hover:text-brown-700 transition-colors">Orders</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li>
+                <a href="{% url 'order_detail' order.pk %}" class="hover:text-brown-700 transition-colors">{{ order.order_number }}</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li class="text-brown-800 font-medium">Edit Order</li>
+        </ol>
+    </nav>
+
+    <form method="post" action="{% url 'order_edit' order.pk %}" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Customer Information -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h2 class="text-lg font-semibold text-brown-800">Customer Information</h2>
+                <p class="text-sm text-brown-500 mt-1">Selected customer cannot be changed</p>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-brown-700 mb-2">
+                            Customer
+                        </label>
+                        <div class="px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-brown-800">
+                            {{ order.customer.name }} - {{ order.customer.contact_number }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Garment & Fabric Selection -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h2 class="text-lg font-semibold text-brown-800">Garment & Fabric</h2>
+                <p class="text-sm text-brown-500 mt-1">Select the garment type and fabric</p>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Garment Type -->
+                    <div>
+                        <label for="id_garment_type" class="block text-sm font-medium text-brown-700 mb-2">
+                            Garment Type <span class="text-red-500">*</span>
+                        </label>
+                        <select name="garment_type"
+                                id="id_garment_type"
+                                required
+                                class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                hx-get="/api/garment-requirements/{this.value}/"
+                                hx-trigger="change"
+                                hx-target="#garment-requirements"
+                                hx-swap="innerHTML"
+                                hx-indicator="#garment-loading">
+                            <option value="">-- Select garment type --</option>
+                            {% for garment in garment_types %}
+                            <option value="{{ garment.pk }}" {% if garment.pk == order.garment_type.pk %}selected{% endif %} data-fabric="{{ garment.fabric_required }}" data-price="{{ garment.base_price }}">
+                                {{ garment.name }} - {{ garment.base_price }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.garment_type.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.garment_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Quantity -->
+                    <div>
+                        <label for="id_quantity" class="block text-sm font-medium text-brown-700 mb-2">
+                            Quantity <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number"
+                               name="quantity"
+                               id="id_quantity"
+                               required
+                               min="1"
+                               value="{{ form.quantity.value }}"
+                               x-model.number="quantity"
+                               @change="calculateTotal()"
+                               class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+                        {% if form.quantity.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.quantity.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Fabric Selection -->
+                <div>
+                    <label for="id_fabric" class="block text-sm font-medium text-brown-700 mb-2">
+                        Fabric <span class="text-red-500">*</span>
+                    </label>
+                    <select name="fabric"
+                            id="id_fabric"
+                            required
+                            class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                            hx-get="{% url 'api_check_fabric_stock' %}"
+                            hx-trigger="change"
+                            hx-target="#stock-status"
+                            hx-swap="innerHTML"
+                            hx-include="[name='fabric'], [name='garment_type'], [name='quantity']">
+                        <option value="">-- Select fabric --</option>
+                        {% for fabric in fabrics %}
+                        <option value="{{ fabric.pk }}" {% if fabric.pk == order.fabric.pk %}selected{% endif %} data-stock="{{ fabric.quantity_in_stock }}">
+                            {{ fabric.name }} ({{ fabric.color }}) - {{ fabric.quantity_in_stock }}m available
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.fabric.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.fabric.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Stock Status (HTMX target) -->
+                <div id="stock-status"></div>
+
+                <!-- Garment Requirements (HTMX target) -->
+                <div id="garment-requirements" class="relative">
+                    <div id="garment-loading" class="htmx-indicator absolute inset-0 bg-white/50 flex items-center justify-center">
+                        <svg class="animate-spin w-6 h-6 text-brown-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Measurements -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h2 class="text-lg font-semibold text-brown-800">Measurements</h2>
+                <p class="text-sm text-brown-500 mt-1">Enter customer measurements (in centimeters)</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Chest -->
+                    <div>
+                        <label for="id_chest" class="block text-sm font-medium text-brown-700 mb-2">
+                            Chest
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="chest"
+                                   id="id_chest"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.chest.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Waist -->
+                    <div>
+                        <label for="id_waist" class="block text-sm font-medium text-brown-700 mb-2">
+                            Waist
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="waist"
+                                   id="id_waist"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.waist.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Hips -->
+                    <div>
+                        <label for="id_hips" class="block text-sm font-medium text-brown-700 mb-2">
+                            Hips
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="hips"
+                                   id="id_hips"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.hips.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Shoulder -->
+                    <div>
+                        <label for="id_shoulder" class="block text-sm font-medium text-brown-700 mb-2">
+                            Shoulder
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="shoulder"
+                                   id="id_shoulder"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.shoulder.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Sleeve Length -->
+                    <div>
+                        <label for="id_sleeve_length" class="block text-sm font-medium text-brown-700 mb-2">
+                            Sleeve Length
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="sleeve_length"
+                                   id="id_sleeve_length"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.sleeve_length.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Body Length -->
+                    <div>
+                        <label for="id_body_length" class="block text-sm font-medium text-brown-700 mb-2">
+                            Body Length
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="body_length"
+                                   id="id_body_length"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.body_length.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Inseam -->
+                    <div>
+                        <label for="id_inseam" class="block text-sm font-medium text-brown-700 mb-2">
+                            Inseam
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="inseam"
+                                   id="id_inseam"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.inseam.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Neck -->
+                    <div>
+                        <label for="id_neck" class="block text-sm font-medium text-brown-700 mb-2">
+                            Neck
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   name="neck"
+                                   id="id_neck"
+                                   step="0.1"
+                                   min="0"
+                                   value="{{ form.neck.value|default:'' }}"
+                                   class="w-full px-4 py-2 pr-10 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.0">
+                            <span class="absolute right-3 top-2.5 text-brown-400 text-sm">cm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing & Dates -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h2 class="text-lg font-semibold text-brown-800">Pricing & Schedule</h2>
+                <p class="text-sm text-brown-500 mt-1">Set the price and due date</p>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Total Price -->
+                    <div>
+                        <label for="id_total_price" class="block text-sm font-medium text-brown-700 mb-2">
+                            Total Price <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-brown-500">$</span>
+                            <input type="number"
+                                   name="total_price"
+                                   id="id_total_price"
+                                   required
+                                   step="0.01"
+                                   min="0"
+                                   value="{{ form.total_price.value }}"
+                                   x-model.number="totalPrice"
+                                   @input="calculateDeposit()"
+                                   class="w-full pl-8 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
+                                   placeholder="0.00">
+                        </div>
+                        {% if form.total_price.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.total_price.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Due Date -->
+                    <div>
+                        <label for="id_due_date" class="block text-sm font-medium text-brown-700 mb-2">
+                            Due Date <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date"
+                               name="due_date"
+                               id="id_due_date"
+                               required
+                               value="{{ form.due_date.value|date:'Y-m-d' }}"
+                               class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
+                        {% if form.due_date.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.due_date.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Special Instructions -->
+        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
+                <h2 class="text-lg font-semibold text-brown-800">Special Instructions</h2>
+                <p class="text-sm text-brown-500 mt-1">Add any special requirements or notes</p>
+            </div>
+            <div class="p-6">
+                <textarea name="special_instructions"
+                          id="id_special_instructions"
+                          rows="4"
+                          class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400 resize-none"
+                          placeholder="Enter any special instructions, design preferences, or notes for the tailor...">{{ form.special_instructions.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-between pt-4">
+            <a href="{% url 'order_detail' order.pk %}"
+               class="px-4 py-2 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="px-6 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm font-medium">
+                <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Update Order
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function orderForm() {
+    return {
+        quantity: {{ order.quantity }},
+        totalPrice: {{ order.total_price }},
+
+        init() {
+            this.calculateDeposit();
+        },
+
+        calculateDeposit() {
+            // Update if needed
+        },
+
+        calculateBalance() {
+            // Update if needed
+        },
+
+        calculateTotal() {
+            // This can be extended to auto-calculate based on garment type base price * quantity
+            const garmentSelect = document.getElementById('id_garment_type');
+            if (garmentSelect && garmentSelect.selectedOptions[0]) {
+                const basePrice = parseFloat(garmentSelect.selectedOptions[0].dataset.price) || 0;
+                this.totalPrice = basePrice * this.quantity;
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

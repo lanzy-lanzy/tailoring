@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Customers - Tailoring System{% endblock %}
+
+{% block page_title %}Customers{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header with search and add button -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <!-- Search -->
+        <div class="relative flex-1 max-w-md">
+            <input type="text"
+                   id="customer-search"
+                   name="search"
+                   placeholder="Search customers..."
+                   value="{{ search_query|default:'' }}"
+                   class="w-full pl-10 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                   hx-get="{% url 'customer_list' %}"
+                   hx-trigger="keyup changed delay:300ms, search"
+                   hx-target="#customer-table-container"
+                   hx-select="#customer-table-container"
+                   hx-push-url="true"
+                   hx-include="[name='search']">
+            <svg class="absolute left-3 top-2.5 w-5 h-5 text-brown-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <span class="htmx-indicator absolute right-3 top-2.5">
+                <svg class="animate-spin w-5 h-5 text-brown-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        </div>
+
+        <!-- Add Customer Button -->
+        <a href="{% url 'customer_create' %}"
+           class="inline-flex items-center px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm"
+           hx-get="{% url 'customer_create' %}"
+           hx-target="#modal-container"
+           hx-swap="innerHTML"
+           hx-push-url="false">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Add Customer
+        </a>
+    </div>
+
+    <!-- Customer Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-brown-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-brown-100 rounded-full">
+                    <svg class="w-6 h-6 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-brown-500">Total Customers</p>
+                    <p class="text-2xl font-bold text-brown-800">{{ total_customers|default:"0" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-brown-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-100 rounded-full">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-brown-500">New This Month</p>
+                    <p class="text-2xl font-bold text-brown-800">{{ new_this_month|default:"0" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-brown-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-100 rounded-full">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-brown-500">With Active Orders</p>
+                    <p class="text-2xl font-bold text-brown-800">{{ with_active_orders|default:"0" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Table -->
+    <div id="customer-table-container" class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+        {% include 'customers/partials/customer_table.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Close modal when clicking outside or pressing escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('modal-container').innerHTML = '';
+        }
+    });
+
+    // Listen for successful form submissions to refresh the table
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'modal-container' && evt.detail.xhr.status === 200) {
+            // Check if modal should close (successful create/update)
+            if (evt.detail.xhr.getResponseHeader('HX-Trigger') === 'customerListChanged') {
+                htmx.trigger('#customer-table-container', 'refresh');
+            }
+        }
+    });
+</script>
+{% endblock %}
