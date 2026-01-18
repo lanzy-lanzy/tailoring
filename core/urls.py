@@ -87,4 +87,21 @@ urlpatterns = [
     path('api/garment-requirements/<int:pk>/', views.get_garment_requirements, name='get_garment_requirements'),
     path('api/check-fabric-stock/', views.api_check_fabric_stock, name='api_check_fabric_stock'),
     path('api/customer-search/', views.api_customer_search, name='api_customer_search'),
+    
+    # Notifications
+    path('notifications/', views.notification_list, name='notification_list'),
+    path('notifications/<int:pk>/read/', views.notification_mark_read, name='notification_mark_read'),
+    path('notifications/mark-all-read/', views.notification_mark_all_read, name='notification_mark_all_read'),
+    path('notifications/<int:pk>/delete/', views.notification_delete, name='notification_delete'),
+    path('notifications/clear-all/', views.notification_clear_all, name='notification_clear_all'),
+    path('notifications/dropdown/', views.notification_dropdown, name='notification_dropdown'),
+    path('notifications/count/', views.notification_count, name='notification_count'),
+    
+    # Commissions
+    path('commissions/', views.commission_dashboard, name='commission_dashboard'),
+    path('commissions/report/', views.tailor_commission_report, name='tailor_commission_report'),
+    path('commissions/history/', views.commission_history, name='commission_history'),
+    path('commissions/admin/', views.admin_commission_report, name='admin_commission_report'),
+    path('commissions/admin/garment-report/', views.admin_garment_report, name='admin_garment_report'),
+    path('commissions/admin/performance-report/', views.admin_tailor_performance_report, name='admin_tailor_performance_report'),
 ]

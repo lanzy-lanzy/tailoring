@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Tailoring System{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header with actions -->
+    <div class="bg-white rounded-lg shadow-sm border border-brown-100 mb-6">
+        <div class="px-6 py-4 border-b border-brown-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-brown-800">All Notifications</h2>
+                <p class="text-sm text-brown-500">
+                    {% if unread_count > 0 %}
+                        You have {{ unread_count }} unread notification{{ unread_count|pluralize }}
+                    {% else %}
+                        No unread notifications
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                {% if unread_count > 0 %}
+                <form method="post" action="{% url 'notification_mark_all_read' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="px-4 py-2 text-sm bg-brown-100 text-brown-700 rounded-lg hover:bg-brown-200 transition-colors">
+                        Mark All as Read
+                    </button>
+                </form>
+                {% endif %}
+                
+                {% if total_count > 0 %}
+                <form method="post" action="{% url 'notification_clear_all' %}" class="inline"
+                      onsubmit="return confirm('Are you sure you want to clear all notifications?')">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                        Clear All
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Filter tabs -->
+        <div class="px-6 py-3 bg-cream-50 border-b border-brown-100">
+            <div class="flex gap-4">
+                <a href="?filter=all" 
+                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'all' %}bg-brown-600 text-white{% else %}text-brown-600 hover:bg-brown-100{% endif %}">
+                    All ({{ total_count }})
+                </a>
+                <a href="?filter=unread" 
+                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'unread' %}bg-brown-600 text-white{% else %}text-brown-600 hover:bg-brown-100{% endif %}">
+                    Unread ({{ unread_count }})
+                </a>
+                <a href="?filter=read" 
+                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'read' %}bg-brown-600 text-white{% else %}text-brown-600 hover:bg-brown-100{% endif %}">
+                    Read ({{ total_count|add:"-"|add:unread_count }})
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification list -->
+    <div id="notification-list" class="space-y-3">
+        {% include 'notifications/partials/notification_list.html' %}
+    </div>
+</div>
+{% endblock %}

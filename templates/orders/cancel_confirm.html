@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Cancel Order #{{ order.order_number }} - Tailoring System{% endblock %}
 
@@ -54,7 +54,7 @@
                     </div>
                     <div class="flex justify-between border-t border-cream-300 pt-2 mt-2">
                         <dt class="text-brown-500">Total Amount:</dt>
-                        <dd class="text-brown-800 font-medium">${{ order.total_price }}</dd>
+                        <dd class="text-brown-800 font-medium">{{ order.total_price }}</dd>
                     </div>
                 </dl>
             </div>
@@ -68,7 +68,7 @@
                     </svg>
                     <div class="ml-3">
                         <p class="text-sm text-yellow-800">
-                            <strong>Payment Received:</strong> This order has received <strong>${{ order.amount_paid }}</strong> in payments.
+                            <strong>Payment Received:</strong> This order has received <strong>{{ order.amount_paid }}</strong> in payments.
                             You may need to process a refund.
                         </p>
                     </div>

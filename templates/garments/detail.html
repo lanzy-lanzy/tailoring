@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}{{ garment_type.name }} - Garment Type - Tailoring System{% endblock %}
 
@@ -81,7 +81,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-brown-500">Base Price</p>
-                        <p class="text-brown-800 font-medium">${{ garment_type.base_price|floatformat:2 }}</p>
+                        <p class="text-brown-800 font-medium">{{ garment_type.base_price|floatformat:2 }}</p>
                     </div>
                 </div>
 

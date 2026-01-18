@@ -178,6 +178,15 @@
                         </svg>
                         Reports
                     </a>
+                    
+                    <!-- Commission Reports (Admin) -->
+                    <a href="{% url 'admin_commission_report' %}" 
+                       class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'commissions/admin' in request.path %}bg-brown-600{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Commissions
+                    </a>
                     {% endif %}
                     
                     <!-- Tasks (visible to all) -->
@@ -187,6 +196,29 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                         Tasks
+                    </a>
+                    
+                    <!-- My Commissions (for tailors) -->
+                    {% if user.profile.is_tailor %}
+                    <a href="{% url 'commission_dashboard' %}" 
+                       class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'commissions' in request.path and 'admin' not in request.path %}bg-brown-600{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        My Commissions
+                    </a>
+                    {% endif %}
+                    
+                    <!-- Notifications -->
+                    <a href="{% url 'notification_list' %}" 
+                       class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'notifications' in request.path %}bg-brown-600{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        Notifications
+                        {% if unread_notification_count > 0 %}
+                        <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ unread_notification_count }}</span>
+                        {% endif %}
                     </a>
                 </div>
             </nav>
@@ -208,8 +240,59 @@
                     <!-- Page Title -->
                     <h1 class="text-xl font-semibold text-brown-800">{% block page_title %}Dashboard{% endblock %}</h1>
                     
-                    <!-- User Menu -->
-                    <div x-data="{ open: false }" class="relative">
+                    <!-- Right side: Notifications + User Menu -->
+                    <div class="flex items-center gap-4">
+                        <!-- Notification Bell -->
+                        <div x-data="{ notifOpen: false }" class="relative">
+                            <button @click="notifOpen = !notifOpen" 
+                                    @click.away="notifOpen = false"
+                                    class="relative p-2 text-brown-600 hover:text-brown-800 hover:bg-cream-100 rounded-full focus:outline-none transition-colors"
+                                    hx-get="{% url 'notification_dropdown' %}"
+                                    hx-trigger="click"
+                                    hx-target="#notification-dropdown-content"
+                                    hx-swap="innerHTML">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                <!-- Notification badge -->
+                                {% if unread_notification_count > 0 %}
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                                    {{ unread_notification_count|default:0 }}
+                                </span>
+                                {% endif %}
+                            </button>
+                            
+                            <!-- Notification Dropdown -->
+                            <div x-show="notifOpen" 
+                                 x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50 overflow-hidden border border-brown-100">
+                                <!-- Header -->
+                                <div class="px-4 py-3 bg-brown-600 text-white flex items-center justify-between">
+                                    <span class="font-medium">Notifications</span>
+                                    {% if unread_notification_count > 0 %}
+                                    <span class="px-2 py-0.5 bg-white/20 text-xs rounded-full">{{ unread_notification_count }} new</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Content loaded via HTMX -->
+                                <div id="notification-dropdown-content">
+                                    <div class="px-4 py-8 text-center">
+                                        <div class="animate-spin w-6 h-6 border-2 border-brown-300 border-t-brown-600 rounded-full mx-auto"></div>
+                                        <p class="text-sm text-brown-500 mt-2">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- User Menu -->
+                        <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" 
                                 class="flex items-center space-x-3 text-brown-600 hover:text-brown-800 focus:outline-none">
                             <span class="hidden md:block font-medium">{{ user.get_full_name|default:user.username }}</span>

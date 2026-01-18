@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Inventory Dashboard - Tailoring System{% endblock %}
 
@@ -63,7 +63,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-brown-500">Total Value</p>
-                    <p class="text-2xl font-bold text-brown-800">${{ total_value|floatformat:2|default:"0.00" }}</p>
+                    <p class="text-2xl font-bold text-brown-800">{{ total_value|floatformat:2|default:"0.00" }}</p>
                 </div>
             </div>
         </div>
@@ -173,7 +173,7 @@
                             <p class="font-semibold {% if fabric.stock_meters <= 5 %}text-red-600{% elif fabric.stock_meters <= 15 %}text-yellow-600{% else %}text-green-600{% endif %}">
                                 {{ fabric.stock_meters }} m
                             </p>
-                            <p class="text-sm text-brown-500">${{ fabric.price_per_meter }}/m</p>
+                            <p class="text-sm text-brown-500">{{ fabric.price_per_meter }}/m</p>
                         </div>
                     </div>
                 </div>
@@ -219,7 +219,7 @@
                             <p class="font-semibold {% if accessory.stock_quantity <= 10 %}text-red-600{% elif accessory.stock_quantity <= 30 %}text-yellow-600{% else %}text-green-600{% endif %}">
                                 {{ accessory.stock_quantity }} {{ accessory.unit }}
                             </p>
-                            <p class="text-sm text-brown-500">${{ accessory.price_per_unit }}/{{ accessory.unit }}</p>
+                            <p class="text-sm text-brown-500">{{ accessory.price_per_unit }}/{{ accessory.unit }}</p>
                         </div>
                     </div>
                 </div>

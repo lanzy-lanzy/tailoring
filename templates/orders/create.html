@@ -334,11 +334,36 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-semibold text-brown-800">Pricing & Schedule</h2>
-                        <p class="text-sm text-brown-500">Set the price and due date (50% deposit required)</p>
+                        <p class="text-sm text-brown-500">Set the price, payment option, and due date</p>
                     </div>
                 </div>
             </div>
             <div class="p-6">
+                <!-- Payment Option Selection -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-cream-50 to-brown-50 rounded-xl border border-cream-200">
+                    <label class="block text-sm font-medium text-brown-700 mb-3">
+                        Payment Option <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex items-center space-x-6">
+                        <label class="inline-flex items-center cursor-pointer group">
+                            <input type="radio" name="payment_option" value="deposit" x-model="paymentOption" @change="calculateDeposit()"
+                                   class="w-5 h-5 text-brown-600 focus:ring-brown-400 border-brown-300">
+                            <span class="ml-3 text-brown-700 group-hover:text-brown-900 transition-colors">
+                                <span class="font-medium">50% Deposit</span>
+                                <span class="text-sm text-brown-500 block">Pay half now, balance on pickup</span>
+                            </span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer group">
+                            <input type="radio" name="payment_option" value="full" x-model="paymentOption" @change="calculateDeposit()"
+                                   class="w-5 h-5 text-green-600 focus:ring-green-400 border-green-300">
+                            <span class="ml-3 text-brown-700 group-hover:text-brown-900 transition-colors">
+                                <span class="font-medium text-green-700">Full Payment</span>
+                                <span class="text-sm text-green-600 block">Pay full amount now</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <!-- Total Price -->
                     <div>
@@ -353,23 +378,37 @@
                         </div>
                     </div>
 
-                    <!-- Deposit (50%) -->
+                    <!-- Payment Amount -->
                     <div>
                         <label class="block text-sm font-medium text-brown-700 mb-2">
-                            Deposit (50%) <span class="text-red-500">*</span>
+                            <span x-text="paymentOption === 'full' ? 'Full Payment' : 'Deposit (50%)'"></span> <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <span class="absolute left-4 top-3 text-brown-500 font-medium">₱</span>
                             <input type="number" name="deposit_amount" x-model.number="depositAmount" readonly
-                                   class="w-full pl-10 pr-4 py-3 border border-brown-200 rounded-lg bg-cream-50 text-lg font-semibold text-brown-700">
+                                   :class="paymentOption === 'full' ? 'bg-green-50 border-green-300 text-green-700' : 'bg-cream-50 text-brown-700'"
+                                   class="w-full pl-10 pr-4 py-3 border border-brown-200 rounded-lg text-lg font-semibold">
                         </div>
                     </div>
 
                     <!-- Balance -->
                     <div>
                         <label class="block text-sm font-medium text-brown-700 mb-2">Balance Due</label>
-                        <div class="px-4 py-3 bg-gradient-to-r from-cream-100 to-brown-50 border border-brown-200 rounded-lg">
-                            <span class="text-lg font-bold text-brown-800">₱<span x-text="balanceAmount.toFixed(2)">0.00</span></span>
+                        <div :class="paymentOption === 'full' ? 'bg-green-50 border-green-200' : 'bg-gradient-to-r from-cream-100 to-brown-50 border-brown-200'" 
+                             class="px-4 py-3 border rounded-lg">
+                            <span :class="paymentOption === 'full' ? 'text-green-600' : 'text-brown-800'" class="text-lg font-bold">
+                                <template x-if="paymentOption === 'full'">
+                                    <span class="flex items-center">
+                                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        PAID
+                                    </span>
+                                </template>
+                                <template x-if="paymentOption !== 'full'">
+                                    <span>₱<span x-text="balanceAmount.toFixed(2)">0.00</span></span>
+                                </template>
+                            </span>
                         </div>
                     </div>
 
@@ -520,28 +559,46 @@
                         </div>
 
                         <!-- Payment Summary -->
-                        <div class="bg-gradient-to-br from-brown-600 to-brown-700 rounded-xl p-5 text-white">
-                            <div class="flex items-center mb-4">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                                <h4 class="font-semibold">Payment Details</h4>
+                        <div :class="paymentOption === 'full' ? 'bg-gradient-to-br from-green-600 to-green-700' : 'bg-gradient-to-br from-brown-600 to-brown-700'" class="rounded-xl p-5 text-white">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <h4 class="font-semibold">Payment Details</h4>
+                                </div>
+                                <template x-if="paymentOption === 'full'">
+                                    <span class="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-bold">FULL PAYMENT</span>
+                                </template>
                             </div>
                             <div class="space-y-3">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-cream-200">Total Price</span>
+                                    <span class="text-white/80">Total Price</span>
                                     <span class="text-xl font-bold">₱<span x-text="totalPrice.toFixed(2)"></span></span>
                                 </div>
                                 <div class="border-t border-white/20 pt-3">
                                     <div class="flex justify-between items-center">
-                                        <span class="text-cream-200">Deposit Required (50%)</span>
-                                        <span class="text-2xl font-bold text-cream-100">₱<span x-text="depositAmount.toFixed(2)"></span></span>
+                                        <span class="text-white/80" x-text="paymentOption === 'full' ? 'Full Payment' : 'Deposit Required (50%)'"></span>
+                                        <span class="text-2xl font-bold">₱<span x-text="depositAmount.toFixed(2)"></span></span>
                                     </div>
                                 </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-cream-300">Balance After Deposit</span>
-                                    <span class="text-cream-200">₱<span x-text="balanceAmount.toFixed(2)"></span></span>
-                                </div>
+                                <template x-if="paymentOption !== 'full'">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-white/60">Balance After Deposit</span>
+                                        <span class="text-white/80">₱<span x-text="balanceAmount.toFixed(2)"></span></span>
+                                    </div>
+                                </template>
+                                <template x-if="paymentOption === 'full'">
+                                    <div class="flex justify-between items-center text-sm bg-white/10 rounded-lg p-2 mt-2">
+                                        <span class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            No Balance Due
+                                        </span>
+                                        <span class="font-bold">FULLY PAID</span>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -614,8 +671,8 @@
                                     <p class="text-cream-200 text-xs">San Pablo, Dumingag, Zamboanga del Sur</p>
                                 </div>
                             </div>
-                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg">
-                                <span class="font-bold text-lg">DEPOSIT PAID</span>
+                            <div :class="paymentOption === 'full' ? 'bg-green-600' : 'bg-green-500'" class="text-white px-4 py-2 rounded-lg">
+                                <span class="font-bold text-lg" x-text="paymentOption === 'full' ? 'FULLY PAID' : 'DEPOSIT PAID'"></span>
                             </div>
                         </div>
                     </div>
@@ -623,7 +680,7 @@
                     <!-- TITLE BAR - Cream like claim receipt -->
                     <div class="bg-cream-100 border-b border-brown-300 px-6 py-2 flex justify-between items-center">
                         <div>
-                            <h2 class="text-xl font-bold text-brown-800">DEPOSIT RECEIPT</h2>
+                            <h2 class="text-xl font-bold text-brown-800" x-text="paymentOption === 'full' ? 'PAYMENT RECEIPT' : 'DEPOSIT RECEIPT'"></h2>
                             <p class="text-brown-600 text-sm">Order #<span x-text="createdOrderNumber"></span></p>
                         </div>
                         <div class="text-right">
@@ -702,7 +759,7 @@
                                         </thead>
                                         <tbody class="divide-y divide-cream-200">
                                             <tr>
-                                                <td class="px-2 py-1 text-brown-700">Deposit Payment (50%)</td>
+                                                <td class="px-2 py-1 text-brown-700" x-text="paymentOption === 'full' ? 'Full Payment (100%)' : 'Deposit Payment (50%)'"></td>
                                                 <td class="px-2 py-1 text-right font-semibold text-green-600">P<span x-text="depositAmount.toFixed(2)"></span></td>
                                             </tr>
                                         </tbody>
@@ -721,12 +778,22 @@
                                         <span class="text-brown-800 font-medium">P<span x-text="totalPrice.toFixed(2)"></span></span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-brown-700">Deposit Paid:</span>
+                                        <span class="text-brown-700" x-text="paymentOption === 'full' ? 'Full Payment:' : 'Deposit Paid:'"></span>
                                         <span class="text-green-600 font-semibold">P<span x-text="depositAmount.toFixed(2)"></span></span>
                                     </div>
                                     <div class="flex justify-between pt-1 border-t-2 border-brown-300">
                                         <span class="font-bold text-brown-800">Balance Due:</span>
-                                        <span class="text-red-600 font-bold text-lg">P<span x-text="balanceAmount.toFixed(2)"></span></span>
+                                        <template x-if="paymentOption === 'full'">
+                                            <span class="text-green-600 font-bold text-lg flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                PAID
+                                            </span>
+                                        </template>
+                                        <template x-if="paymentOption !== 'full'">
+                                            <span class="text-red-600 font-bold text-lg">P<span x-text="balanceAmount.toFixed(2)"></span></span>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -745,11 +812,11 @@
                                 <p class="text-xs text-brown-500" x-text="getCustomerName()"></p>
                             </div>
                             
-                            <!-- Deposit Stamp -->
+                            <!-- Payment Stamp -->
                             <div class="flex-shrink-0 mx-6">
-                                <div class="border-4 border-green-500 rounded-lg px-6 py-2 transform -rotate-3 bg-green-50">
-                                    <p class="text-green-600 font-bold text-xl tracking-wider text-center">DEPOSIT PAID</p>
-                                    <p class="text-green-500 text-xs text-center" x-text="formatDate(new Date())"></p>
+                                <div :class="paymentOption === 'full' ? 'border-green-600 bg-green-100' : 'border-green-500 bg-green-50'" class="border-4 rounded-lg px-6 py-2 transform -rotate-3">
+                                    <p :class="paymentOption === 'full' ? 'text-green-700' : 'text-green-600'" class="font-bold text-xl tracking-wider text-center" x-text="paymentOption === 'full' ? 'FULLY PAID' : 'DEPOSIT PAID'"></p>
+                                    <p :class="paymentOption === 'full' ? 'text-green-600' : 'text-green-500'" class="text-xs text-center" x-text="formatDate(new Date())"></p>
                                 </div>
                             </div>
                             
@@ -772,7 +839,12 @@
                             <div>
                                 <p class="font-bold text-brown-700 mb-1">Terms & Conditions:</p>
                                 <ul class="list-disc list-inside space-y-0.5">
-                                    <li>Balance due upon pickup</li>
+                                    <template x-if="paymentOption !== 'full'">
+                                        <li>Balance due upon pickup</li>
+                                    </template>
+                                    <template x-if="paymentOption === 'full'">
+                                        <li>Order is fully paid - no balance due</li>
+                                    </template>
                                     <li>Present this receipt when claiming</li>
                                     <li>Keep this receipt for reference</li>
                                 </ul>
@@ -856,6 +928,7 @@ function orderForm() {
         },
         
         // Pricing
+        paymentOption: 'deposit', // 'deposit' or 'full'
         totalPrice: 0,
         depositAmount: 0,
         balanceAmount: 0,
@@ -917,8 +990,13 @@ function orderForm() {
         },
         
         calculateDeposit() {
-            this.depositAmount = Math.round(this.totalPrice * 0.5 * 100) / 100;
-            this.balanceAmount = Math.round((this.totalPrice - this.depositAmount) * 100) / 100;
+            if (this.paymentOption === 'full') {
+                this.depositAmount = Math.round(this.totalPrice * 100) / 100;
+                this.balanceAmount = 0;
+            } else {
+                this.depositAmount = Math.round(this.totalPrice * 0.5 * 100) / 100;
+                this.balanceAmount = Math.round((this.totalPrice - this.depositAmount) * 100) / 100;
+            }
         },
         
         getCustomerName() {
@@ -976,6 +1054,7 @@ function orderForm() {
                 formData.append('fabric', this.selectedFabric);
                 formData.append('quantity', this.quantity);
                 formData.append('total_price', this.totalPrice);
+                formData.append('payment_option', this.paymentOption);
                 formData.append('due_date', this.dueDate);
                 formData.append('special_instructions', this.specialInstructions);
                 

@@ -16,7 +16,7 @@ from .models import (
     UserProfile, Customer, Fabric, Accessory, 
     GarmentType, GarmentTypeAccessory, Order, 
     OrderAccessory, TailoringTask, Payment, 
-    InventoryLog, SMSLog
+    InventoryLog, SMSLog, Notification, TailorCommission
 )
 from .forms import (
     LoginForm, UserRegistrationForm, CustomerForm, 
@@ -881,9 +881,16 @@ def order_create(request):
         
         try:
             with transaction.atomic():
-                # Calculate deposit (50%)
-                deposit_amount = total_price * Decimal('0.5')
-                balance_amount = total_price - deposit_amount
+                # Get payment option (default to deposit for 50%)
+                payment_option = request.POST.get('payment_option', 'deposit')
+                
+                # Calculate deposit based on payment option
+                if payment_option == 'full':
+                    deposit_amount = total_price
+                    balance_amount = Decimal('0')
+                else:
+                    deposit_amount = total_price * Decimal('0.5')
+                    balance_amount = total_price - deposit_amount
                 
                 # Create order
                 order = Order.objects.create(
@@ -953,17 +960,20 @@ def order_create(request):
                     tailor = tailors
                 
                 if tailor:
-                    TailoringTask.objects.create(
+                    task = TailoringTask.objects.create(
                         order=order,
                         tailor=tailor,
                         status='assigned'
                     )
+                    # Send in-app notification to tailor
+                    Notification.notify_tailors_task_assigned(task, sender=request.user)
                 
-                # Create initial payment (deposit)
+                # Create initial payment based on payment option
+                payment_type = 'full' if payment_option == 'full' else 'deposit'
                 Payment.objects.create(
                     order=order,
                     amount=deposit_amount,
-                    payment_type='deposit',
+                    payment_type=payment_type,
                     payment_method='cash',
                     status='completed',
                     received_by=request.user
@@ -974,6 +984,7 @@ def order_create(request):
                         'success': True,
                         'order_id': order.pk,
                         'order_number': order.order_number,
+                        'payment_option': payment_option,
                         'message': f'Order {order.order_number} created successfully.'
                     })
                 
@@ -1188,6 +1199,9 @@ def task_create(request):
             else:
                 action = f'assigned to {tailor.get_full_name() or tailor.username}'
             
+            # Notify the tailor about the assignment
+            Notification.notify_tailors_task_assigned(task, sender=request.user)
+            
             messages.success(request, f'Task {action}.')
             
             if request.headers.get('HX-Request'):
@@ -1275,6 +1289,8 @@ def task_update_status(request, pk):
         elif new_status == 'completed' and task.status == 'in_progress':
             task.status = 'completed'
             task.completed_date = timezone.now()
+            # Notify all admins that task is completed and awaiting approval
+            Notification.notify_admins_task_completed(task, sender=request.user)
         
         task.notes = notes
         task.save()
@@ -1335,6 +1351,9 @@ def task_approve(request, pk):
             task.order.status = 'completed'
             task.order.completed_date = timezone.now()
             task.order.save()
+            
+            # Send in-app notification to tailor about approval
+            Notification.notify_tailor_task_approved(task, sender=request.user)
             
             # Send SMS notification
             send_order_ready_sms(task.order)
@@ -1458,12 +1477,19 @@ def send_order_ready_sms(order):
         )
         return False
     
+    # Build message with balance info if applicable
+    balance = order.remaining_balance
+    if balance > 0:
+        balance_info = f"Please bring the remaining balance of P{balance:.2f} upon pickup. "
+    else:
+        balance_info = "Your order is fully paid. "
+    
     message = (
-        f"Good day, {order.customer.name}! 🎉 "
+        f"Good day, {order.customer.name}! "
         f"Great news from El Senior Original Tailoring - your {order.garment_type.name} "
         f"(Order #{order.order_number}) is now ready for pickup! "
-        f"We can't wait for you to see the finished product. "
-        f"Thank you for trusting us with your garment! - El Senior Original Team!"
+        f"{balance_info}"
+        f"Thank you for trusting us! - El Senior Team"
     )
     
     phone = order.customer.contact_number
@@ -1776,6 +1802,28 @@ def process_claim(request, pk):
                         received_by=request.user
                     )
                 
+                # Credit commission to tailor when order is claimed
+                try:
+                    task = order.tailoring_task
+                    if task and task.tailor and not task.commission_paid:
+                        # Create commission record
+                        TailorCommission.create_from_task(task)
+                        
+                        # Send notification to tailor about commission
+                        Notification.create_notification(
+                            recipient=task.tailor,
+                            title='Commission Credited',
+                            message=f'You earned a commission of PHP{task.commission_amount:.2f} for completing order {order.order_number}. Great job!',
+                            notification_type='general',
+                            sender=request.user,
+                            order=order,
+                            task=task,
+                            action_url='/commissions/',
+                            priority='normal'
+                        )
+                except TailoringTask.DoesNotExist:
+                    pass
+                
                 # Update order status to delivered
                 order.status = 'delivered'
                 order.save()
@@ -1831,3 +1879,648 @@ def claim_receipt(request, pk):
     }
     
     return render(request, 'claims/receipt.html', context)
+
+
+# ============== Notification Management ==============
+
+@login_required
+def notification_list(request):
+    """List all notifications for the current user"""
+    filter_type = request.GET.get('filter', 'all')
+    
+    notifications = Notification.objects.filter(
+        recipient=request.user
+    ).select_related('sender', 'order', 'task').order_by('-created_at')
+    
+    if filter_type == 'unread':
+        notifications = notifications.filter(is_read=False)
+    elif filter_type == 'read':
+        notifications = notifications.filter(is_read=True)
+    
+    paginator = Paginator(notifications, 20)
+    page = request.GET.get('page', 1)
+    notifications = paginator.get_page(page)
+    
+    # Get counts for filter tabs
+    total_count = Notification.objects.filter(recipient=request.user).count()
+    unread_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    
+    context = {
+        'notifications': notifications,
+        'filter_type': filter_type,
+        'total_count': total_count,
+        'unread_count': unread_count,
+    }
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'notifications/partials/notification_list.html', context)
+    
+    return render(request, 'notifications/list.html', context)
+
+
+@login_required
+def notification_mark_read(request, pk):
+    """Mark a single notification as read"""
+    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    notification.mark_as_read()
+    
+    # If it's an HTMX request, return updated notification item
+    if request.headers.get('HX-Request'):
+        return render(request, 'notifications/partials/notification_item.html', {
+            'notification': notification
+        })
+    
+    # If there's an action URL, redirect to it
+    if notification.action_url:
+        return redirect(notification.action_url)
+    
+    return redirect('notification_list')
+
+
+@login_required
+def notification_mark_all_read(request):
+    """Mark all notifications as read for the current user"""
+    if request.method == 'POST':
+        Notification.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).update(is_read=True, read_at=timezone.now())
+        
+        messages.success(request, 'All notifications marked as read.')
+        
+        if request.headers.get('HX-Request'):
+            return HttpResponse(status=204, headers={'HX-Trigger': 'notificationsUpdated'})
+    
+    return redirect('notification_list')
+
+
+@login_required
+def notification_delete(request, pk):
+    """Delete a notification"""
+    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    
+    if request.method == 'POST':
+        notification.delete()
+        
+        if request.headers.get('HX-Request'):
+            return HttpResponse(status=204, headers={'HX-Trigger': 'notificationDeleted'})
+        
+        messages.success(request, 'Notification deleted.')
+    
+    return redirect('notification_list')
+
+
+@login_required
+def notification_clear_all(request):
+    """Clear all notifications for the current user"""
+    if request.method == 'POST':
+        Notification.objects.filter(recipient=request.user).delete()
+        messages.success(request, 'All notifications cleared.')
+        
+        if request.headers.get('HX-Request'):
+            return HttpResponse(status=204, headers={'HX-Trigger': 'notificationsCleared'})
+    
+    return redirect('notification_list')
+
+
+@login_required
+def notification_dropdown(request):
+    """HTMX endpoint for notification dropdown content"""
+    recent_notifications = Notification.get_recent_notifications(request.user, limit=5)
+    unread_count = Notification.get_unread_count(request.user)
+    
+    return render(request, 'notifications/partials/dropdown.html', {
+        'notifications': recent_notifications,
+        'unread_count': unread_count,
+    })
+
+
+@login_required
+def notification_count(request):
+    """HTMX endpoint for notification count badge"""
+    unread_count = Notification.get_unread_count(request.user)
+    
+    if request.headers.get('HX-Request'):
+        if unread_count > 0:
+            return HttpResponse(f'<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{unread_count if unread_count < 100 else "99+"}</span>')
+        return HttpResponse('')
+    
+    return JsonResponse({'count': unread_count})
+
+
+# ============== Commission Management ==============
+
+@login_required
+def commission_dashboard(request):
+    """Commission dashboard - tailors see their own, admins see all"""
+    from datetime import timedelta
+    from django.db.models import Sum, Count, Avg
+    
+    today = timezone.now().date()
+    
+    if hasattr(request.user, 'profile') and request.user.profile.is_tailor:
+        # Tailor view - show their commissions
+        commissions = TailorCommission.objects.filter(
+            tailor=request.user
+        ).select_related('order', 'task').order_by('-earned_date')
+        
+        # Summary stats
+        total_earned = commissions.aggregate(total=Sum('commission_amount'))['total'] or Decimal('0')
+        total_tasks = commissions.count()
+        
+        # This week
+        week_start = today - timedelta(days=today.weekday())
+        week_commissions = commissions.filter(earned_date__date__gte=week_start)
+        week_total = week_commissions.aggregate(total=Sum('commission_amount'))['total'] or Decimal('0')
+        
+        # This month
+        month_start = today.replace(day=1)
+        month_commissions = commissions.filter(earned_date__date__gte=month_start)
+        month_total = month_commissions.aggregate(total=Sum('commission_amount'))['total'] or Decimal('0')
+        
+        # Pending commissions (tasks approved but order not yet claimed)
+        pending_tasks = TailoringTask.objects.filter(
+            tailor=request.user,
+            status='approved',
+            commission_paid=False
+        ).select_related('order')
+        
+        pending_amount = sum(task.commission_amount for task in pending_tasks)
+        
+        context = {
+            'commissions': commissions[:20],
+            'total_earned': total_earned,
+            'total_tasks': total_tasks,
+            'week_total': week_total,
+            'month_total': month_total,
+            'pending_amount': pending_amount,
+            'pending_tasks': pending_tasks,
+            'is_tailor_view': True,
+        }
+        
+        return render(request, 'commissions/tailor_dashboard.html', context)
+    
+    else:
+        # Admin view - show all commissions with tailor breakdown
+        return redirect('admin_commission_report')
+
+
+@login_required
+def tailor_commission_report(request):
+    """Generate PDF commission report for tailor"""
+    from datetime import timedelta
+    from .reports import generate_tailor_commission_report
+    
+    # Determine date range based on report type
+    report_type = request.GET.get('type', 'weekly')
+    today = timezone.now().date()
+    
+    if report_type == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        end_date = today
+    elif report_type == 'monthly':
+        start_date = today.replace(day=1)
+        end_date = today
+    elif report_type == 'yearly':
+        start_date = today.replace(month=1, day=1)
+        end_date = today
+    else:
+        # Custom range
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        else:
+            start_date = today - timedelta(days=7)
+            end_date = today
+    
+    # Get tailor (either current user or specified for admin)
+    if hasattr(request.user, 'profile') and request.user.profile.is_admin:
+        tailor_id = request.GET.get('tailor_id')
+        if tailor_id:
+            tailor = get_object_or_404(User, pk=tailor_id, profile__role='tailor')
+        else:
+            tailor = request.user
+    else:
+        tailor = request.user
+    
+    # Get commissions
+    commissions = TailorCommission.objects.filter(
+        tailor=tailor,
+        earned_date__date__gte=start_date,
+        earned_date__date__lte=end_date
+    ).select_related('order', 'task').order_by('-earned_date')
+    
+    # Get summary
+    summary = TailorCommission.get_tailor_summary(tailor, start_date, end_date)
+    
+    # Generate PDF
+    pdf = generate_tailor_commission_report(
+        tailor=tailor,
+        commissions=list(commissions),
+        start_date=start_date,
+        end_date=end_date,
+        summary=summary,
+        report_type=report_type
+    )
+    
+    # Create response
+    response = HttpResponse(pdf, content_type='application/pdf')
+    filename = f"commission_report_{tailor.username}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+
+@login_required
+@admin_required
+def admin_commission_report(request):
+    """Admin commission report dashboard and PDF generation"""
+    from datetime import timedelta
+    from django.db.models import Sum, Count
+    
+    today = timezone.now().date()
+    
+    # Handle PDF generation request
+    if request.GET.get('format') == 'pdf':
+        return generate_admin_commission_pdf(request)
+    
+    # Dashboard view
+    report_type = request.GET.get('type', 'monthly')
+    
+    if report_type == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        end_date = today
+    elif report_type == 'monthly':
+        start_date = today.replace(day=1)
+        end_date = today
+    elif report_type == 'yearly':
+        start_date = today.replace(month=1, day=1)
+        end_date = today
+    else:
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        else:
+            start_date = today.replace(day=1)
+            end_date = today
+    
+    # Get all commissions in the period
+    commissions = TailorCommission.objects.filter(
+        earned_date__date__gte=start_date,
+        earned_date__date__lte=end_date
+    ).select_related('tailor', 'order', 'task')
+    
+    # Overall summary
+    total_commissions = commissions.aggregate(total=Sum('commission_amount'))['total'] or Decimal('0')
+    total_orders_value = commissions.aggregate(total=Sum('order_amount'))['total'] or Decimal('0')
+    total_tasks = commissions.count()
+    
+    # Per-tailor breakdown
+    tailors_summary = []
+    tailors = User.objects.filter(profile__role='tailor').select_related('profile')
+    
+    for tailor in tailors:
+        tailor_commissions = commissions.filter(tailor=tailor)
+        summary = tailor_commissions.aggregate(
+            total_commission=Sum('commission_amount'),
+            total_order_value=Sum('order_amount'),
+            task_count=Count('id')
+        )
+        
+        if summary['task_count'] and summary['task_count'] > 0:
+            tailors_summary.append({
+                'tailor': tailor,
+                'tailor_name': tailor.get_full_name() or tailor.username,
+                'total_commission': summary['total_commission'] or Decimal('0'),
+                'total_order_value': summary['total_order_value'] or Decimal('0'),
+                'task_count': summary['task_count'] or 0,
+            })
+    
+    # Sort by total commission descending
+    tailors_summary.sort(key=lambda x: x['total_commission'], reverse=True)
+    
+    # Recent commissions
+    recent_commissions = commissions.order_by('-earned_date')[:20]
+    
+    # Garment type breakdown
+    garment_breakdown = commissions.values('garment_type').annotate(
+        count=Count('id'),
+        total_commission=Sum('commission_amount'),
+        total_value=Sum('order_amount')
+    ).order_by('-total_commission')[:10]
+    
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'report_type': report_type,
+        'total_commissions': total_commissions,
+        'total_orders_value': total_orders_value,
+        'total_tasks': total_tasks,
+        'tailors_summary': tailors_summary,
+        'recent_commissions': recent_commissions,
+        'garment_breakdown': garment_breakdown,
+        'tailors': tailors,
+    }
+    
+    return render(request, 'commissions/admin_dashboard.html', context)
+
+
+@login_required
+@admin_required
+def generate_admin_commission_pdf(request):
+    """Generate comprehensive admin PDF report"""
+    from datetime import timedelta
+    from django.db.models import Sum, Count
+    from .reports import generate_admin_commission_report
+    
+    today = timezone.now().date()
+    report_type = request.GET.get('type', 'monthly')
+    
+    if report_type == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        end_date = today
+    elif report_type == 'monthly':
+        start_date = today.replace(day=1)
+        end_date = today
+    elif report_type == 'yearly':
+        start_date = today.replace(month=1, day=1)
+        end_date = today
+    else:
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        else:
+            start_date = today.replace(day=1)
+            end_date = today
+    
+    # Get all commissions
+    commissions = TailorCommission.objects.filter(
+        earned_date__date__gte=start_date,
+        earned_date__date__lte=end_date
+    ).select_related('tailor', 'order')
+    
+    # Build tailors summary
+    tailors_summary = []
+    tailors = User.objects.filter(profile__role='tailor')
+    
+    for tailor in tailors:
+        tailor_commissions = commissions.filter(tailor=tailor)
+        summary = tailor_commissions.aggregate(
+            total_commission=Sum('commission_amount'),
+            total_order_value=Sum('order_amount'),
+            task_count=Count('id')
+        )
+        
+        if summary['task_count'] and summary['task_count'] > 0:
+            tailors_summary.append({
+                'tailor_name': tailor.get_full_name() or tailor.username,
+                'total_commission': float(summary['total_commission'] or 0),
+                'total_order_value': float(summary['total_order_value'] or 0),
+                'task_count': summary['task_count'] or 0,
+            })
+    
+    tailors_summary.sort(key=lambda x: x['total_commission'], reverse=True)
+    
+    # Generate PDF
+    pdf = generate_admin_commission_report(
+        commissions=list(commissions),
+        tailors_summary=tailors_summary,
+        start_date=start_date,
+        end_date=end_date,
+        report_type='comprehensive',
+        generated_by=request.user.get_full_name() or request.user.username
+    )
+    
+    response = HttpResponse(pdf, content_type='application/pdf')
+    filename = f"commission_report_admin_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+
+@login_required
+@admin_required  
+def admin_garment_report(request):
+    """Generate garment production and commission report"""
+    from datetime import timedelta
+    from django.db.models import Sum, Count
+    from .reports import generate_garment_production_report
+    
+    today = timezone.now().date()
+    report_type = request.GET.get('type', 'monthly')
+    
+    if report_type == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        end_date = today
+    elif report_type == 'monthly':
+        start_date = today.replace(day=1)
+        end_date = today
+    elif report_type == 'yearly':
+        start_date = today.replace(month=1, day=1)
+        end_date = today
+    else:
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        else:
+            start_date = today.replace(day=1)
+            end_date = today
+    
+    # Get garment statistics from commissions
+    garment_stats = TailorCommission.objects.filter(
+        earned_date__date__gte=start_date,
+        earned_date__date__lte=end_date
+    ).values('garment_type').annotate(
+        quantity=Sum('quantity'),
+        revenue=Sum('order_amount'),
+        commission=Sum('commission_amount')
+    ).order_by('-revenue')
+    
+    garment_list = [
+        {
+            'garment_type': g['garment_type'],
+            'quantity': g['quantity'] or 0,
+            'revenue': float(g['revenue'] or 0),
+            'commission': float(g['commission'] or 0),
+        }
+        for g in garment_stats
+    ]
+    
+    pdf = generate_garment_production_report(
+        garment_stats=garment_list,
+        start_date=start_date,
+        end_date=end_date,
+        generated_by=request.user.get_full_name() or request.user.username
+    )
+    
+    response = HttpResponse(pdf, content_type='application/pdf')
+    filename = f"garment_production_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+
+@login_required
+@admin_required
+def admin_tailor_performance_report(request):
+    """Generate tailor performance report"""
+    from datetime import timedelta
+    from django.db.models import Sum, Count, Avg, F
+    from .reports import generate_tailor_performance_report
+    
+    today = timezone.now().date()
+    report_type = request.GET.get('type', 'monthly')
+    
+    if report_type == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        end_date = today
+    elif report_type == 'monthly':
+        start_date = today.replace(day=1)
+        end_date = today
+    elif report_type == 'yearly':
+        start_date = today.replace(month=1, day=1)
+        end_date = today
+    else:
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        else:
+            start_date = today.replace(day=1)
+            end_date = today
+    
+    tailors_data = []
+    tailors = User.objects.filter(profile__role='tailor').select_related('profile')
+    
+    for tailor in tailors:
+        # Get commission data
+        commissions = TailorCommission.objects.filter(
+            tailor=tailor,
+            earned_date__date__gte=start_date,
+            earned_date__date__lte=end_date
+        )
+        
+        summary = commissions.aggregate(
+            total_commission=Sum('commission_amount'),
+            total_revenue=Sum('order_amount'),
+            task_count=Count('id')
+        )
+        
+        # Get completed tasks to calculate avg completion time
+        tasks = TailoringTask.objects.filter(
+            tailor=tailor,
+            status='approved',
+            approved_date__date__gte=start_date,
+            approved_date__date__lte=end_date
+        )
+        
+        avg_time = 'N/A'
+        if tasks.exists():
+            # Calculate average time from assignment to completion
+            total_days = 0
+            count = 0
+            for task in tasks:
+                if task.completed_date and task.assigned_date:
+                    delta = task.completed_date - task.assigned_date
+                    total_days += delta.days
+                    count += 1
+            if count > 0:
+                avg_days = total_days / count
+                avg_time = f"{avg_days:.1f} days"
+        
+        if summary['task_count'] and summary['task_count'] > 0:
+            tailors_data.append({
+                'name': tailor.get_full_name() or tailor.username,
+                'tasks_completed': summary['task_count'] or 0,
+                'avg_completion_time': avg_time,
+                'revenue': float(summary['total_revenue'] or 0),
+                'commission': float(summary['total_commission'] or 0),
+            })
+    
+    tailors_data.sort(key=lambda x: x['commission'], reverse=True)
+    
+    pdf = generate_tailor_performance_report(
+        tailors_data=tailors_data,
+        start_date=start_date,
+        end_date=end_date,
+        generated_by=request.user.get_full_name() or request.user.username
+    )
+    
+    response = HttpResponse(pdf, content_type='application/pdf')
+    filename = f"tailor_performance_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+
+@login_required
+def commission_history(request):
+    """View full commission history with filtering"""
+    from django.db.models import Sum
+    
+    # For tailors, show their own commissions
+    if hasattr(request.user, 'profile') and request.user.profile.is_tailor:
+        commissions = TailorCommission.objects.filter(
+            tailor=request.user
+        ).select_related('order', 'task')
+    else:
+        # Admin sees all
+        commissions = TailorCommission.objects.all().select_related(
+            'tailor', 'order', 'task'
+        )
+    
+    # Filtering
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        commissions = commissions.filter(status=status_filter)
+    
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    if date_from:
+        from datetime import datetime
+        date_from = datetime.strptime(date_from, '%Y-%m-%d').date()
+        commissions = commissions.filter(earned_date__date__gte=date_from)
+    
+    if date_to:
+        from datetime import datetime
+        date_to = datetime.strptime(date_to, '%Y-%m-%d').date()
+        commissions = commissions.filter(earned_date__date__lte=date_to)
+    
+    commissions = commissions.order_by('-earned_date')
+    
+    # Summary
+    summary = commissions.aggregate(
+        total=Sum('commission_amount'),
+        count=Count('id')
+    )
+    
+    paginator = Paginator(commissions, 30)
+    page = request.GET.get('page', 1)
+    commissions = paginator.get_page(page)
+    
+    context = {
+        'commissions': commissions,
+        'total_amount': summary['total'] or Decimal('0'),
+        'total_count': summary['count'] or 0,
+        'status_filter': status_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    
+    return render(request, 'commissions/history.html', context)
+

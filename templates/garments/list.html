@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Garment Types - Tailoring System{% endblock %}
 
@@ -80,7 +80,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-brown-500">Avg. Base Price</p>
-                    <p class="text-2xl font-bold text-brown-800">${{ avg_base_price|floatformat:2|default:"0.00" }}</p>
+                    <p class="text-2xl font-bold text-brown-800">₱{{ avg_base_price|floatformat:2|default:"0.00" }}</p>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                             {{ garment.estimated_fabric_meters }} meters
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-brown-800 font-medium">
-                            ${{ garment.base_price|floatformat:2 }}
+                            {{ garment.base_price|floatformat:2 }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-brown-600">
                             {% if garment.default_tailor %}

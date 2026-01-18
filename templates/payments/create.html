@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Record Payment - Order #{{ order.order_number }} - Tailoring System{% endblock %}
 
@@ -58,15 +58,15 @@
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div class="bg-cream-50 rounded-lg p-4">
                         <p class="text-sm text-brown-500">Total Amount</p>
-                        <p class="text-xl font-bold text-brown-800">${{ order.total_price|floatformat:2 }}</p>
+                        <p class="text-xl font-bold text-brown-800">{{ order.total_price|floatformat:2 }}</p>
                     </div>
                     <div class="bg-green-50 rounded-lg p-4">
                         <p class="text-sm text-green-600">Amount Paid</p>
-                        <p class="text-xl font-bold text-green-600">${{ order.total_paid|floatformat:2 }}</p>
+                        <p class="text-xl font-bold text-green-600">{{ order.total_paid|floatformat:2 }}</p>
                     </div>
                     <div class="bg-{% if order.remaining_balance > 0 %}red{% else %}green{% endif %}-50 rounded-lg p-4">
                         <p class="text-sm text-{% if order.remaining_balance > 0 %}red{% else %}green{% endif %}-600">Balance Due</p>
-                        <p class="text-xl font-bold text-{% if order.remaining_balance > 0 %}red{% else %}green{% endif %}-600">${{ order.remaining_balance|floatformat:2 }}</p>
+                        <p class="text-xl font-bold text-{% if order.remaining_balance > 0 %}red{% else %}green{% endif %}-600">{{ order.remaining_balance|floatformat:2 }}</p>
                     </div>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                         Amount <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <span class="absolute left-3 top-2.5 text-brown-500">$</span>
+                        <span class="absolute left-3 top-2.5 text-brown-500"></span>
                         <input type="number"
                                name="amount"
                                id="id_amount"
@@ -104,7 +104,7 @@
                                class="w-full pl-8 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
                                placeholder="0.00">
                     </div>
-                    <p class="mt-1 text-xs text-brown-500">Maximum: ${{ order.remaining_balance|floatformat:2 }}</p>
+                    <p class="mt-1 text-xs text-brown-500">Maximum: {{ order.remaining_balance|floatformat:2 }}</p>
                     {% if form.amount.errors %}
                     <p class="mt-1 text-sm text-red-600">{{ form.amount.errors.0 }}</p>
                     {% endif %}

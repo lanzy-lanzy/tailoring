@@ -1,4 +1,4 @@
-{% comment %}
+﻿{% comment %}
 Order Table Partial - Used for HTMX updates
 This partial renders the order table content and pagination.
 Expects: orders (queryset), page_obj (pagination object), search_query (string), status_filter (string)
@@ -105,9 +105,9 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                 </p>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">
-                <p class="text-brown-800 font-medium">${{ order.total_price }}</p>
+                <p class="text-brown-800 font-medium">{{ order.total_price }}</p>
                 {% if order.balance_amount > 0 %}
-                <p class="text-xs text-red-500">Bal: ${{ order.balance_amount }}</p>
+                <p class="text-xs text-red-500">Bal: {{ order.balance_amount }}</p>
                 {% endif %}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">

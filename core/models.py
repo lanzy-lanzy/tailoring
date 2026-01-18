@@ -313,6 +313,25 @@ class TailoringTask(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='assigned')
     notes = models.TextField(blank=True)
     
+    # Commission fields
+    commission_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('10.00'),
+        help_text="Commission percentage for this task"
+    )
+    commission_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text="Calculated commission amount"
+    )
+    commission_paid = models.BooleanField(
+        default=False,
+        help_text="Whether commission has been credited to tailor"
+    )
+    commission_paid_date = models.DateTimeField(null=True, blank=True)
+    
     assigned_date = models.DateTimeField(auto_now_add=True)
     started_date = models.DateTimeField(null=True, blank=True)
     completed_date = models.DateTimeField(null=True, blank=True)
@@ -333,6 +352,18 @@ class TailoringTask(models.Model):
     
     def __str__(self):
         return f"Task for {self.order.order_number} - {self.tailor}"
+    
+    def calculate_commission(self):
+        """Calculate commission based on order total price and commission rate"""
+        if self.order and self.order.total_price:
+            self.commission_amount = (self.order.total_price * self.commission_rate) / Decimal('100')
+        return self.commission_amount
+    
+    def save(self, *args, **kwargs):
+        # Auto-calculate commission if not set
+        if self.commission_amount == Decimal('0.00') and self.order_id:
+            self.calculate_commission()
+        super().save(*args, **kwargs)
 
 
 class Payment(models.Model):
@@ -382,6 +413,140 @@ class Payment(models.Model):
         if not self.payment_number:
             self.payment_number = f"PAY-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
+
+
+class TailorCommission(models.Model):
+    """Track individual commission records for tailors"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('credited', 'Credited'),
+        ('paid', 'Paid Out'),
+    ]
+    
+    commission_number = models.CharField(max_length=50, unique=True, editable=False)
+    tailor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='commissions'
+    )
+    task = models.OneToOneField(
+        'TailoringTask',
+        on_delete=models.CASCADE,
+        related_name='commission_record'
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='commission_records'
+    )
+    
+    # Commission details
+    order_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Original order amount"
+    )
+    commission_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="Commission percentage applied"
+    )
+    commission_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Commission amount earned"
+    )
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Garment details for reporting
+    garment_type = models.CharField(max_length=200)
+    quantity = models.PositiveIntegerField(default=1)
+    customer_name = models.CharField(max_length=200)
+    
+    # Timestamps
+    earned_date = models.DateTimeField(auto_now_add=True)
+    credited_date = models.DateTimeField(null=True, blank=True)
+    paid_date = models.DateTimeField(null=True, blank=True)
+    
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-earned_date']
+        verbose_name = "Tailor Commission"
+        verbose_name_plural = "Tailor Commissions"
+        indexes = [
+            models.Index(fields=['tailor', 'status']),
+            models.Index(fields=['tailor', '-earned_date']),
+        ]
+    
+    def __str__(self):
+        return f"{self.commission_number} - {self.tailor.get_full_name() or self.tailor.username} - ₱{self.commission_amount}"
+    
+    def save(self, *args, **kwargs):
+        if not self.commission_number:
+            self.commission_number = f"COM-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_from_task(cls, task):
+        """Create a commission record from a completed task when order is claimed"""
+        from django.utils import timezone
+        
+        if not task.tailor or not task.order:
+            return None
+        
+        # Check if commission already exists
+        if hasattr(task, 'commission_record'):
+            return task.commission_record
+        
+        commission = cls.objects.create(
+            tailor=task.tailor,
+            task=task,
+            order=task.order,
+            order_amount=task.order.total_price,
+            commission_rate=task.commission_rate,
+            commission_amount=task.commission_amount,
+            status='credited',
+            garment_type=task.order.garment_type.name,
+            quantity=task.order.quantity,
+            customer_name=task.order.customer.name,
+            credited_date=timezone.now()
+        )
+        
+        # Update task commission status
+        task.commission_paid = True
+        task.commission_paid_date = timezone.now()
+        task.save(update_fields=['commission_paid', 'commission_paid_date'])
+        
+        return commission
+    
+    @classmethod
+    def get_tailor_summary(cls, tailor, start_date=None, end_date=None):
+        """Get commission summary for a tailor within date range"""
+        from django.db.models import Sum, Count
+        
+        queryset = cls.objects.filter(tailor=tailor)
+        
+        if start_date:
+            queryset = queryset.filter(earned_date__date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(earned_date__date__lte=end_date)
+        
+        summary = queryset.aggregate(
+            total_commissions=Sum('commission_amount'),
+            total_tasks=Count('id'),
+            total_orders_value=Sum('order_amount')
+        )
+        
+        return {
+            'total_commissions': summary['total_commissions'] or Decimal('0'),
+            'total_tasks': summary['total_tasks'] or 0,
+            'total_orders_value': summary['total_orders_value'] or Decimal('0'),
+        }
 
 
 class InventoryLog(models.Model):
@@ -474,3 +639,185 @@ class SMSLog(models.Model):
     
     def __str__(self):
         return f"SMS to {self.phone_number} - {self.status}"
+
+
+class Notification(models.Model):
+    """In-app notification system for tailors and admins"""
+    TYPE_CHOICES = [
+        ('task_assigned', 'Task Assigned'),
+        ('task_completed', 'Task Completed'),
+        ('task_approved', 'Task Approved'),
+        ('order_created', 'Order Created'),
+        ('payment_received', 'Payment Received'),
+        ('low_stock', 'Low Stock Alert'),
+        ('general', 'General'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('normal', 'Normal'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='sent_notifications'
+    )
+    notification_type = models.CharField(
+        max_length=30,
+        choices=TYPE_CHOICES,
+        default='general'
+    )
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    priority = models.CharField(
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default='normal'
+    )
+    
+    # Related objects (optional)
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+    task = models.ForeignKey(
+        'TailoringTask',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+    
+    # URL for action (e.g., link to task or order)
+    action_url = models.CharField(max_length=500, blank=True)
+    
+    # Status
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
+        indexes = [
+            models.Index(fields=['recipient', 'is_read']),
+            models.Index(fields=['recipient', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.title} - {self.recipient.username}"
+    
+    def mark_as_read(self):
+        """Mark notification as read"""
+        if not self.is_read:
+            from django.utils import timezone
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+    
+    @classmethod
+    def get_unread_count(cls, user):
+        """Get count of unread notifications for a user"""
+        return cls.objects.filter(recipient=user, is_read=False).count()
+    
+    @classmethod
+    def get_recent_notifications(cls, user, limit=10):
+        """Get recent notifications for a user"""
+        return cls.objects.filter(recipient=user).select_related(
+            'sender', 'order', 'task'
+        )[:limit]
+    
+    @classmethod
+    def create_notification(cls, recipient, title, message, notification_type='general',
+                           sender=None, order=None, task=None, action_url='', priority='normal'):
+        """Helper method to create a notification"""
+        return cls.objects.create(
+            recipient=recipient,
+            sender=sender,
+            notification_type=notification_type,
+            title=title,
+            message=message,
+            priority=priority,
+            order=order,
+            task=task,
+            action_url=action_url
+        )
+    
+    @classmethod
+    def notify_tailors_task_assigned(cls, task, sender=None):
+        """Notify tailor when a new task is assigned"""
+        if task.tailor:
+            return cls.create_notification(
+                recipient=task.tailor,
+                title='New Task Assigned',
+                message=f'You have been assigned a new task for order {task.order.order_number}. '
+                       f'Customer: {task.order.customer.name}. '
+                       f'Garment: {task.order.garment_type.name}.',
+                notification_type='task_assigned',
+                sender=sender,
+                order=task.order,
+                task=task,
+                action_url=f'/tasks/{task.pk}/',
+                priority='high'
+            )
+        return None
+    
+    @classmethod
+    def notify_admins_task_completed(cls, task, sender=None):
+        """Notify all admins when a task is marked as completed"""
+        from .models import UserProfile
+        notifications = []
+        admin_profiles = UserProfile.objects.filter(role='admin').select_related('user')
+        
+        for profile in admin_profiles:
+            notification = cls.create_notification(
+                recipient=profile.user,
+                title='Task Completed - Awaiting Approval',
+                message=f'Task for order {task.order.order_number} has been marked as completed by '
+                       f'{task.tailor.get_full_name() or task.tailor.username}. '
+                       f'Customer: {task.order.customer.name}. '
+                       f'Garment: {task.order.garment_type.name}. '
+                       f'Please review and approve.',
+                notification_type='task_completed',
+                sender=sender,
+                order=task.order,
+                task=task,
+                action_url=f'/tasks/{task.pk}/',
+                priority='high'
+            )
+            notifications.append(notification)
+        
+        return notifications
+    
+    @classmethod
+    def notify_tailor_task_approved(cls, task, sender=None):
+        """Notify tailor when their task is approved"""
+        if task.tailor:
+            return cls.create_notification(
+                recipient=task.tailor,
+                title='Task Approved',
+                message=f'Your task for order {task.order.order_number} has been approved. '
+                       f'Great work!',
+                notification_type='task_approved',
+                sender=sender,
+                order=task.order,
+                task=task,
+                action_url=f'/tasks/{task.pk}/',
+                priority='normal'
+            )
+        return None

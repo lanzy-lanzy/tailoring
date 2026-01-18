@@ -63,6 +63,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.shop_info",
+                "core.context_processors.notifications",
             ],
         },
     },
@@ -143,6 +144,8 @@ LOGOUT_REDIRECT_URL = 'login'
 # Semaphore SMS API settings
 # Get your API key from https://semaphore.co/
 # Replace the empty strings below with your actual API key and sender name
+# SEMAPHORE_API_KEY = os.environ.get('SEMAPHORE_API_KEY', 'fa0f4ff77ba74de0b8e74be14735e951')  # <- Add your API key here
+# SEMAPHORE_SENDER_NAME = os.environ.get('SEMAPHORE_SENDER_NAME', 'elsenior')  # <- Add your sender name here
 
 # Shop Information (for receipts)
 SHOP_NAME = 'El Senior Original Tailoring'

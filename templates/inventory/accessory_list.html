@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Accessories - Tailoring System{% endblock %}
 
@@ -78,7 +78,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-brown-500">Total Value</p>
-                    <p class="text-2xl font-bold text-brown-800">${{ total_value|floatformat:2|default:"0.00" }}</p>
+                    <p class="text-2xl font-bold text-brown-800">{{ total_value|floatformat:2|default:"0.00" }}</p>
                 </div>
             </div>
         </div>
@@ -150,7 +150,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-brown-700">
-                            ${{ accessory.price_per_unit }}
+                            {{ accessory.price_per_unit }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex items-center justify-end space-x-2">
