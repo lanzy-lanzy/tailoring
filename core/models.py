@@ -131,6 +131,16 @@ class GarmentType(models.Model):
     """Types of garments with fabric and accessory requirements"""
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    garment_category = models.CharField(
+        max_length=20,
+        choices=[
+            ('upper', 'Upper Body'),
+            ('lower', 'Lower Body'),
+            ('both', 'Upper & Lower (Both)'),
+        ],
+        default='upper',
+        help_text="Category of garment for measurement purposes"
+    )
     estimated_fabric_meters = models.DecimalField(
         max_digits=5, 
         decimal_places=2,

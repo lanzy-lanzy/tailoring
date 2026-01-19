@@ -71,8 +71,9 @@ class GarmentTypeAccessoryInline(admin.TabularInline):
 
 @admin.register(GarmentType)
 class GarmentTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'estimated_fabric_meters', 'base_price', 'default_tailor')
+    list_display = ('name', 'garment_category', 'estimated_fabric_meters', 'base_price', 'default_tailor')
     search_fields = ('name',)
+    list_filter = ('garment_category',)
     inlines = [GarmentTypeAccessoryInline]
 
 

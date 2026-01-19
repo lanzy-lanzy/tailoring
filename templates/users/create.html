@@ -28,6 +28,43 @@
             <p class="text-sm text-brown-500 mt-1">Create a new user account</p>
         </div>
 
+        <!-- Display Non-Field Errors -->
+        {% if form.non_field_errors %}
+        <div class="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-red-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    {% for error in form.non_field_errors %}
+                    <p class="text-sm text-red-700">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Display All Form Errors Summary -->
+        {% if form.errors %}
+        <div class="mx-6 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-yellow-800">Please correct the errors below:</p>
+                    <ul class="mt-1 text-sm text-yellow-700 list-disc list-inside">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <form method="post" action="{% url 'user_create' %}" class="p-6 space-y-6">
             {% csrf_token %}
 
@@ -43,7 +80,7 @@
                            required
                            maxlength="150"
                            value="{{ form.first_name.value|default:'' }}"
-                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.first_name.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                            placeholder="John">
                     {% if form.first_name.errors %}
                     <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
@@ -61,7 +98,7 @@
                            required
                            maxlength="150"
                            value="{{ form.last_name.value|default:'' }}"
-                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.last_name.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                            placeholder="Doe">
                     {% if form.last_name.errors %}
                     <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
@@ -82,7 +119,7 @@
                            required
                            maxlength="150"
                            value="{{ form.username.value|default:'' }}"
-                           class="w-full pl-8 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full pl-8 pr-4 py-2 border {% if form.username.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                            placeholder="johndoe">
                 </div>
                 <p class="mt-1 text-xs text-brown-500">Letters, digits and @/./+/-/_ only</p>
@@ -102,7 +139,7 @@
                        required
                        maxlength="254"
                        value="{{ form.email.value|default:'' }}"
-                       class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       class="w-full px-4 py-2 border {% if form.email.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                        placeholder="john@example.com">
                 {% if form.email.errors %}
                 <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
@@ -110,39 +147,52 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Password -->
+                <!-- Password (password1) -->
                 <div>
-                    <label for="id_password" class="block text-sm font-medium text-brown-700 mb-2">
+                    <label for="id_password1" class="block text-sm font-medium text-brown-700 mb-2">
                         Password <span class="text-red-500">*</span>
                     </label>
                     <input type="password"
-                           name="password"
-                           id="id_password"
+                           name="password1"
+                           id="id_password1"
                            required
                            minlength="8"
-                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.password1.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                            placeholder="Min. 8 characters">
-                    {% if form.password.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                    {% if form.password1.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
                     {% endif %}
                 </div>
 
-                <!-- Confirm Password -->
+                <!-- Confirm Password (password2) -->
                 <div>
-                    <label for="id_password_confirm" class="block text-sm font-medium text-brown-700 mb-2">
+                    <label for="id_password2" class="block text-sm font-medium text-brown-700 mb-2">
                         Confirm Password <span class="text-red-500">*</span>
                     </label>
                     <input type="password"
-                           name="password_confirm"
-                           id="id_password_confirm"
+                           name="password2"
+                           id="id_password2"
                            required
                            minlength="8"
-                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.password2.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                            placeholder="Repeat password">
-                    {% if form.password_confirm.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.password_confirm.errors.0 }}</p>
+                    {% if form.password2.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
                     {% endif %}
                 </div>
+            </div>
+
+            <!-- Password Requirements Help Text -->
+            <div class="bg-cream-50 border border-cream-200 rounded-lg p-3">
+                <p class="text-xs text-brown-600">
+                    <strong>Password requirements:</strong>
+                    <ul class="mt-1 list-disc list-inside text-xs text-brown-500">
+                        <li>At least 8 characters</li>
+                        <li>Cannot be too similar to your username</li>
+                        <li>Cannot be a commonly used password</li>
+                        <li>Cannot be entirely numeric</li>
+                    </ul>
+                </p>
             </div>
 
             <!-- Role Selection -->
@@ -151,8 +201,8 @@
                     Role <span class="text-red-500">*</span>
                 </label>
                 <div class="grid grid-cols-2 gap-4">
-                    <label class="relative flex items-center p-4 border-2 border-brown-200 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors">
-                        <input type="radio" name="role" value="tailor" class="sr-only" checked>
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors role-option" data-role="tailor">
+                        <input type="radio" name="role" value="tailor" class="sr-only" {% if form.role.value == 'tailor' or not form.role.value %}checked{% endif %}>
                         <div class="flex items-center">
                             <div class="p-2 bg-blue-100 rounded-lg mr-3">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,8 +215,8 @@
                             </div>
                         </div>
                     </label>
-                    <label class="relative flex items-center p-4 border-2 border-brown-200 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors">
-                        <input type="radio" name="role" value="admin" class="sr-only">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors role-option" data-role="admin">
+                        <input type="radio" name="role" value="admin" class="sr-only" {% if form.role.value == 'admin' %}checked{% endif %}>
                         <div class="flex items-center">
                             <div class="p-2 bg-purple-100 rounded-lg mr-3">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +245,7 @@
                        id="id_phone"
                        maxlength="20"
                        value="{{ form.phone.value|default:'' }}"
-                       class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       class="w-full px-4 py-2 border {% if form.phone.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
                        placeholder="+1 234 567 8900">
                 {% if form.phone.errors %}
                 <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
@@ -223,23 +273,25 @@
 {% block extra_js %}
 <script>
     // Role selection styling
-    document.querySelectorAll('input[name="role"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.querySelectorAll('input[name="role"]').forEach(r => {
-                r.closest('label').classList.remove('border-brown-600', 'bg-cream-50');
-                r.closest('label').classList.add('border-brown-200');
-            });
-            if (this.checked) {
-                this.closest('label').classList.remove('border-brown-200');
-                this.closest('label').classList.add('border-brown-600', 'bg-cream-50');
+    function updateRoleStyles() {
+        document.querySelectorAll('.role-option').forEach(label => {
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio.checked) {
+                label.classList.remove('border-brown-200');
+                label.classList.add('border-brown-600', 'bg-cream-50');
+            } else {
+                label.classList.remove('border-brown-600', 'bg-cream-50');
+                label.classList.add('border-brown-200');
             }
         });
-        // Set initial state
-        if (radio.checked) {
-            radio.closest('label').classList.remove('border-brown-200');
-            radio.closest('label').classList.add('border-brown-600', 'bg-cream-50');
-        }
+    }
+
+    document.querySelectorAll('input[name="role"]').forEach(radio => {
+        radio.addEventListener('change', updateRoleStyles);
     });
+
+    // Set initial state
+    updateRoleStyles();
 </script>
 {% endblock %}
 {% endblock %}

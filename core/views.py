@@ -1729,17 +1729,36 @@ def user_create(request):
     if request.method == "POST":
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            UserProfile.objects.create(
-                user=user,
-                role=form.cleaned_data["role"],
-                phone=form.cleaned_data.get("phone", ""),
-            )
-            messages.success(request, f'User "{user.username}" created successfully.')
+            try:
+                user = form.save()
+                UserProfile.objects.create(
+                    user=user,
+                    role=form.cleaned_data["role"],
+                    phone=form.cleaned_data.get("phone", ""),
+                )
+                messages.success(
+                    request, f'User "{user.username}" created successfully.'
+                )
 
-            if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/users/"})
-            return redirect("user_list")
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(status=204, headers={"HX-Redirect": "/users/"})
+                return redirect("user_list")
+            except Exception as e:
+                messages.error(request, f"Error creating user: {str(e)}")
+        else:
+            # Form is not valid - show error message
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        error_messages.append(error)
+                    else:
+                        error_messages.append(f"{field}: {error}")
+            if error_messages:
+                messages.error(
+                    request,
+                    "Please fix the errors below: " + "; ".join(error_messages[:3]),
+                )
     else:
         form = UserRegistrationForm()
 

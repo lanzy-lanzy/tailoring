@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Garment Types - Tailoring System{% endblock %}
 
@@ -91,46 +91,63 @@
         {% if garment_types %}
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-cream-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Fabric Estimate</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Base Price</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Default Tailor</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Accessories</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-brown-600 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-brown-100">
-                    {% for garment in garment_types %}
-                    <tr class="hover:bg-cream-50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <a href="{% url 'garment_type_detail' garment.pk %}" class="text-brown-800 font-medium hover:text-brown-600 transition-colors">
-                                {{ garment.name }}
-                            </a>
-                            {% if garment.description %}
-                            <p class="text-sm text-brown-500 truncate max-w-xs">{{ garment.description|truncatechars:50 }}</p>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-brown-600">
-                            {{ garment.estimated_fabric_meters }} meters
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-brown-800 font-medium">
-                            {{ garment.base_price|floatformat:2 }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-brown-600">
-                            {% if garment.default_tailor %}
-                                {{ garment.default_tailor.get_full_name|default:garment.default_tailor.username }}
-                            {% else %}
-                                <span class="text-brown-400">Not assigned</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brown-100 text-brown-800">
-                                {{ garment.required_accessories.count }} items
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                 <thead class="bg-cream-50">
+                     <tr>
+                         <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Name</th>
+                         <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Category</th>
+                         <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Fabric Estimate</th>
+                         <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Base Price</th>
+                         <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Default Tailor</th>
+                         <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Accessories</th>
+                         <th class="px-6 py-3 text-right text-xs font-semibold text-brown-600 uppercase tracking-wider">Actions</th>
+                     </tr>
+                 </thead>
+                 <tbody class="divide-y divide-brown-100">
+                     {% for garment in garment_types %}
+                     <tr class="hover:bg-cream-50 transition-colors">
+                         <td class="px-6 py-4 whitespace-nowrap">
+                             <a href="{% url 'garment_type_detail' garment.pk %}" class="text-brown-800 font-medium hover:text-brown-600 transition-colors">
+                                 {{ garment.name }}
+                             </a>
+                             {% if garment.description %}
+                             <p class="text-sm text-brown-500 truncate max-w-xs">{{ garment.description|truncatechars:50 }}</p>
+                             {% endif %}
+                         </td>
+                         <td class="px-6 py-4 whitespace-nowrap">
+                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                 {% if garment.garment_category == 'upper' %}
+                                     bg-blue-100 text-blue-800
+                                 {% elif garment.garment_category == 'lower' %}
+                                     bg-green-100 text-green-800
+                                 {% elif garment.garment_category == 'both' %}
+                                     bg-purple-100 text-purple-800
+                                 {% else %}
+                                     bg-gray-100 text-gray-800
+                                 {% endif %}">
+                                 {% if garment.garment_category == 'upper' %}Upper Body{% endif %}
+                                 {% if garment.garment_category == 'lower' %}Lower Body{% endif %}
+                                 {% if garment.garment_category == 'both' %}Upper & Lower{% endif %}
+                             </span>
+                         </td>
+                         <td class="px-6 py-4 whitespace-nowrap text-brown-600">
+                             {{ garment.estimated_fabric_meters }} meters
+                         </td>
+                         <td class="px-6 py-4 whitespace-nowrap text-brown-800 font-medium">
+                             {{ garment.base_price|floatformat:2 }}
+                         </td>
+                         <td class="px-6 py-4 whitespace-nowrap text-brown-600">
+                             {% if garment.default_tailor %}
+                                 {{ garment.default_tailor.get_full_name|default:garment.default_tailor.username }}
+                             {% else %}
+                                 <span class="text-brown-400">Not assigned</span>
+                             {% endif %}
+                         </td>
+                         <td class="px-6 py-4 whitespace-nowrap">
+                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brown-100 text-brown-800">
+                                 {{ garment.required_accessories.count }} items
+                             </span>
+                         </td>
+                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end space-x-2">
                                 <a href="{% url 'garment_type_detail' garment.pk %}" 
                                    class="p-2 text-brown-500 hover:text-brown-700 hover:bg-brown-100 rounded-lg transition-colors"

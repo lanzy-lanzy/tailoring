@@ -180,9 +180,16 @@ class GarmentTypeForm(forms.ModelForm):
     """Form for managing garment types"""
     class Meta:
         model = GarmentType
-        fields = ['name', 'description', 'estimated_fabric_meters', 'base_price', 'default_tailor']
+        fields = ['name', 'description', 'garment_category', 'estimated_fabric_meters', 'base_price', 'default_tailor']
         widgets = {
             'name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+                'placeholder': 'Garment Type Name'
+            }),
+            'garment_category': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+            }),
+            'description': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
                 'placeholder': 'Garment Type Name'
             }),

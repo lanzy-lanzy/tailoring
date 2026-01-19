@@ -75,18 +75,22 @@
         .bg-brown-100 { background-color: #F0E6D8 !important; }
         .bg-cream-100 { background-color: #FFF9E6 !important; }
         .bg-cream-50 { background-color: #FFFDF7 !important; }
-        .bg-green-500 { background-color: #22c55e !important; }
-        .bg-green-50 { background-color: #f0fdf4 !important; }
-        .bg-green-100 { background-color: #dcfce7 !important; }
-        
-        /* Text colors */
-        .text-white { color: white !important; }
-        .text-cream-200 { color: #FFF3CC !important; }
-        .text-cream-100 { color: #FFF9E6 !important; }
-        .text-green-600 { color: #16a34a !important; }
-        .text-green-500 { color: #22c55e !important; }
-        .text-green-800 { color: #166534 !important; }
-        .text-red-600 { color: #dc2626 !important; }
+         .bg-green-500 { background-color: #22c55e !important; }
+         .bg-green-50 { background-color: #f0fdf4 !important; }
+         .bg-green-100 { background-color: #dcfce7 !important; }
+         .bg-blue-100 { background-color: #dbeafe !important; }
+         .bg-purple-100 { background-color: #f3e8ff !important; }
+
+         /* Text colors */
+         .text-white { color: white !important; }
+         .text-cream-200 { color: #FFF3CC !important; }
+         .text-cream-100 { color: #FFF9E6 !important; }
+         .text-green-600 { color: #16a34a !important; }
+         .text-green-500 { color: #22c55e !important; }
+         .text-green-800 { color: #166534 !important; }
+         .text-blue-700 { color: #1d4ed8 !important; }
+         .text-purple-700 { color: #7c3aed !important; }
+         .text-red-600 { color: #dc2626 !important; }
         
         /* Border colors */
         .border-green-500 { border-color: #22c55e !important; }
@@ -216,24 +220,42 @@
             </div>
             <div class="p-6 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Garment Type -->
-                    <div>
-                        <label class="block text-sm font-medium text-brown-700 mb-2">
-                            Garment Type <span class="text-red-500">*</span>
-                        </label>
-                        <select name="garment_type" id="id_garment_type" x-model="selectedGarment" @change="updateGarmentInfo()"
-                                class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white" required>
-                            <option value="">-- Select garment --</option>
-                            {% for garment in garment_types %}
-                            <option value="{{ garment.pk }}" 
-                                    data-name="{{ garment.name }}"
-                                    data-fabric="{{ garment.estimated_fabric_meters }}"
-                                    data-price="{{ garment.base_price }}">
-                                {{ garment.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                     <!-- Garment Type -->
+                     <div>
+                         <label class="block text-sm font-medium text-brown-700 mb-2">
+                             Garment Type <span class="text-red-500">*</span>
+                         </label>
+                         <select name="garment_type" id="id_garment_type" x-model="selectedGarment" @change="updateGarmentInfo()"
+                                 class="w-full px-4 py-3 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white" required>
+                             <option value="">-- Select garment --</option>
+                             {% for garment in garment_types %}
+                             <option value="{{ garment.pk }}"
+                                     data-name="{{ garment.name }}"
+                                     data-fabric="{{ garment.estimated_fabric_meters }}"
+                                     data-price="{{ garment.base_price }}"
+                                     data-category="{{ garment.garment_category }}"
+                                     data-category-label="{% if garment.garment_category == 'upper' %}Upper Body{% elif garment.garment_category == 'lower' %}Lower Body{% elif garment.garment_category == 'both' %}Upper & Lower{% endif %}">
+                                 {% if garment.garment_category == 'upper' %}[U] {% endif %}
+                                 {% if garment.garment_category == 'lower' %}[L] {% endif %}
+                                 {% if garment.garment_category == 'both' %}[B] {% endif %}
+                                 {{ garment.name }}
+                             </option>
+                             {% endfor %}
+                         </select>
+                         <div x-show="selectedGarment" class="mt-2 flex items-center space-x-2">
+                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                   :class="{
+                                       'bg-blue-100 text-blue-800': garmentCategory === 'upper',
+                                       'bg-green-100 text-green-800': garmentCategory === 'lower',
+                                       'bg-purple-100 text-purple-800': garmentCategory === 'both'
+                                   }">
+                                 <template x-if="garmentCategory === 'upper'">Upper Body</template>
+                                 <template x-if="garmentCategory === 'lower'">Lower Body</template>
+                                 <template x-if="garmentCategory === 'both'">Upper & Lower</template>
+                             </span>
+                             <span class="text-xs text-brown-500">Selected</span>
+                         </div>
+                     </div>
 
                     <!-- Fabric -->
                     <div>
@@ -291,37 +313,175 @@
             </div>
         </div>
 
-        <!-- Measurements -->
-        <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-brown-100 bg-gradient-to-r from-brown-50 to-cream-50">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-brown-100 rounded-lg flex items-center justify-center mr-3">
-                        <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-semibold text-brown-800">Measurements</h2>
-                        <p class="text-sm text-brown-500">Enter customer measurements (in inches)</p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <template x-for="(field, key) in measurements" :key="key">
-                        <div>
-                            <label :for="'measure_' + key" class="block text-sm font-medium text-brown-700 mb-2 capitalize" x-text="key.replace('_', ' ')"></label>
-                            <div class="relative">
-                                <input type="number" :name="key" :id="'measure_' + key" x-model="measurements[key]"
-                                       step="0.25" min="0" placeholder="0"
-                                       class="w-full px-4 py-2 pr-12 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 bg-white">
-                                <span class="absolute right-3 top-2.5 text-brown-400 text-sm">in</span>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
+         <!-- Measurements -->
+         <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
+             <div class="px-6 py-4 border-b border-brown-100 bg-gradient-to-r from-brown-50 to-cream-50">
+                 <div class="flex items-center justify-between">
+                     <div class="flex items-center">
+                         <div class="w-10 h-10 bg-brown-100 rounded-lg flex items-center justify-center mr-3">
+                             <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                             </svg>
+                         </div>
+                         <div>
+                             <h2 class="text-lg font-semibold text-brown-800">Measurements</h2>
+                             <p class="text-sm text-brown-500">Enter customer measurements (in inches)</p>
+                         </div>
+                     </div>
+                     <div class="flex items-center space-x-3">
+                         <div class="flex items-center space-x-1 text-xs">
+                             <span class="flex items-center">
+                                 <span class="w-3 h-3 bg-blue-600 rounded-full mr-1"></span>
+                                 <span class="text-brown-600">Upper</span>
+                             </span>
+                             <span class="flex items-center">
+                                 <span class="w-3 h-3 bg-green-600 rounded-full mr-1"></span>
+                                 <span class="text-brown-600">Lower</span>
+                             </span>
+                             <span class="flex items-center">
+                                 <span class="w-3 h-3 bg-purple-600 rounded-full mr-1"></span>
+                                 <span class="text-brown-600">Both</span>
+                             </span>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+              <div class="p-6">
+                  <div x-show="!garmentCategory" class="text-center py-12 text-brown-500 bg-gradient-to-br from-brown-50 to-cream-50 rounded-xl border-2 border-dashed border-brown-200">
+                      <svg class="w-16 h-16 mx-auto mb-4 text-brown-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                      </svg>
+                      <p class="text-lg font-semibold text-brown-700">Select a garment type first</p>
+                      <p class="text-sm mt-1">Measurements will appear based on the selected garment category</p>
+                  </div>
+
+                  <div x-show="garmentCategory" x-transition>
+                      <div x-show="showUpperMeasurements" x-transition class="mb-8 bg-blue-50 rounded-xl border-2 border-blue-200 overflow-hidden">
+                          <div class="bg-blue-600 px-6 py-3 flex items-center justify-between">
+                              <div class="flex items-center">
+                                  <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                  </svg>
+                                  <h3 class="font-bold text-white text-lg">Upper Body Measurements</h3>
+                              </div>
+                              <span class="bg-white text-blue-700 px-3 py-1 rounded-full text-sm font-bold uppercase">Required</span>
+                          </div>
+                          <div class="p-6">
+                              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                  <template x-for="field in upperMeasurements" :key="field">
+                                      <div>
+                                          <label :for="'measure_' + field" class="block text-sm font-bold text-blue-800 mb-2 capitalize" x-text="field.replace('_', ' ')"></label>
+                                          <div class="relative">
+                                              <input type="number" :name="field" :id="'measure_' + field" x-model="measurements[field]"
+                                                     step="0.25" min="0" placeholder="0"
+                                                     class="w-full px-4 py-3 pr-12 border-2 border-blue-300 rounded-lg focus:ring-4 focus:ring-blue-400 focus:border-blue-500 bg-white text-lg transition-colors">
+                                              <span class="absolute right-3 top-3.5 text-blue-500 text-sm font-bold">in</span>
+                                          </div>
+                                      </div>
+                                  </template>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div x-show="showLowerMeasurements" x-transition class="mb-8 bg-green-50 rounded-xl border-2 border-green-200 overflow-hidden">
+                          <div class="bg-green-600 px-6 py-3 flex items-center justify-between">
+                              <div class="flex items-center">
+                                  <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                  </svg>
+                                  <h3 class="font-bold text-white text-lg">Lower Body Measurements</h3>
+                              </div>
+                              <span class="bg-white text-green-700 px-3 py-1 rounded-full text-sm font-bold uppercase">Required</span>
+                          </div>
+                          <div class="p-6">
+                              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                  <template x-for="field in lowerMeasurements" :key="field">
+                                      <div>
+                                          <label :for="'measure_' + field" class="block text-sm font-bold text-green-800 mb-2 capitalize" x-text="field.replace('_', ' ')"></label>
+                                          <div class="relative">
+                                              <input type="number" :name="field" :id="'measure_' + field" x-model="measurements[field]"
+                                                     step="0.25" min="0" placeholder="0"
+                                                     class="w-full px-4 py-3 pr-12 border-2 border-green-300 rounded-lg focus:ring-4 focus:ring-green-400 focus:border-green-500 bg-white text-lg transition-colors">
+                                              <span class="absolute right-3 top-3.5 text-green-500 text-sm font-bold">in</span>
+                                          </div>
+                                      </div>
+                                  </template>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div x-show="garmentCategory" x-transition class="bg-purple-50 rounded-xl border-2 border-purple-200 overflow-hidden">
+                          <div class="bg-purple-600 px-6 py-3 flex items-center justify-between">
+                              <div class="flex items-center">
+                                  <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                  </svg>
+                                  <h3 class="font-bold text-white text-lg">Common Measurements</h3>
+                              </div>
+                              <span class="bg-white text-purple-700 px-3 py-1 rounded-full text-sm font-bold uppercase">Required</span>
+                          </div>
+                          <div class="p-6">
+                              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                  <template x-for="field in bothMeasurements" :key="field">
+                                      <div>
+                                          <label :for="'measure_' + field" class="block text-sm font-bold text-purple-800 mb-2 capitalize" x-text="field.replace('_', ' ')"></label>
+                                          <div class="relative">
+                                              <input type="number" :name="field" :id="'measure_' + field" x-model="measurements[field]"
+                                                     step="0.25" min="0" placeholder="0"
+                                                     class="w-full px-4 py-3 pr-12 border-2 border-purple-300 rounded-lg focus:ring-4 focus:ring-purple-400 focus:border-purple-500 bg-white text-lg transition-colors">
+                                              <span class="absolute right-3 top-3.5 text-purple-500 text-sm font-bold">in</span>
+                                          </div>
+                                      </div>
+                                  </template>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div x-show="garmentCategory" class="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                          <div class="flex items-start">
+                              <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                              </svg>
+                              <div class="text-sm text-brown-700">
+                                  <div class="flex items-center mb-2">
+                                      <p class="font-bold">Garment: <span class="text-brown-800" x-text="garmentName"></span></p>
+                                      <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase"
+                                            :class="{
+                                                'bg-blue-600 text-white': garmentCategory === 'upper',
+                                                'bg-green-600 text-white': garmentCategory === 'lower',
+                                                'bg-purple-600 text-white': garmentCategory === 'both'
+                                            }">
+                                          <template x-if="garmentCategory === 'upper'">Upper Body</template>
+                                          <template x-if="garmentCategory === 'lower'">Lower Body</template>
+                                          <template x-if="garmentCategory === 'both'">Upper & Lower</template>
+                                      </span>
+                                  </div>
+                                  <div class="space-y-1">
+                                      <template x-if="garmentCategory === 'upper'">
+                                          <p class="flex items-center">
+                                              <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
+                                              Fill in upper body measurements (chest, shoulder, sleeve, length, neck)
+                                          </p>
+                                      </template>
+                                      <template x-if="garmentCategory === 'lower'">
+                                          <p class="flex items-center">
+                                              <span class="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                                              Fill in lower body measurements (inseam, waist, hips)
+                                          </p>
+                                      </template>
+                                      <template x-if="garmentCategory === 'both'">
+                                          <p class="flex items-center">
+                                              <span class="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
+                                              Fill in BOTH upper and lower body measurements
+                                          </p>
+                                      </template>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                 </div>
+             </div>
+         </div>
 
         <!-- Pricing & Schedule -->
         <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
@@ -511,33 +671,85 @@
                             <p class="text-sm text-brown-600" x-text="getCustomerPhone()"></p>
                         </div>
 
-                        <!-- Order Details -->
-                        <div class="bg-cream-50 rounded-xl p-4 border border-cream-200">
-                            <div class="flex items-center mb-3">
-                                <svg class="w-5 h-5 text-brown-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                                </svg>
-                                <h4 class="font-semibold text-brown-800">Order Details</h4>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-sm text-brown-500">Garment</p>
-                                    <p class="font-medium text-brown-900" x-text="garmentName"></p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-brown-500">Quantity</p>
-                                    <p class="font-medium text-brown-900" x-text="quantity"></p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-brown-500">Fabric</p>
-                                    <p class="font-medium text-brown-900" x-text="fabricName"></p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-brown-500">Due Date</p>
-                                    <p class="font-medium text-brown-900" x-text="formatDate(dueDate)"></p>
-                                </div>
-                            </div>
-                        </div>
+                         <!-- Order Details -->
+                         <div class="bg-cream-50 rounded-xl p-4 border border-cream-200">
+                             <div class="flex items-center mb-3">
+                                 <svg class="w-5 h-5 text-brown-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                 </svg>
+                                 <h4 class="font-semibold text-brown-800">Order Details</h4>
+                             </div>
+                             <div class="grid grid-cols-2 gap-4">
+                                 <div>
+                                     <p class="text-sm text-brown-500">Garment</p>
+                                     <p class="font-medium text-brown-900" x-text="garmentName"></p>
+                                 </div>
+                                 <div>
+                                     <p class="text-sm text-brown-500">Quantity</p>
+                                     <p class="font-medium text-brown-900" x-text="quantity"></p>
+                                 </div>
+                                 <div>
+                                     <p class="text-sm text-brown-500">Fabric</p>
+                                     <p class="font-medium text-brown-900" x-text="fabricName"></p>
+                                 </div>
+                                 <div>
+                                     <p class="text-sm text-brown-500">Due Date</p>
+                                     <p class="font-medium text-brown-900" x-text="formatDate(dueDate)"></p>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <!-- Measurements Summary -->
+                         <div class="bg-cream-50 rounded-xl p-4 border border-cream-200">
+                             <div class="flex items-center mb-3">
+                                 <svg class="w-5 h-5 text-brown-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                 </svg>
+                                 <h4 class="font-semibold text-brown-800">Measurements</h4>
+                             </div>
+                             <div x-show="showUpperMeasurements" class="mb-2">
+                                 <p class="text-xs font-medium text-blue-700 mb-1">Upper Body</p>
+                                 <div class="flex flex-wrap gap-2">
+                                     <template x-for="field in upperMeasurements" :key="field">
+                                         <span x-show="measurements[field]" class="inline-flex items-center px-2 py-1 bg-white rounded text-xs border border-brown-200">
+                                             <span class="text-brown-600 capitalize mr-1" x-text="field.replace('_', ' ')"></span>
+                                             <span class="font-bold text-brown-800" x-text="measurements[field] + ' in'"></span>
+                                         </span>
+                                     </template>
+                                     <template x-if="!upperMeasurements.some(f => measurements[f])">
+                                         <span class="text-xs text-brown-500 italic">No upper measurements provided</span>
+                                     </template>
+                                 </div>
+                             </div>
+                             <div x-show="showLowerMeasurements" class="mb-2">
+                                 <p class="text-xs font-medium text-green-700 mb-1">Lower Body</p>
+                                 <div class="flex flex-wrap gap-2">
+                                     <template x-for="field in lowerMeasurements" :key="field">
+                                         <span x-show="measurements[field]" class="inline-flex items-center px-2 py-1 bg-white rounded text-xs border border-brown-200">
+                                             <span class="text-brown-600 capitalize mr-1" x-text="field.replace('_', ' ')"></span>
+                                             <span class="font-bold text-brown-800" x-text="measurements[field] + ' in'"></span>
+                                         </span>
+                                     </template>
+                                     <template x-if="!lowerMeasurements.some(f => measurements[f])">
+                                         <span class="text-xs text-brown-500 italic">No lower measurements provided</span>
+                                     </template>
+                                 </div>
+                             </div>
+                             <div>
+                                 <p class="text-xs font-medium text-purple-700 mb-1">Common</p>
+                                 <div class="flex flex-wrap gap-2">
+                                     <template x-for="field in bothMeasurements" :key="field">
+                                         <span x-show="measurements[field]" class="inline-flex items-center px-2 py-1 bg-white rounded text-xs border border-brown-200">
+                                             <span class="text-brown-600 capitalize mr-1" x-text="field.replace('_', ' ')"></span>
+                                             <span class="font-bold text-brown-800" x-text="measurements[field] + ' in'"></span>
+                                         </span>
+                                     </template>
+                                     <template x-if="!bothMeasurements.some(f => measurements[f])">
+                                         <span class="text-xs text-brown-500 italic">No common measurements provided</span>
+                                     </template>
+                                 </div>
+                             </div>
+                         </div>
 
                         <!-- Inventory Deduction Warning -->
                         <div class="bg-amber-50 rounded-xl p-4 border border-amber-200">
@@ -715,32 +927,49 @@
                             </div>
                         </div>
                         
-                        <!-- Garment Details - Compact like claim receipt -->
-                        <div class="border border-brown-200 rounded overflow-hidden mb-3">
-                            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                                <h3 class="font-bold text-brown-700 uppercase text-xs">Garment Details</h3>
-                            </div>
-                            <div class="p-2">
-                                <div class="grid grid-cols-4 gap-3 text-sm">
-                                    <div>
-                                        <span class="text-brown-500 text-xs block">Garment Type</span>
-                                        <p class="font-bold text-brown-800" x-text="garmentName"></p>
-                                    </div>
-                                    <div>
-                                        <span class="text-brown-500 text-xs block">Fabric</span>
-                                        <p class="font-semibold text-brown-800" x-text="fabricName"></p>
-                                    </div>
-                                    <div>
-                                        <span class="text-brown-500 text-xs block">Fabric Used</span>
-                                        <p class="font-semibold text-brown-800"><span x-text="fabricRequired.toFixed(2)"></span> meters</p>
-                                    </div>
-                                    <div>
-                                        <span class="text-brown-500 text-xs block">Quantity</span>
-                                        <p class="font-bold text-brown-800" x-text="quantity"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                         <!-- Garment Details - Compact like claim receipt -->
+                         <div class="border border-brown-200 rounded overflow-hidden mb-3">
+                             <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                 <h3 class="font-bold text-brown-700 uppercase text-xs">Garment Details</h3>
+                             </div>
+                             <div class="p-2">
+                                 <div class="grid grid-cols-4 gap-3 text-sm">
+                                     <div>
+                                         <span class="text-brown-500 text-xs block">Garment Type</span>
+                                         <p class="font-bold text-brown-800" x-text="garmentName"></p>
+                                     </div>
+                                     <div>
+                                         <span class="text-brown-500 text-xs block">Fabric</span>
+                                         <p class="font-semibold text-brown-800" x-text="fabricName"></p>
+                                     </div>
+                                     <div>
+                                         <span class="text-brown-500 text-xs block">Fabric Used</span>
+                                         <p class="font-semibold text-brown-800"><span x-text="fabricRequired.toFixed(2)"></span> meters</p>
+                                     </div>
+                                     <div>
+                                         <span class="text-brown-500 text-xs block">Quantity</span>
+                                         <p class="font-bold text-brown-800" x-text="quantity"></p>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <!-- Measurements - Compact like claim receipt -->
+                         <div class="border border-brown-200 rounded overflow-hidden mb-3" x-show="Object.values(measurements).some(v => v)">
+                             <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
+                                 <h3 class="font-bold text-brown-700 uppercase text-xs">Measurements (inches)</h3>
+                             </div>
+                             <div class="p-2">
+                                 <div class="grid grid-cols-4 gap-x-4 gap-y-1 text-sm">
+                                     <template x-for="(value, key) in measurements" :key="key">
+                                         <div x-show="value" class="flex justify-between">
+                                             <span class="text-brown-600 capitalize text-xs" x-text="key.replace('_', ' ')"></span>
+                                             <span class="font-bold text-brown-800 text-xs" x-text="value"></span>
+                                         </div>
+                                     </template>
+                                 </div>
+                             </div>
+                         </div>
                         
                         <!-- Payment Section - Two Columns like claim receipt -->
                         <div class="grid grid-cols-2 gap-4 mb-3">
@@ -902,12 +1131,49 @@ function orderForm() {
         customerName: '',
         customerPhone: '',
         
-        // Garment & Fabric
+         // Garment & Fabric
         selectedGarment: '',
         selectedFabric: '',
         garmentName: '',
+        garmentCategory: '',
         fabricName: '',
         quantity: 1,
+
+        // Measurement categories
+        measurementCategories: {
+            upper: {
+                label: 'Upper Body Measurements',
+                fields: ['chest', 'shoulder', 'sleeve_length', 'body_length', 'neck']
+            },
+            lower: {
+                label: 'Lower Body Measurements',
+                fields: ['inseam']
+            },
+            both: {
+                label: 'Common Measurements',
+                fields: ['waist', 'hips']
+            }
+        },
+
+        get upperMeasurements() {
+            return this.measurementCategories.upper.fields;
+        },
+
+        get lowerMeasurements() {
+            return this.measurementCategories.lower.fields;
+        },
+
+        get bothMeasurements() {
+            return this.measurementCategories.both.fields;
+        },
+
+        get showUpperMeasurements() {
+            return this.garmentCategory === 'upper' || this.garmentCategory === 'both';
+        },
+
+        get showLowerMeasurements() {
+            return this.garmentCategory === 'lower' || this.garmentCategory === 'both';
+        },
         
         // Fabric requirements
         fabricPerUnit: 0,
@@ -959,14 +1225,21 @@ function orderForm() {
             }
         },
         
-        updateGarmentInfo() {
+         updateGarmentInfo() {
             const select = document.getElementById('id_garment_type');
             if (select && select.selectedOptions[0] && this.selectedGarment) {
                 this.garmentName = select.selectedOptions[0].dataset.name || '';
+                this.garmentCategory = select.selectedOptions[0].dataset.category || '';
                 this.fabricPerUnit = parseFloat(select.selectedOptions[0].dataset.fabric) || 0;
                 const basePrice = parseFloat(select.selectedOptions[0].dataset.price) || 0;
                 this.totalPrice = basePrice * this.quantity;
+                console.log('Garment selected:', this.garmentName, 'Category:', this.garmentCategory);
                 this.calculateAll();
+            } else {
+                this.garmentName = '';
+                this.garmentCategory = '';
+                this.fabricPerUnit = 0;
+                this.totalPrice = 0;
             }
         },
         
@@ -1163,18 +1436,22 @@ function orderForm() {
             .bg-brown-100 { background-color: #F0E6D8 !important; }
             .bg-cream-100 { background-color: #FFF9E6 !important; }
             .bg-cream-50 { background-color: #FFFDF7 !important; }
-            .bg-green-500 { background-color: #22c55e !important; }
-            .bg-green-50 { background-color: #f0fdf4 !important; }
-            .bg-green-100 { background-color: #dcfce7 !important; }
-            
-            /* Text colors */
-            .text-white { color: white !important; }
-            .text-cream-200 { color: #FFF3CC !important; }
-            .text-cream-100 { color: #FFF9E6 !important; }
-            .text-green-600 { color: #16a34a !important; }
-            .text-green-500 { color: #22c55e !important; }
-            .text-green-800 { color: #166534 !important; }
-            .text-red-600 { color: #dc2626 !important; }
+             .bg-green-500 { background-color: #22c55e !important; }
+             .bg-green-50 { background-color: #f0fdf4 !important; }
+             .bg-green-100 { background-color: #dcfce7 !important; }
+             .bg-blue-100 { background-color: #dbeafe !important; }
+             .bg-purple-100 { background-color: #f3e8ff !important; }
+
+             /* Text colors */
+             .text-white { color: white !important; }
+             .text-cream-200 { color: #FFF3CC !important; }
+             .text-cream-100 { color: #FFF9E6 !important; }
+             .text-green-600 { color: #16a34a !important; }
+             .text-green-500 { color: #22c55e !important; }
+             .text-green-800 { color: #166534 !important; }
+             .text-blue-700 { color: #1d4ed8 !important; }
+             .text-purple-700 { color: #7c3aed !important; }
+             .text-red-600 { color: #dc2626 !important; }
             
             /* Border colors */
             .border-green-500 { border-color: #22c55e !important; }
