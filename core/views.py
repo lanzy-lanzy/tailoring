@@ -727,7 +727,34 @@ def garment_type_list(request):
     garment_types = GarmentType.objects.prefetch_related(
         "required_accessories__accessory"
     ).all()
-    return render(request, "garments/list.html", {"garment_types": garment_types})
+
+    search_query = request.GET.get("search", "")
+    if search_query:
+        garment_types = garment_types.filter(name__icontains=search_query)
+
+    total_garment_types = garment_types.count()
+
+    # Calculate active orders count
+    active_orders_count = Order.objects.filter(
+        status__in=["pending", "in_progress"]
+    ).count()
+
+    # Calculate average base price
+    from django.db.models import Avg
+    avg_price_result = garment_types.aggregate(Avg("base_price"))
+    avg_base_price = avg_price_result["base_price__avg"] or 0
+
+    return render(
+        request,
+        "garments/list.html",
+        {
+            "garment_types": garment_types,
+            "total_garment_types": total_garment_types,
+            "active_orders_count": active_orders_count,
+            "avg_base_price": avg_base_price,
+            "search_query": search_query,
+        },
+    )
 
 
 @login_required
@@ -748,12 +775,14 @@ def garment_type_create(request):
     else:
         form = GarmentTypeForm()
 
+    tailors = User.objects.filter(profile__role="tailor")
+
     template = (
         "garments/partials/garment_form.html"
         if request.headers.get("HX-Request")
         else "garments/create.html"
     )
-    return render(request, template, {"form": form})
+    return render(request, template, {"form": form, "tailors": tailors})
 
 
 @login_required
@@ -761,6 +790,7 @@ def garment_type_create(request):
 def garment_type_edit(request, pk):
     """Edit garment type"""
     garment_type = get_object_or_404(GarmentType, pk=pk)
+    tailors = User.objects.filter(profile__role="tailor")
 
     if request.method == "POST":
         form = GarmentTypeForm(request.POST, instance=garment_type)
@@ -781,7 +811,7 @@ def garment_type_edit(request, pk):
         if request.headers.get("HX-Request")
         else "garments/edit.html"
     )
-    return render(request, template, {"form": form, "garment_type": garment_type})
+    return render(request, template, {"form": form, "garment_type": garment_type, "tailors": tailors})
 
 
 @login_required
@@ -792,11 +822,20 @@ def garment_type_detail(request, pk):
     required_accessories = garment_type.required_accessories.select_related(
         "accessory"
     ).all()
+    available_accessories = Accessory.objects.all()
+    recent_orders = Order.objects.filter(garment_type=garment_type).select_related("customer").order_by("-created_at")[:10]
+    tailors = User.objects.filter(profile__role="tailor")
 
     return render(
         request,
         "garments/detail.html",
-        {"garment_type": garment_type, "required_accessories": required_accessories},
+        {
+            "garment_type": garment_type,
+            "required_accessories": required_accessories,
+            "available_accessories": available_accessories,
+            "recent_orders": recent_orders,
+            "tailors": tailors,
+        },
     )
 
 
