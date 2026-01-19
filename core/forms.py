@@ -1,10 +1,11 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from decimal import Decimal
 from .models import (
-    UserProfile, Customer, Fabric, Accessory, 
-    GarmentType, GarmentTypeAccessory, Order, 
-    TailoringTask, Payment
+    UserProfile, Customer, Fabric, Accessory,
+    GarmentType, GarmentTypeAccessory, Order,
+    TailoringTask, Payment, Rework
 )
 
 
@@ -496,3 +497,85 @@ class StockAddForm(forms.Form):
             'rows': 2
         })
     )
+
+
+class ReworkCreateForm(forms.Form):
+    """Form for creating rework request from delivered order"""
+    reason = forms.ChoiceField(
+        choices=Rework.REASON_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+        })
+    )
+    reason_description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Detailed description of the issue',
+            'rows': 4
+        })
+    )
+    charge_type = forms.ChoiceField(
+        choices=Rework.CHARGE_TYPE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'x-on:change': 'toggleAdditionalCost()'
+        })
+    )
+    additional_cost = forms.DecimalField(
+        required=False,
+        initial=Decimal('0.00'),
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Additional Cost',
+            'step': '0.01',
+            'min': '0'
+        })
+    )
+    fabric_used = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+        })
+    )
+    fabric_meters_used = forms.DecimalField(
+        required=False,
+        initial=Decimal('0.00'),
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Fabric Meters Used',
+            'step': '0.01',
+            'min': '0'
+        })
+    )
+    assigned_to = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+        })
+    )
+    notes = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Additional notes',
+            'rows': 3
+        })
+    )
+
+
+class ReworkUpdateForm(forms.ModelForm):
+    """Form for updating rework status"""
+    class Meta:
+        model = Rework
+        fields = ['status', 'notes']
+        widgets = {
+            'status': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+                'placeholder': 'Notes',
+                'rows': 3
+            }),
+        }
+

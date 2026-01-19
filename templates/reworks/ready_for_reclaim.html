@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Ready for Re-Claim - El Senior Original Tailoring{% endblock %}
+
+{% block page_title %}Ready for Re-Claim{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Back Button -->
+    <div>
+        <a href="{% url 'rework_list' %}" class="inline-flex items-center text-brown-600 hover:text-brown-800">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Reworks
+        </a>
+    </div>
+    
+    <!-- Summary Card -->
+    <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+        <div class="flex items-center">
+            <div class="p-3 bg-green-500 rounded-lg">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <h2 class="text-lg font-semibold text-green-800">Ready for Re-Claim</h2>
+                <p class="text-green-700">
+                    {{ count }} order{{ count|pluralize }} that have undergone rework and are ready for customer pickup
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders Table -->
+    {% if orders %}
+    <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-brown-100">
+            <h3 class="text-lg font-semibold text-brown-800">Orders Ready for Re-Claim</h3>
+            <p class="text-sm text-brown-500">These orders have completed rework and are waiting for customer pickup</p>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-cream-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider">Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider">Garment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider">Rework #</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider">Rework Reason</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider">Updated</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-brown-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brown-100">
+                    {% for order in orders %}
+                    <tr class="hover:bg-cream-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <a href="{% url 'order_detail' order.pk %}" class="text-brown-600 hover:text-brown-800 font-medium">
+                                {{ order.order_number }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-brown-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                    {{ order.customer.name|slice:":1"|upper }}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-brown-800">{{ order.customer.name }}</p>
+                                    <p class="text-xs text-brown-500">{{ order.customer.contact_number }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-brown-600">{{ order.garment_type.name }}</td>
+                        <td class="px-6 py-4">
+                            {% with rework=order.reworks.first %}
+                            {% if rework %}
+                            <a href="{% url 'rework_detail' rework.pk %}" class="font-mono text-sm font-semibold text-brown-600 hover:text-brown-800">
+                                {{ rework.rework_number }}
+                            </a>
+                            {% else %}
+                            <span class="text-sm text-brown-400">-</span>
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% with rework=order.reworks.first %}
+                            {% if rework %}
+                            <span class="inline-flex px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
+                                {{ rework.get_reason_display }}
+                            </span>
+                            {% else %}
+                            <span class="text-sm text-brown-400">-</span>
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-brown-500">
+                            {{ order.updated_at|date:"M d, Y g:i A" }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{% url 'process_reclaim' order.pk %}" 
+                               class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                </svg>
+                                Process Re-Claim
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl shadow-sm border border-brown-100 p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-brown-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-brown-800">No Orders Ready for Re-Claim</h3>
+        <p class="mt-2 text-sm text-brown-500">
+            All reworks have been claimed by customers or no reworks have been completed yet.
+        </p>
+        <a href="{% url 'rework_list' %}" class="mt-4 inline-flex items-center text-brown-600 hover:text-brown-800">
+            View All Reworks
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

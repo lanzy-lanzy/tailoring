@@ -27,6 +27,8 @@ from .models import (
     SMSLog,
     Notification,
     TailorCommission,
+    Rework,
+    ReworkMaterial,
 )
 from .forms import (
     LoginForm,
@@ -40,6 +42,7 @@ from .forms import (
     TailoringTaskUpdateForm,
     PaymentForm,
     StockAddForm,
+    ReworkCreateForm,
 )
 from django.conf import settings
 
@@ -1520,6 +1523,14 @@ def task_update_status(request, pk):
         if new_status == "in_progress" and task.status == "assigned":
             task.status = "in_progress"
             task.started_date = timezone.now()
+            
+            # Update order status to in_progress
+            task.order.status = "in_progress"
+            task.order.save()
+            
+            # Notify admins that task has started
+            Notification.notify_admins_task_started(task, sender=request.user)
+            
         elif new_status == "completed" and task.status == "in_progress":
             task.status = "completed"
             task.completed_date = timezone.now()
@@ -1571,7 +1582,7 @@ def task_approve(request, pk):
     task = get_object_or_404(TailoringTask, pk=pk)
 
     if task.status != "completed":
-        messages.error(request, "Can only approve completed tasks.")
+        messages.error(request, "Can only complete orders for completed tasks.")
         return redirect("task_detail", pk=pk)
 
     if request.method == "POST":
@@ -1594,7 +1605,7 @@ def task_approve(request, pk):
 
             messages.success(
                 request,
-                f"Task approved. SMS notification sent to {task.order.customer.name}.",
+                f"Order completed. SMS notification sent to {task.order.customer.name}.",
             )
 
         if request.headers.get("HX-Request"):
@@ -2304,6 +2315,534 @@ def claim_receipt(request, pk):
     }
 
     return render(request, "claims/receipt.html", context)
+
+
+# ============== Rework Management ==============
+
+
+@login_required
+@admin_required
+def rework_list(request):
+    """List all reworks"""
+    status_filter = request.GET.get("status", "")
+    search = request.GET.get("search", "")
+
+    reworks = Rework.objects.select_related(
+        "order", "order__customer", "assigned_to", "fabric_used", "created_by"
+    ).prefetch_related("materials__accessory")
+
+    if status_filter:
+        reworks = reworks.filter(status=status_filter)
+
+    if search:
+        reworks = reworks.filter(
+            Q(rework_number__icontains=search)
+            | Q(order__order_number__icontains=search)
+            | Q(original_customer_name__icontains=search)
+        )
+
+    reworks = reworks.order_by("-created_date")
+
+    paginator = Paginator(reworks, 20)
+    page = request.GET.get("page", 1)
+    reworks = paginator.get_page(page)
+
+    # Calculate stats
+    from django.db.models import Sum
+    all_reworks = Rework.objects.all()
+    stats = {
+        "pending": all_reworks.filter(status="pending").count(),
+        "in_progress": all_reworks.filter(status="in_progress").count(),
+        "completed": all_reworks.filter(status="completed").count(),
+        "total_cost": all_reworks.aggregate(total=Sum("additional_cost"))["total"] or Decimal("0"),
+    }
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request, "reworks/partials/rework_table.html", {"reworks": reworks}
+        )
+
+    return render(
+        request,
+        "reworks/list.html",
+        {
+            "reworks": reworks,
+            "status_filter": status_filter,
+            "search": search,
+            "status_choices": Rework.STATUS_CHOICES,
+            "stats": stats,
+        },
+    )
+
+
+@login_required
+@admin_required
+def rework_create(request, order_pk):
+    """Create rework request from delivered order"""
+    order = get_object_or_404(Order, pk=order_pk)
+
+    if order.status != "delivered":
+        messages.error(request, "Reworks can only be created for delivered orders.")
+        return redirect("order_detail", pk=order.pk)
+
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    if request.method == "POST":
+        form = ReworkCreateForm(request.POST)
+
+        # Set choices for fabric and tailor
+        form.fields["fabric_used"].choices = [("", "---------")] + [
+            (f.pk, f.name) for f in Fabric.objects.all()
+        ]
+        form.fields["assigned_to"].choices = [("", "---------")] + [
+            (u.pk, u.get_full_name() or u.username)
+            for u in User.objects.filter(profile__role="tailor", is_active=True)
+        ]
+
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    reason = form.cleaned_data["reason"]
+                    reason_description = form.cleaned_data["reason_description"]
+                    charge_type = form.cleaned_data["charge_type"]
+                    additional_cost = form.cleaned_data.get("additional_cost")
+                    if additional_cost is None:
+                        additional_cost = Decimal("0")
+                    fabric_id = form.cleaned_data.get("fabric_used")
+                    fabric_meters = form.cleaned_data.get("fabric_meters_used")
+                    if fabric_meters is None:
+                        fabric_meters = Decimal("0")
+                    assigned_to_id = form.cleaned_data.get("assigned_to")
+                    notes = form.cleaned_data.get("notes", "")
+
+                    # Handle fabric deduction
+                    fabric = None
+                    if fabric_id and fabric_meters > 0:
+                        fabric = Fabric.objects.get(pk=fabric_id)
+                        if not fabric.has_sufficient_stock(fabric_meters):
+                            messages.error(
+                                request,
+                                f"Insufficient fabric stock. Need {fabric_meters}m, available {fabric.stock_meters}m.",
+                            )
+                            return render(
+                                request,
+                                "reworks/create.html",
+                                {"form": form, "order": order},
+                            )
+
+                    # Create rework
+                    rework = Rework.objects.create(
+                        order=order,
+                        reason=reason,
+                        reason_description=reason_description,
+                        charge_type=charge_type,
+                        additional_cost=additional_cost,
+                        created_by=request.user,
+                        notes=notes,
+                    )
+
+                    # Deduct fabric if specified
+                    if fabric and fabric_meters > 0:
+                        old_stock = fabric.stock_meters
+                        fabric.deduct_stock(fabric_meters)
+                        rework.fabric_used = fabric
+                        rework.fabric_meters_used = fabric_meters
+
+                        # Log inventory change
+                        InventoryLog.objects.create(
+                            item_type="fabric",
+                            fabric=fabric,
+                            action="deduct",
+                            quantity=fabric_meters,
+                            previous_stock=old_stock,
+                            new_stock=fabric.stock_meters,
+                            notes=f"Rework {rework.rework_number} - Order {order.order_number}",
+                            created_by=request.user,
+                        )
+
+                    # Assign to tailor if specified
+                    if assigned_to_id:
+                        tailor = User.objects.get(pk=assigned_to_id)
+                        rework.assigned_to = tailor
+                        rework.status = "in_progress"
+                        rework.started_date = timezone.now()
+
+                        # Notify tailor
+                        Notification.create_notification(
+                            recipient=tailor,
+                            title="New Rework Assigned",
+                            message=f"You have been assigned to rework {rework.rework_number} for order {order.order_number}. Reason: {rework.get_reason_display()}.",
+                            notification_type="rework_assigned",
+                            sender=request.user,
+                            order=order,
+                            action_url=f"/reworks/{rework.pk}/",
+                            priority="high",
+                        )
+
+                    rework.save()
+
+                    # Create payment record if paid rework
+                    if charge_type == "paid" and additional_cost > 0:
+                        Payment.objects.create(
+                            order=order,
+                            amount=additional_cost,
+                            payment_type="balance",
+                            payment_method="cash",
+                            status="completed",
+                            notes=f"Rework charge - {rework.rework_number}",
+                            received_by=request.user,
+                        )
+
+                    messages.success(
+                        request, f"Rework {rework.rework_number} created successfully."
+                    )
+
+                    if is_ajax:
+                        return JsonResponse(
+                            {
+                                "success": True,
+                                "rework_id": rework.pk,
+                                "rework_number": rework.rework_number,
+                                "message": f"Rework {rework.rework_number} created successfully.",
+                            }
+                        )
+
+                    return redirect("rework_detail", pk=rework.pk)
+
+            except Exception as e:
+                if is_ajax:
+                    return JsonResponse({"success": False, "error": str(e)})
+                messages.error(request, f"Error creating rework: {str(e)}")
+                return render(
+                    request, "reworks/create.html", {"form": form, "order": order}
+                )
+    else:
+        form = ReworkCreateForm()
+        form.fields["fabric_used"].choices = [("", "---------")] + [
+            (f.pk, f.name) for f in Fabric.objects.all()
+        ]
+        form.fields["assigned_to"].choices = [("", "---------")] + [
+            (u.pk, u.get_full_name() or u.username)
+            for u in User.objects.filter(profile__role="tailor", is_active=True)
+        ]
+
+    return render(
+        request,
+        "reworks/create.html",
+        {"form": form, "order": order},
+    )
+
+
+@login_required
+@admin_required
+def rework_detail(request, pk):
+    """Rework detail view"""
+    rework = get_object_or_404(
+        Rework.objects.select_related(
+            "order",
+            "order__customer",
+            "order__garment_type",
+            "order__fabric",
+            "assigned_to",
+            "fabric_used",
+            "created_by",
+        ).prefetch_related("materials__accessory"),
+        pk=pk,
+    )
+
+    return render(request, "reworks/detail.html", {"rework": rework})
+
+
+@login_required
+@admin_required
+def rework_update_status(request, pk):
+    """Update rework status"""
+    rework = get_object_or_404(Rework, pk=pk)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        notes = request.POST.get("notes", "")
+
+        if new_status == "in_progress" and rework.status == "pending":
+            if not rework.assigned_to:
+                messages.error(request, "Assign this rework to a tailor first.")
+                return redirect("rework_detail", pk=pk)
+
+            rework.status = "in_progress"
+            rework.started_date = timezone.now()
+            if notes:
+                rework.notes = notes
+            rework.save()
+            messages.success(request, f"Rework {rework.rework_number} started.")
+
+        elif new_status == "completed" and rework.status in ["pending", "in_progress"]:
+            with transaction.atomic():
+                rework.status = "completed"
+                rework.completed_date = timezone.now()
+                if notes:
+                    rework.notes = notes
+                rework.save()
+
+                # Update order status to ready_for_reclaim
+                order = rework.order
+                order.status = "ready_for_reclaim"
+                order.save()
+
+                # Notify assigned tailor
+                if rework.assigned_to:
+                    Notification.create_notification(
+                        recipient=rework.assigned_to,
+                        title="Rework Completed",
+                        message=f"Rework {rework.rework_number} for order {order.order_number} has been marked as completed.",
+                        notification_type="rework_completed",
+                        sender=request.user,
+                        order=order,
+                        action_url=f"/reworks/{rework.pk}/",
+                        priority="normal",
+                    )
+
+                messages.success(
+                    request,
+                    f"Rework {rework.rework_number} completed. Order {order.order_number} is now ready for re-claim.",
+                )
+
+        return redirect("rework_detail", pk=pk)
+
+    return redirect("rework_detail", pk=pk)
+
+
+@login_required
+@admin_required
+def rework_assign(request, pk):
+    """Assign rework to a tailor"""
+    rework = get_object_or_404(Rework, pk=pk)
+
+    if request.method == "POST":
+        tailor_id = request.POST.get("assigned_to")
+
+        if not tailor_id:
+            messages.error(request, "Please select a tailor to assign.")
+            return redirect("rework_detail", pk=pk)
+
+        try:
+            tailor = User.objects.get(pk=tailor_id, profile__role="tailor")
+
+            if rework.status == "pending":
+                rework.assigned_to = tailor
+                rework.status = "in_progress"
+                rework.started_date = timezone.now()
+                rework.save()
+
+                # Notify tailor
+                Notification.create_notification(
+                    recipient=tailor,
+                    title="New Rework Assigned",
+                    message=f"You have been assigned to rework {rework.rework_number} for order {rework.order.order_number}. Reason: {rework.get_reason_display()}.",
+                    notification_type="rework_assigned",
+                    sender=request.user,
+                    order=rework.order,
+                    action_url=f"/reworks/{rework.pk}/",
+                    priority="high",
+                )
+
+                messages.success(
+                    request,
+                    f"Rework {rework.rework_number} assigned to {tailor.get_full_name() or tailor.username}.",
+                )
+            else:
+                messages.error(
+                    request, "Rework has already been started or completed."
+                )
+
+            return redirect("rework_detail", pk=pk)
+
+        except User.DoesNotExist:
+            messages.error(request, "Invalid tailor selected.")
+            return redirect("rework_detail", pk=pk)
+
+    return redirect("rework_detail", pk=pk)
+
+
+@login_required
+@admin_required
+def rework_add_material(request, pk):
+    """Add accessory material to rework"""
+    rework = get_object_or_404(Rework, pk=pk)
+
+    if request.method == "POST":
+        accessory_id = request.POST.get("accessory")
+        quantity = request.POST.get("quantity")
+
+        if not accessory_id or not quantity:
+            messages.error(request, "Please select an accessory and quantity.")
+            return redirect("rework_detail", pk=pk)
+
+        try:
+            accessory = Accessory.objects.get(pk=accessory_id)
+            quantity = Decimal(quantity)
+
+            if not accessory.has_sufficient_stock(quantity):
+                messages.error(
+                    request,
+                    f"Insufficient {accessory.name} stock. Need {quantity}, available {accessory.stock_quantity}.",
+                )
+                return redirect("rework_detail", pk=pk)
+
+            with transaction.atomic():
+                # Deduct from inventory
+                old_stock = accessory.stock_quantity
+                accessory.deduct_stock(quantity)
+
+                # Create rework material record
+                ReworkMaterial.objects.create(
+                    rework=rework, accessory=accessory, quantity_used=quantity
+                )
+
+                # Log inventory change
+                InventoryLog.objects.create(
+                    item_type="accessory",
+                    accessory=accessory,
+                    action="deduct",
+                    quantity=quantity,
+                    previous_stock=old_stock,
+                    new_stock=accessory.stock_quantity,
+                    notes=f"Rework {rework.rework_number} - Order {rework.order.order_number}",
+                    created_by=request.user,
+                )
+
+                messages.success(
+                    request, f"Added {quantity} {accessory.unit} of {accessory.name} to rework."
+                )
+
+            return redirect("rework_detail", pk=pk)
+
+        except Accessory.DoesNotExist:
+            messages.error(request, "Invalid accessory selected.")
+            return redirect("rework_detail", pk=pk)
+
+    return redirect("rework_detail", pk=pk)
+
+
+@login_required
+@admin_required
+def rework_remove_material(request, pk, material_pk):
+    """Remove material from rework and restore inventory"""
+    rework = get_object_or_404(Rework, pk=pk)
+    material = get_object_or_404(ReworkMaterial, pk=material_pk, rework=rework)
+
+    if request.method == "POST":
+        with transaction.atomic():
+            # Restore inventory
+            accessory = material.accessory
+            old_stock = accessory.stock_quantity
+            accessory.stock_quantity += material.quantity_used
+            accessory.save()
+
+            # Log inventory change
+            InventoryLog.objects.create(
+                item_type="accessory",
+                accessory=accessory,
+                action="add",
+                quantity=material.quantity_used,
+                previous_stock=old_stock,
+                new_stock=accessory.stock_quantity,
+                notes=f"Restored from rework {rework.rework_number}",
+                created_by=request.user,
+            )
+
+            # Delete material record
+            material.delete()
+
+            messages.success(
+                request,
+                f"Removed {material.quantity_used} {accessory.unit} of {accessory.name} from rework and restored inventory.",
+            )
+
+        return redirect("rework_detail", pk=pk)
+
+    return redirect("rework_detail", pk=pk)
+
+
+@login_required
+@admin_required
+def reworks_for_reclaim(request):
+    """List orders ready for re-claim after rework"""
+    orders = (
+        Order.objects.filter(status="ready_for_reclaim")
+        .select_related("customer", "garment_type", "fabric")
+        .prefetch_related("payments", "reworks")
+        .order_by("-updated_at")
+    )
+
+    return render(
+        request,
+        "reworks/ready_for_reclaim.html",
+        {"orders": orders, "count": orders.count()},
+    )
+
+
+@login_required
+@admin_required
+def process_reclaim(request, order_pk):
+    """Process re-claim for order that underwent rework"""
+    order = get_object_or_404(
+        Order.objects.select_related("customer", "garment_type", "fabric").prefetch_related(
+            "payments", "reworks"
+        ),
+        pk=order_pk,
+    )
+
+    if order.status != "ready_for_reclaim":
+        messages.error(request, "This order is not ready for re-claim.")
+        return redirect("order_detail", pk=order.pk)
+
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    # Calculate totals
+    total_due = order.total_price
+    for rework in order.reworks.all():
+        if rework.additional_cost > 0:
+            total_due += rework.additional_cost
+
+    remaining_balance = total_due - order.total_paid
+
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                # Update order status to delivered
+                order.status = "delivered"
+                order.save()
+
+                # Get completed rework
+                completed_rework = order.reworks.filter(status="completed").first()
+
+                if is_ajax:
+                    return JsonResponse(
+                        {
+                            "success": True,
+                            "order_id": order.pk,
+                            "order_number": order.order_number,
+                            "message": f"Order {order.order_number} has been reclaimed by customer.",
+                        }
+                    )
+
+                messages.success(
+                    request,
+                    f"Order {order.order_number} has been reclaimed by customer after rework {completed_rework.rework_number if completed_rework else ''}.",
+                )
+                return redirect("claim_receipt", pk=order.pk)
+
+        except Exception as e:
+            if is_ajax:
+                return JsonResponse({"success": False, "error": str(e)})
+            messages.error(request, f"Error processing re-claim: {str(e)}")
+            return redirect("order_detail", pk=order.pk)
+
+    return render(
+        request,
+        "reworks/process_reclaim.html",
+        {"order": order, "total_due": total_due, "remaining_balance": remaining_balance},
+    )
 
 
 # ============== Notification Management ==============

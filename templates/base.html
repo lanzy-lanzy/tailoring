@@ -152,7 +152,7 @@
                         Payments
                     </a>
                     
-                    <!-- Claims -->
+                     <!-- Claims -->
                     <a href="{% url 'claims_list' %}" 
                        class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'claims' in request.path %}bg-brown-600{% endif %}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +160,16 @@
                         </svg>
                         Claims
                     </a>
-                    
+                     
+                     <!-- Reworks -->
+                     <a href="{% url 'rework_list' %}" 
+                        class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'reworks' in request.path %}bg-brown-600{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 15m-15.356-2A8.001 8.001 0 0014.001 6.998V6a2 2 0 00-2-2H5a2 2 0 00-2 2v4h1a1 1 0 011 1h6l-3.5 3.5a1 1 0 011.414-.586l3.5-3.5A1 1 0 0112 12v9h-4a1 1 0 01-1-1V6a1 1 0 011-1H6l-3.5-3.5A1 1 0 011.414-.586L.5 7.5A1 1 0 010 6.5V3a1 1 0 011-1H2a1 1 0 01-1 1V6a2 2 0 012 2h15a2 2 0 012-2V6a2 2 0 00-2-2H6z"/>
+                        </svg>
+                        Reworks
+                    </a>
+                     
                     <!-- Users -->
                     <a href="{% url 'user_list' %}" 
                        class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'users' in request.path %}bg-brown-600{% endif %}">

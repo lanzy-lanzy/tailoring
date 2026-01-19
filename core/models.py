@@ -168,6 +168,23 @@ class GarmentType(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def get_required_measurements(self):
+        """Get list of required measurements based on garment category"""
+        upper_measurements = [
+            'chest', 'shoulder', 'sleeve_length', 'arm_hole', 'cuff', 'neck'
+        ]
+        lower_measurements = [
+            'waist', 'hips', 'thigh', 'knee', 'hem', 'inseam', 'outseam', 'rise'
+        ]
+        
+        if self.garment_category == 'upper':
+            return upper_measurements
+        elif self.garment_category == 'lower':
+            return lower_measurements
+        elif self.garment_category == 'both':
+            return upper_measurements + lower_measurements
+        return []
 
 
 class GarmentTypeAccessory(models.Model):
@@ -202,6 +219,8 @@ class Order(models.Model):
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
         ('delivered', 'Delivered'),
+        ('for_adjustment', 'For Adjustment/Rework'),
+        ('ready_for_reclaim', 'Ready for Re-Claim'),
         ('cancelled', 'Cancelled'),
     ]
     
@@ -651,15 +670,156 @@ class SMSLog(models.Model):
         return f"SMS to {self.phone_number} - {self.status}"
 
 
+class Rework(models.Model):
+    """Rework requests for claimed garments that need adjustments"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    
+    REASON_CHOICES = [
+        ('fitting_issue', 'Fitting Issue'),
+        ('design_change', 'Design Change'),
+        ('workmanship_concern', 'Workmanship Concern'),
+        ('material_issue', 'Material Issue'),
+        ('other', 'Other'),
+    ]
+    
+    CHARGE_TYPE_CHOICES = [
+        ('free', 'Free (Shop Error)'),
+        ('paid', 'Paid (Customer Requested)'),
+    ]
+    
+    rework_number = models.CharField(max_length=50, unique=True, editable=False)
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='reworks'
+    )
+    original_garment_type = models.CharField(max_length=200)
+    original_customer_name = models.CharField(max_length=200)
+    
+    reason = models.CharField(max_length=50, choices=REASON_CHOICES)
+    reason_description = models.TextField()
+    charge_type = models.CharField(max_length=20, choices=CHARGE_TYPE_CHOICES, default='free')
+    additional_cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text="Additional cost for paid reworks"
+    )
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Materials tracking
+    fabric_used = models.ForeignKey(
+        Fabric,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rework_fabric_used'
+    )
+    fabric_meters_used = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    
+    notes = models.TextField(blank=True)
+    
+    # Assignment
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_reworks'
+    )
+    
+    # Timestamps
+    created_date = models.DateTimeField(auto_now_add=True)
+    started_date = models.DateTimeField(null=True, blank=True)
+    completed_date = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_reworks'
+    )
+    
+    class Meta:
+        ordering = ['-created_date']
+        verbose_name = "Rework"
+        verbose_name_plural = "Reworks"
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return f"{self.rework_number} - {self.order.order_number}"
+    
+    def save(self, *args, **kwargs):
+        if not self.rework_number:
+            self.rework_number = f"RWK-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_from_delivered_order(cls, order, reason, reason_description, charge_type='free',
+                                   additional_cost=Decimal('0.00'), created_by=None):
+        """Create a rework request from a delivered order"""
+        rework = cls.objects.create(
+            order=order,
+            original_garment_type=order.garment_type.name,
+            original_customer_name=order.customer.name,
+            reason=reason,
+            reason_description=reason_description,
+            charge_type=charge_type,
+            additional_cost=additional_cost,
+            created_by=created_by
+        )
+        
+        # Update order status to for_adjustment
+        order.status = 'for_adjustment'
+        order.save()
+        
+        return rework
+
+
+class ReworkMaterial(models.Model):
+    """Materials used for rework (accessories beyond fabric)"""
+    rework = models.ForeignKey(
+        Rework,
+        on_delete=models.CASCADE,
+        related_name='materials'
+    )
+    accessory = models.ForeignKey(
+        Accessory,
+        on_delete=models.CASCADE
+    )
+    quantity_used = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        verbose_name = "Rework Material"
+        verbose_name_plural = "Rework Materials"
+    
+    def __str__(self):
+        return f"{self.rework.rework_number} - {self.accessory.name}"
+
+
 class Notification(models.Model):
     """In-app notification system for tailors and admins"""
     TYPE_CHOICES = [
         ('task_assigned', 'Task Assigned'),
+        ('task_started', 'Task Started'),
         ('task_completed', 'Task Completed'),
-        ('task_approved', 'Task Approved'),
+        ('task_approved', 'Order Completed'),
         ('order_created', 'Order Created'),
         ('payment_received', 'Payment Received'),
         ('low_stock', 'Low Stock Alert'),
+        ('rework_assigned', 'Rework Assigned'),
+        ('rework_completed', 'Rework Completed'),
         ('general', 'General'),
     ]
     
@@ -797,12 +957,12 @@ class Notification(models.Model):
         for profile in admin_profiles:
             notification = cls.create_notification(
                 recipient=profile.user,
-                title='Task Completed - Awaiting Approval',
+                title='Task Completed - Ready for Order Completion',
                 message=f'Task for order {task.order.order_number} has been marked as completed by '
                        f'{task.tailor.get_full_name() or task.tailor.username}. '
                        f'Customer: {task.order.customer.name}. '
                        f'Garment: {task.order.garment_type.name}. '
-                       f'Please review and approve.',
+                       f'Please complete the order.',
                 notification_type='task_completed',
                 sender=sender,
                 order=task.order,
@@ -820,9 +980,9 @@ class Notification(models.Model):
         if task.tailor:
             return cls.create_notification(
                 recipient=task.tailor,
-                title='Task Approved',
+                title='Order Completed',
                 message=f'Your task for order {task.order.order_number} has been approved. '
-                       f'Great work!',
+                       f'The order is now complete.',
                 notification_type='task_approved',
                 sender=sender,
                 order=task.order,
@@ -831,3 +991,29 @@ class Notification(models.Model):
                 priority='normal'
             )
         return None
+    
+    @classmethod
+    def notify_admins_task_started(cls, task, sender=None):
+        """Notify all admins when a task is started by tailor"""
+        from .models import UserProfile
+        notifications = []
+        admin_profiles = UserProfile.objects.filter(role='admin').select_related('user')
+        
+        # Only notify if there are admins and a sender is specified
+        if admin_profiles.exists() and sender:
+            for profile in admin_profiles:
+                notification = cls.create_notification(
+                    recipient=profile.user,
+                    title='Task Started',
+                    message=f'Task for order {task.order.order_number} has been started by '
+                           f'{task.tailor.get_full_name() or task.tailor.username}.',
+                    notification_type='task_started',
+                    sender=sender,
+                    order=task.order,
+                    task=task,
+                    action_url=f'/tasks/{task.pk}/',
+                    priority='normal'
+                )
+                notifications.append(notification)
+        
+        return notifications

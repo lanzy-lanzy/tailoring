@@ -97,9 +97,9 @@
             <a href="{% url 'task_approve' task.pk %}"
                class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Approve Task
+                Complete Order
             </a>
             {% endif %}
         </div>
@@ -249,16 +249,16 @@
                     </div>
                     {% endif %}
 
-                    <!-- Approved -->
+                    <!-- Order Completed -->
                     {% if task.approved_date %}
                     <div class="flex items-start space-x-3">
                         <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
                         <div>
-                            <p class="text-brown-800 font-medium">Approved</p>
+                            <p class="text-brown-800 font-medium">Order Completed</p>
                             <p class="text-sm text-brown-500">{{ task.approved_date|date:"M j, Y - g:i A" }}</p>
                             {% if task.approved_by %}
                             <p class="text-xs text-brown-400">by {{ task.approved_by.get_full_name|default:task.approved_by.username }}</p>

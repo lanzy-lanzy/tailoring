@@ -135,7 +135,7 @@
                 </div>
             </div>
             <div class="bg-green-500 text-white px-4 py-2 rounded-lg">
-                <span class="font-bold text-lg">DELIVERED</span>
+                <span class="font-bold text-lg">CLAIMED</span>
             </div>
         </div>
     </div>
@@ -326,10 +326,10 @@
                 <p class="text-xs text-brown-500">{{ order.customer.name }}</p>
             </div>
             
-            <!-- Delivered Stamp -->
+            <!-- Claimed Stamp -->
             <div class="flex-shrink-0 mx-6">
                 <div class="border-4 border-green-500 rounded-lg px-6 py-2 transform -rotate-3 bg-green-50">
-                    <p class="text-green-600 font-bold text-xl tracking-wider text-center">DELIVERED</p>
+                    <p class="text-green-600 font-bold text-xl tracking-wider text-center">CLAIMED</p>
                     <p class="text-green-500 text-xs text-center">{{ claim_date|date:"M d, Y g:i A" }}</p>
                 </div>
             </div>

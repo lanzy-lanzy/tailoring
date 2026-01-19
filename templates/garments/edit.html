@@ -82,9 +82,9 @@
                          required
                          class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
                      <option value="">-- Select category --</option>
-                     <option value="upper" {% if garment_type.garment_category == 'upper' %}selected{% endif %}>Upper Body</option>
-                     <option value="lower" {% if garment_type.garment_category == 'lower' %}selected{% endif %}>Lower Body</option>
-                     <option value="both" {% if garment_type.garment_category == 'both' %}selected{% endif %}>Upper & Lower (Both)</option>
+                     <option value="upper" {% if garment_category == 'upper' %}selected{% endif %}>Upper Body</option>
+                     <option value="lower" {% if garment_category == 'lower' %}selected{% endif %}>Lower Body</option>
+                     <option value="both" {% if garment_category == 'both' %}selected{% endif %}>Upper & Lower (Both)</option>
                  </select>
                  {% if form.garment_category.errors %}
                  <p class="mt-1 text-sm text-red-600">{{ form.garment_category.errors.0 }}</p>

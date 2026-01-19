@@ -137,6 +137,16 @@ urlpatterns = [
     path("claims/", views.claims_list, name="claims_list"),
     path("claims/<int:pk>/process/", views.process_claim, name="process_claim"),
     path("claims/<int:pk>/receipt/", views.claim_receipt, name="claim_receipt"),
+    # Reworks
+    path("reworks/", views.rework_list, name="rework_list"),
+    path("reworks/orders/<int:order_pk>/create/", views.rework_create, name="rework_create"),
+    path("reworks/<int:pk>/", views.rework_detail, name="rework_detail"),
+    path("reworks/<int:pk>/update-status/", views.rework_update_status, name="rework_update_status"),
+    path("reworks/<int:pk>/assign/", views.rework_assign, name="rework_assign"),
+    path("reworks/<int:pk>/add-material/", views.rework_add_material, name="rework_add_material"),
+    path("reworks/<int:pk>/remove-material/<int:material_pk>/", views.rework_remove_material, name="rework_remove_material"),
+    path("reworks/ready-for-reclaim/", views.reworks_for_reclaim, name="reworks_for_reclaim"),
+    path("reworks/reclaim/<int:order_pk>/process/", views.process_reclaim, name="process_reclaim"),
     # API Endpoints (HTMX)
     path(
         "api/garment-requirements/<int:pk>/",

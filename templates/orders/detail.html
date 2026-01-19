@@ -1,4 +1,5 @@
-{% extends 'base.html' %}
+ {% extends 'base.html' %}
+{% load filters %}
 
 {% block title %}Order #{{ order.order_number }} - El Senior Original Tailoring{% endblock %}
 
@@ -182,6 +183,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
                 Edit Order
+            </a>
+            {% endif %}
+            {% if order.status == 'delivered' %}
+            <a href="{% url 'rework_create' order.pk %}"
+               class="inline-flex items-center px-4 py-2 bg-yellow-100 border border-yellow-200 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 15m-15.356-2A8.001 8.001 0 0014.001 6.998V6a2 2 0 00-2-2H5a2 2 0 00-2 2v4h1a1 1 0 011 1h6l-3.5 3.5a1 1 0 011.414.586l3.5-3.5A1 1 0 0112 12v9h-4a1 1 0 01-1-1V6a1 1 0 011-1H6l-3.5-3.5A1 1 0 011.414-.586L.5 7.5A1 1 0 010 6.5V3a1 1 0 011-1H2a1 1 0 01-1 1V6a2 2 0 012 2h15a2 2 0 012-2V6a2 2 0 00-2-2H6z"/>
+                </svg>
+                Create Rework
             </a>
             {% endif %}
             <button onclick="window.print()"

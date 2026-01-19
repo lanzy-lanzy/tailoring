@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Approve Task - {{ task.order.order_number }} - Tailoring System{% endblock %}
+{% block title %}Complete Order - {{ task.order.order_number }} - Tailoring System{% endblock %}
 
-{% block page_title %}Approve Task{% endblock %}
+{% block page_title %}Complete Order{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto mt-8">
@@ -16,8 +16,8 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <h2 class="text-lg font-semibold text-green-800">Approve Task</h2>
-                    <p class="text-sm text-green-600">Confirm task completion</p>
+                    <h2 class="text-lg font-semibold text-green-800">Complete Order</h2>
+                    <p class="text-sm text-green-600">Mark order as ready for claim</p>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
         <!-- Content -->
         <div class="p-6">
             <p class="text-brown-700 mb-4">
-                Are you sure you want to approve this task for order <strong class="text-brown-900">#{{ task.order.order_number }}</strong>?
+                Are you sure you want to complete this order <strong class="text-brown-900">#{{ task.order.order_number }}</strong>?
             </p>
 
             <div class="bg-cream-50 border border-cream-200 rounded-lg p-4 mb-6">
@@ -68,7 +68,7 @@
                     </svg>
                     <div class="ml-3">
                         <p class="text-sm text-green-800">
-                            Approving this task will update the order status and notify the customer that their garment is ready.
+                            Completing this order will update the order status to "completed" and send SMS notification to the customer.
                         </p>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                         <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Approve Task
+                        Complete Order
                     </button>
                 </div>
             </form>
