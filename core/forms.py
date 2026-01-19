@@ -286,6 +286,22 @@ class OrderForm(forms.ModelForm):
             'step': '0.25'
         })
     )
+    arm_hole = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Arm Hole (inches)',
+            'step': '0.25'
+        })
+    )
+    cuff = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Cuff (inches)',
+            'step': '0.25'
+        })
+    )
     body_length = forms.DecimalField(
         required=False,
         widget=forms.NumberInput(attrs={
@@ -302,6 +318,46 @@ class OrderForm(forms.ModelForm):
             'step': '0.25'
         })
     )
+    outseam = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Outseam (inches)',
+            'step': '0.25'
+        })
+    )
+    thigh = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Thigh (inches)',
+            'step': '0.25'
+        })
+    )
+    knee = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Knee (inches)',
+            'step': '0.25'
+        })
+    )
+    hem = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Hem (inches)',
+            'step': '0.25'
+        })
+    )
+    rise = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+            'placeholder': 'Rise (inches)',
+            'step': '0.25'
+        })
+    )
     neck = forms.DecimalField(
         required=False,
         widget=forms.NumberInput(attrs={
@@ -310,7 +366,7 @@ class OrderForm(forms.ModelForm):
             'step': '0.25'
         })
     )
-    
+
     class Meta:
         model = Order
         fields = ['customer', 'garment_type', 'fabric', 'quantity', 'total_price', 'due_date', 'special_instructions']
@@ -354,7 +410,7 @@ class OrderForm(forms.ModelForm):
         cleaned_data = super().clean()
         # Collect measurements into a dict
         measurements = {}
-        measurement_fields = ['chest', 'waist', 'hips', 'shoulder', 'sleeve_length', 'body_length', 'inseam', 'neck']
+        measurement_fields = ['chest', 'waist', 'hips', 'shoulder', 'sleeve_length', 'arm_hole', 'cuff', 'body_length', 'inseam', 'outseam', 'thigh', 'knee', 'hem', 'rise', 'neck']
         for field in measurement_fields:
             value = cleaned_data.get(field)
             if value:

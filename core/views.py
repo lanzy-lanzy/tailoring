@@ -1003,8 +1003,8 @@ def order_create(request):
         due_date = request.POST.get("due_date")
         special_instructions = request.POST.get("special_instructions", "")
 
-        # Calculate fabric needed
-        fabric_needed = garment_type.estimated_fabric_meters * quantity
+        # Get fabric meters used (user input instead of calculated)
+        fabric_needed = Decimal(request.POST.get("fabric_meters_used", 0))
 
         # Check fabric availability
         if not fabric.has_sufficient_stock(fabric_needed):
@@ -1014,18 +1014,33 @@ def order_create(request):
             messages.error(request, error_msg)
             return redirect("order_create")
 
-        # Check accessory availability
-        required_accessories = garment_type.required_accessories.all()
-        for req in required_accessories:
-            needed = req.quantity_required * quantity
-            if not req.accessory.has_sufficient_stock(needed):
-                error_msg = f"Insufficient {req.accessory.name} stock. Need {needed}, available {req.accessory.stock_quantity}."
-                if is_ajax:
-                    return JsonResponse({"success": False, "error": error_msg})
-                messages.error(request, error_msg)
-                return redirect("order_create")
+        # Get selected accessories and quantities (user input instead of garment type requirements)
+        selected_accessories_json = request.POST.get("selected_accessories", "[]")
+        accessory_quantities_json = request.POST.get("accessory_quantities", "{}")
 
-        # Collect measurements
+        import json
+        try:
+            selected_accessories = json.loads(selected_accessories_json)
+            accessory_quantities = json.loads(accessory_quantities_json)
+        except (json.JSONDecodeError, TypeError):
+            selected_accessories = []
+            accessory_quantities = {}
+
+        # Check accessory availability
+        for accessory_id in selected_accessories:
+            try:
+                accessory = Accessory.objects.get(pk=accessory_id)
+                needed = Decimal(str(accessory_quantities.get(str(accessory_id), 1))) * quantity
+                if not accessory.has_sufficient_stock(needed):
+                    error_msg = f"Insufficient {accessory.name} stock. Need {needed}, available {accessory.stock_quantity}."
+                    if is_ajax:
+                        return JsonResponse({"success": False, "error": error_msg})
+                    messages.error(request, error_msg)
+                    return redirect("order_create")
+            except Accessory.DoesNotExist:
+                pass
+
+        # Collect measurements (expanded fields)
         measurements = {}
         measurement_fields = [
             "chest",
@@ -1033,8 +1048,15 @@ def order_create(request):
             "hips",
             "shoulder",
             "sleeve_length",
+            "arm_hole",
+            "cuff",
             "body_length",
             "inseam",
+            "outseam",
+            "thigh",
+            "knee",
+            "hem",
+            "rise",
             "neck",
         ]
         for field in measurement_fields:
@@ -1044,6 +1066,7 @@ def order_create(request):
                     measurements[field] = float(value)
                 except ValueError:
                     pass
+
 
         try:
             with transaction.atomic():
@@ -1089,29 +1112,34 @@ def order_create(request):
                     created_by=request.user,
                 )
 
-                # Deduct accessories
-                for req in required_accessories:
-                    needed = req.quantity_required * quantity
-                    old_stock = req.accessory.stock_quantity
-                    req.accessory.deduct_stock(needed)
+                # Deduct selected accessories
+                for accessory_id in selected_accessories:
+                    try:
+                        accessory = Accessory.objects.get(pk=accessory_id)
+                        needed = Decimal(str(accessory_quantities.get(str(accessory_id), 1))) * quantity
+                        old_stock = accessory.stock_quantity
+                        accessory.deduct_stock(needed)
 
-                    # Record order accessory
-                    OrderAccessory.objects.create(
-                        order=order, accessory=req.accessory, quantity_used=needed
-                    )
+                        # Record order accessory
+                        OrderAccessory.objects.create(
+                            order=order, accessory=accessory, quantity_used=needed
+                        )
 
-                    # Log inventory change
-                    InventoryLog.objects.create(
-                        item_type="accessory",
-                        accessory=req.accessory,
-                        action="deduct",
-                        quantity=needed,
-                        previous_stock=old_stock,
-                        new_stock=req.accessory.stock_quantity,
-                        order=order,
-                        notes=f"Order {order.order_number}",
-                        created_by=request.user,
-                    )
+                        # Log inventory change
+                        InventoryLog.objects.create(
+                            item_type="accessory",
+                            accessory=accessory,
+                            action="deduct",
+                            quantity=needed,
+                            previous_stock=old_stock,
+                            new_stock=accessory.stock_quantity,
+                            order=order,
+                            notes=f"Order {order.order_number}",
+                            created_by=request.user,
+                        )
+                    except Accessory.DoesNotExist:
+                        pass
+
 
                 # Auto-assign to tailor
                 tailor = garment_type.default_tailor
@@ -1188,8 +1216,10 @@ def order_create(request):
             "customers": Customer.objects.all().order_by("name"),
             "garment_types": GarmentType.objects.all(),
             "fabrics": Fabric.objects.all(),
+            "accessories": Accessory.objects.all(),
         },
     )
+
 
 
 @login_required
