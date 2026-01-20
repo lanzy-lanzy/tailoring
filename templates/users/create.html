@@ -8,36 +8,36 @@
 <div class="max-w-2xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="mb-6">
-        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+        <ol class="flex items-center space-x-2 text-sm text-green-600">
             <li>
-                <a href="{% url 'user_list' %}" class="hover:text-brown-700 transition-colors">Users</a>
+                <a href="{% url 'user_list' %}" class="hover:text-green-700 transition-colors">Users</a>
             </li>
             <li>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </li>
-            <li class="text-brown-800 font-medium">Add New</li>
+            <li class="text-green-800 font-medium">Add New</li>
         </ol>
     </nav>
 
     <!-- Form Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50">
-            <h2 class="text-lg font-semibold text-brown-800">User Information</h2>
-            <p class="text-sm text-brown-500 mt-1">Create a new user account</p>
+    <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-green-100 bg-cream-5000">
+            <h2 class="text-lg font-semibold text-green-800">User Information</h2>
+            <p class="text-sm text-green-600 mt-1">Create a new user account</p>
         </div>
 
         <!-- Display Non-Field Errors -->
         {% if form.non_field_errors %}
-        <div class="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="mx-6 mt-4 p-4 bg-salmon-50 border border-salmon-200 rounded-lg">
             <div class="flex items-start">
-                <svg class="w-5 h-5 text-red-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-salmon-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
                     {% for error in form.non_field_errors %}
-                    <p class="text-sm text-red-700">{{ error }}</p>
+                    <p class="text-sm text-salmon-500">{{ error }}</p>
                     {% endfor %}
                 </div>
             </div>
@@ -46,14 +46,14 @@
 
         <!-- Display All Form Errors Summary -->
         {% if form.errors %}
-        <div class="mx-6 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div class="mx-6 mt-4 p-4 bg-pink-50 border border-pink-200 rounded-lg">
             <div class="flex items-start">
-                <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-pink-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
                 <div>
-                    <p class="text-sm font-medium text-yellow-800">Please correct the errors below:</p>
-                    <ul class="mt-1 text-sm text-yellow-700 list-disc list-inside">
+                    <p class="text-sm font-medium text-pink-500">Please correct the errors below:</p>
+                    <ul class="mt-1 text-sm text-pink-500 list-disc list-inside">
                         {% for field, errors in form.errors.items %}
                             {% for error in errors %}
                             <li>{{ field|title }}: {{ error }}</li>
@@ -71,8 +71,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- First Name -->
                 <div>
-                    <label for="id_first_name" class="block text-sm font-medium text-brown-700 mb-2">
-                        First Name <span class="text-red-500">*</span>
+                    <label for="id_first_name" class="block text-sm font-medium text-green-700 mb-2">
+                        First Name <span class="text-salmon-500">*</span>
                     </label>
                     <input type="text"
                            name="first_name"
@@ -80,17 +80,17 @@
                            required
                            maxlength="150"
                            value="{{ form.first_name.value|default:'' }}"
-                           class="w-full px-4 py-2 border {% if form.first_name.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.first_name.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                            placeholder="John">
                     {% if form.first_name.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-salmon-500">{{ form.first_name.errors.0 }}</p>
                     {% endif %}
                 </div>
 
                 <!-- Last Name -->
                 <div>
-                    <label for="id_last_name" class="block text-sm font-medium text-brown-700 mb-2">
-                        Last Name <span class="text-red-500">*</span>
+                    <label for="id_last_name" class="block text-sm font-medium text-green-700 mb-2">
+                        Last Name <span class="text-salmon-500">*</span>
                     </label>
                     <input type="text"
                            name="last_name"
@@ -98,40 +98,40 @@
                            required
                            maxlength="150"
                            value="{{ form.last_name.value|default:'' }}"
-                           class="w-full px-4 py-2 border {% if form.last_name.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.last_name.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                            placeholder="Doe">
                     {% if form.last_name.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-salmon-500">{{ form.last_name.errors.0 }}</p>
                     {% endif %}
                 </div>
             </div>
 
             <!-- Username -->
             <div>
-                <label for="id_username" class="block text-sm font-medium text-brown-700 mb-2">
-                    Username <span class="text-red-500">*</span>
+                <label for="id_username" class="block text-sm font-medium text-green-700 mb-2">
+                    Username <span class="text-salmon-500">*</span>
                 </label>
                 <div class="relative">
-                    <span class="absolute left-3 top-2.5 text-brown-400">@</span>
+                    <span class="absolute left-3 top-2.5 text-cream-600">@</span>
                     <input type="text"
                            name="username"
                            id="id_username"
                            required
                            maxlength="150"
                            value="{{ form.username.value|default:'' }}"
-                           class="w-full pl-8 pr-4 py-2 border {% if form.username.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full pl-8 pr-4 py-2 border {% if form.username.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                            placeholder="johndoe">
                 </div>
-                <p class="mt-1 text-xs text-brown-500">Letters, digits and @/./+/-/_ only</p>
+                <p class="mt-1 text-xs text-green-600">Letters, digits and @/./+/-/_ only</p>
                 {% if form.username.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.username.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Email -->
             <div>
-                <label for="id_email" class="block text-sm font-medium text-brown-700 mb-2">
-                    Email Address <span class="text-red-500">*</span>
+                <label for="id_email" class="block text-sm font-medium text-green-700 mb-2">
+                    Email Address <span class="text-salmon-500">*</span>
                 </label>
                 <input type="email"
                        name="email"
@@ -139,54 +139,54 @@
                        required
                        maxlength="254"
                        value="{{ form.email.value|default:'' }}"
-                       class="w-full px-4 py-2 border {% if form.email.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       class="w-full px-4 py-2 border {% if form.email.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                        placeholder="john@example.com">
                 {% if form.email.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.email.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Password (password1) -->
                 <div>
-                    <label for="id_password1" class="block text-sm font-medium text-brown-700 mb-2">
-                        Password <span class="text-red-500">*</span>
+                    <label for="id_password1" class="block text-sm font-medium text-green-700 mb-2">
+                        Password <span class="text-salmon-500">*</span>
                     </label>
                     <input type="password"
                            name="password1"
                            id="id_password1"
                            required
                            minlength="8"
-                           class="w-full px-4 py-2 border {% if form.password1.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.password1.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                            placeholder="Min. 8 characters">
                     {% if form.password1.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-salmon-500">{{ form.password1.errors.0 }}</p>
                     {% endif %}
                 </div>
 
                 <!-- Confirm Password (password2) -->
                 <div>
-                    <label for="id_password2" class="block text-sm font-medium text-brown-700 mb-2">
-                        Confirm Password <span class="text-red-500">*</span>
+                    <label for="id_password2" class="block text-sm font-medium text-green-700 mb-2">
+                        Confirm Password <span class="text-salmon-500">*</span>
                     </label>
                     <input type="password"
                            name="password2"
                            id="id_password2"
                            required
                            minlength="8"
-                           class="w-full px-4 py-2 border {% if form.password2.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border {% if form.password2.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                            placeholder="Repeat password">
                     {% if form.password2.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-salmon-500">{{ form.password2.errors.0 }}</p>
                     {% endif %}
                 </div>
             </div>
 
             <!-- Password Requirements Help Text -->
-            <div class="bg-cream-50 border border-cream-200 rounded-lg p-3">
-                <p class="text-xs text-brown-600">
+            <div class="bg-cream-500 border border-cream-500 rounded-lg p-3">
+                <p class="text-xs text-green-600">
                     <strong>Password requirements:</strong>
-                    <ul class="mt-1 list-disc list-inside text-xs text-brown-500">
+                    <ul class="mt-1 list-disc list-inside text-xs text-green-600">
                         <li>At least 8 characters</li>
                         <li>Cannot be too similar to your username</li>
                         <li>Cannot be a commonly used password</li>
@@ -197,11 +197,11 @@
 
             <!-- Role Selection -->
             <div>
-                <label class="block text-sm font-medium text-brown-700 mb-3">
-                    Role <span class="text-red-500">*</span>
+                <label class="block text-sm font-medium text-green-700 mb-3">
+                    Role <span class="text-salmon-500">*</span>
                 </label>
                 <div class="grid grid-cols-2 gap-4">
-                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors role-option" data-role="tailor">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-pink-5000 transition-colors role-option" data-role="tailor">
                         <input type="radio" name="role" value="tailor" class="sr-only" {% if form.role.value == 'tailor' or not form.role.value %}checked{% endif %}>
                         <div class="flex items-center">
                             <div class="p-2 bg-blue-100 rounded-lg mr-3">
@@ -210,12 +210,12 @@
                                 </svg>
                             </div>
                             <div>
-                                <span class="block font-medium text-brown-800">Tailor</span>
-                                <span class="block text-sm text-brown-500">Can work on assigned tasks</span>
+                                <span class="block font-medium text-green-800">Tailor</span>
+                                <span class="block text-sm text-green-600">Can work on assigned tasks</span>
                             </div>
                         </div>
                     </label>
-                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-cream-50 transition-colors role-option" data-role="admin">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-pink-5000 transition-colors role-option" data-role="admin">
                         <input type="radio" name="role" value="admin" class="sr-only" {% if form.role.value == 'admin' %}checked{% endif %}>
                         <div class="flex items-center">
                             <div class="p-2 bg-purple-100 rounded-lg mr-3">
@@ -224,20 +224,20 @@
                                 </svg>
                             </div>
                             <div>
-                                <span class="block font-medium text-brown-800">Admin</span>
-                                <span class="block text-sm text-brown-500">Full system access</span>
+                                <span class="block font-medium text-green-800">Admin</span>
+                                <span class="block text-sm text-green-600">Full system access</span>
                             </div>
                         </div>
                     </label>
                 </div>
                 {% if form.role.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.role.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.role.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Phone -->
             <div>
-                <label for="id_phone" class="block text-sm font-medium text-brown-700 mb-2">
+                <label for="id_phone" class="block text-sm font-medium text-green-700 mb-2">
                     Phone Number
                 </label>
                 <input type="tel"
@@ -245,21 +245,21 @@
                        id="id_phone"
                        maxlength="20"
                        value="{{ form.phone.value|default:'' }}"
-                       class="w-full px-4 py-2 border {% if form.phone.errors %}border-red-500{% else %}border-brown-200{% endif %} rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       class="w-full px-4 py-2 border {% if form.phone.errors %}border-salmon-500{% else %}border-green-200{% endif %} rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                        placeholder="+1 234 567 8900">
                 {% if form.phone.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.phone.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Form Actions -->
-            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-brown-100">
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-green-100">
                 <a href="{% url 'user_list' %}"
-                   class="px-4 py-2 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                   class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
                     Cancel
                 </a>
                 <button type="submit"
-                        class="px-6 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm font-medium">
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium">
                     <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                     </svg>
@@ -277,11 +277,11 @@
         document.querySelectorAll('.role-option').forEach(label => {
             const radio = label.querySelector('input[type="radio"]');
             if (radio.checked) {
-                label.classList.remove('border-brown-200');
-                label.classList.add('border-brown-600', 'bg-cream-50');
+                label.classList.remove('border-green-200');
+                label.classList.add('border-green-600', 'bg-cream-500');
             } else {
-                label.classList.remove('border-brown-600', 'bg-cream-50');
-                label.classList.add('border-brown-200');
+                label.classList.remove('border-green-600', 'bg-cream-500');
+                label.classList.add('border-green-200');
             }
         });
     }

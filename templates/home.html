@@ -75,10 +75,10 @@
     <!-- Navigation -->
     <nav class="px-8 py-6 flex items-center justify-between max-w-7xl mx-auto overflow-hidden">
         <div class="flex items-center space-x-3 nav-item">
-            <div class="w-10 h-10 border-2 border-brown-600 flex items-center justify-center rounded-sm rotate-45">
-                <span class="text-brown-700 font-bold -rotate-45 text-xl">ES</span>
+            <div class="w-10 h-10 border-2 border-green-600 flex items-center justify-center rounded-sm rotate-45">
+                <span class="text-green-700 font-bold -rotate-45 text-xl">ES</span>
             </div>
-            <span class="text-xl font-bold tracking-tighter text-brown-900 uppercase">El Senior</span>
+            <span class="text-xl font-bold tracking-tighter text-green-900 uppercase">El Senior</span>
         </div>
         <div class="nav-item">
             {% if user.is_authenticated %}
@@ -101,31 +101,31 @@
 
     <!-- Hero Section -->
     <section class="min-h-[90vh] flex flex-col items-center justify-center px-6 text-center">
-        <h2 class="hero-reveal text-sm font-bold tracking-[0.4em] uppercase text-brown-500 mb-4">Bespoke Excellence Since 1995</h2>
-        <h1 class="hero-reveal text-5xl md:text-8xl font-serif font-bold text-brown-900 leading-tight mb-8">
+        <h2 class="hero-reveal text-sm font-bold tracking-[0.4em] uppercase text-green-600 mb-4">Bespoke Excellence Since 1995</h2>
+        <h1 class="hero-reveal text-5xl md:text-8xl font-serif font-bold text-green-900 leading-tight mb-8">
             Crafting Your <br>
             <span class="gold-gradient italic">Perfect Silhouette</span>
         </h1>
-        <p class="hero-reveal text-lg text-brown-700 max-w-xl mx-auto mb-10 leading-relaxed font-light">
+        <p class="hero-reveal text-lg text-green-700 max-w-xl mx-auto mb-10 leading-relaxed font-light">
             Experience the heritage of artisanal tailoring. Where every stitch tells a story of precision, luxury, and timeless style.
         </p>
         <div class="hero-reveal flex flex-col sm:flex-row gap-6">
             {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}" class="px-10 py-4 bg-brown-700 text-white rounded-sm font-semibold shadow-2xl hover:bg-brown-800 transition-all transform hover:-translate-y-1">
+            <a href="{% url 'dashboard' %}" class="px-10 py-4 bg-green-700 text-white rounded-sm font-semibold shadow-2xl hover:bg-brown-800 transition-all transform hover:-translate-y-1">
                 Back to Dashboard
             </a>
             {% else %}
-            <a href="{% url 'login' %}" class="px-10 py-4 bg-brown-700 text-white rounded-sm font-semibold shadow-2xl hover:bg-brown-800 transition-all transform hover:-translate-y-1">
+            <a href="{% url 'login' %}" class="px-10 py-4 bg-green-700 text-white rounded-sm font-semibold shadow-2xl hover:bg-brown-800 transition-all transform hover:-translate-y-1">
                 Get Started
             </a>
             {% endif %}
-            <a href="#about" class="px-10 py-4 glass-card text-brown-800 rounded-sm font-semibold border border-brown-200 hover:bg-cream-100 transition-all">
+            <a href="#about" class="px-10 py-4 glass-card text-green-800 rounded-sm font-semibold border border-green-200 hover:bg-pink-50000 transition-all">
                 Discover Our Process
             </a>
         </div>
         
         <div class="absolute bottom-10 left-1/2 -translate-x-1/2 scroll-indicator">
-            <svg class="w-6 h-6 text-brown-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
             </svg>
         </div>
@@ -136,46 +136,46 @@
             <div class="max-w-7xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                     <div class="reveal glass-card p-10 rounded-2xl group hover:border-gold transition-all duration-500">
-                        <div class="w-16 h-16 bg-brown-100 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <svg class="w-8 h-8 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-serif font-bold text-brown-900 mb-4">Artisanal Quality</h3>
-                        <p class="text-brown-600 leading-relaxed font-light">Each garment is handcrafted with the finest materials and centuries-old techniques.</p>
+                        <h3 class="text-2xl font-serif font-bold text-green-900 mb-4">Artisanal Quality</h3>
+                        <p class="text-green-600 leading-relaxed font-light">Each garment is handcrafted with the finest materials and centuries-old techniques.</p>
                     </div>
 
                     <div class="reveal glass-card p-10 rounded-2xl group hover:border-gold transition-all duration-500" style="transition-delay: 200ms;">
                         <div class="w-16 h-16 bg-gold/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <svg class="w-8 h-8 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-serif font-bold text-brown-900 mb-4">Precision Management</h3>
-                        <p class="text-brown-600 leading-relaxed font-light">Our digital ecosystem ensures your measurements and orders are tracked with absolute precision.</p>
+                        <h3 class="text-2xl font-serif font-bold text-green-900 mb-4">Precision Management</h3>
+                        <p class="text-green-600 leading-relaxed font-light">Our digital ecosystem ensures your measurements and orders are tracked with absolute precision.</p>
                     </div>
 
                     <div class="reveal glass-card p-10 rounded-2xl group hover:border-gold transition-all duration-500" style="transition-delay: 400ms;">
                         <div class="w-16 h-16 bg-brown-900 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <svg class="w-8 h-8 text-cream-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-8 h-8 text-cream-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-serif font-bold text-brown-900 mb-4">Timeless Elegance</h3>
-                        <p class="text-brown-600 leading-relaxed font-light">From classic tuxedos to modern bespoke suits, we define the standard of elegance.</p>
+                        <h3 class="text-2xl font-serif font-bold text-green-900 mb-4">Timeless Elegance</h3>
+                        <p class="text-green-600 leading-relaxed font-light">From classic tuxedos to modern bespoke suits, we define the standard of elegance.</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Footer -->
-        <footer class="py-12 px-6 border-t border-brown-100/30">
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-brown-500 text-sm">
+        <footer class="py-12 px-6 border-t border-green-100/30">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-green-600 text-sm">
                 <p class="font-light tracking-widest uppercase">&copy; {% now "Y" %} El Senior Original Tailoring</p>
                 <div class="flex space-x-8 mt-4 md:mt-0">
-                    <a href="#" class="hover:text-brown-800 transition-colors">Privacy</a>
-                    <a href="#" class="hover:text-brown-800 transition-colors">Terms</a>
-                    <a href="#" class="hover:text-brown-800 transition-colors">Contact</a>
+                    <a href="#" class="hover:text-green-800 transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-green-800 transition-colors">Terms</a>
+                    <a href="#" class="hover:text-green-800 transition-colors">Contact</a>
                 </div>
             </div>
         </footer>

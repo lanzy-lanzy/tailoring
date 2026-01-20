@@ -8,9 +8,9 @@
 <div class="max-w-2xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="mb-6">
-        <ol class="flex items-center space-x-2 text-sm text-brown-500">
+        <ol class="flex items-center space-x-2 text-sm text-green-600">
             <li>
-                <a href="{% url 'inventory_dashboard' %}" class="hover:text-brown-700 transition-colors">Inventory</a>
+                <a href="{% url 'inventory_dashboard' %}" class="hover:text-green-700 transition-colors">Inventory</a>
             </li>
             <li>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,27 +18,27 @@
                 </svg>
             </li>
             <li>
-                <a href="{% url 'accessory_list' %}" class="hover:text-brown-700 transition-colors">Accessories</a>
+                <a href="{% url 'accessory_list' %}" class="hover:text-green-700 transition-colors">Accessories</a>
             </li>
             <li>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </li>
-            <li class="text-brown-800 font-medium">{{ accessory.name }}</li>
+            <li class="text-green-800 font-medium">{{ accessory.name }}</li>
         </ol>
     </nav>
 
     <!-- Form Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-brown-100 bg-blue-50 flex items-center justify-between">
+    <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-green-100 bg-blue-50 flex items-center justify-between">
             <div>
-                <h2 class="text-lg font-semibold text-brown-800">Edit Accessory</h2>
-                <p class="text-sm text-brown-500 mt-1">Update accessory information</p>
+                <h2 class="text-lg font-semibold text-green-800">Edit Accessory</h2>
+                <p class="text-sm text-green-600 mt-1">Update accessory information</p>
             </div>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
-                {% if accessory.stock_quantity <= 10 %}bg-red-100 text-red-800
-                {% elif accessory.stock_quantity <= 30 %}bg-yellow-100 text-yellow-800
+                {% if accessory.stock_quantity <= 10 %}bg-salmon-100 text-salmon-500
+                {% elif accessory.stock_quantity <= 30 %}bg-pink-100 text-pink-500
                 {% else %}bg-green-100 text-green-800{% endif %}">
                 {{ accessory.stock_quantity }} {{ accessory.unit }} in stock
             </span>
@@ -49,8 +49,8 @@
 
             <!-- Name -->
             <div>
-                <label for="id_name" class="block text-sm font-medium text-brown-700 mb-2">
-                    Accessory Name <span class="text-red-500">*</span>
+                <label for="id_name" class="block text-sm font-medium text-green-700 mb-2">
+                    Accessory Name <span class="text-salmon-500">*</span>
                 </label>
                 <input type="text"
                        name="name"
@@ -58,22 +58,22 @@
                        required
                        maxlength="200"
                        value="{{ form.name.value|default:accessory.name }}"
-                       class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                       class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                        placeholder="e.g., Brass Buttons, Zipper (YKK)">
                 {% if form.name.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.name.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Unit -->
             <div>
-                <label for="id_unit" class="block text-sm font-medium text-brown-700 mb-2">
-                    Unit Type <span class="text-red-500">*</span>
+                <label for="id_unit" class="block text-sm font-medium text-green-700 mb-2">
+                    Unit Type <span class="text-salmon-500">*</span>
                 </label>
                 <select name="unit"
                         id="id_unit"
                         required
-                        class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-brown-800">
+                        class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-green-800">
                     <option value="pcs" {% if accessory.unit == 'pcs' %}selected{% endif %}>Pieces</option>
                     <option value="set" {% if accessory.unit == 'set' %}selected{% endif %}>Sets</option>
                     <option value="m" {% if accessory.unit == 'm' %}selected{% endif %}>Meters</option>
@@ -83,7 +83,7 @@
                     <option value="pack" {% if accessory.unit == 'pack' %}selected{% endif %}>Packs</option>
                 </select>
                 {% if form.unit.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.unit.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.unit.errors.0 }}</p>
                 {% endif %}
             </div>
 
@@ -91,14 +91,14 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- Stock Quantity - read only with add stock button -->
                 <div>
-                    <label class="block text-sm font-medium text-brown-700 mb-2">
+                    <label class="block text-sm font-medium text-green-700 mb-2">
                         Current Stock
                     </label>
                     <div class="flex items-center gap-2">
                         <input type="text"
                                value="{{ accessory.stock_quantity }} {{ accessory.unit }}"
                                disabled
-                               class="flex-1 px-4 py-2 border border-brown-200 rounded-lg bg-cream-50 text-brown-600">
+                               class="flex-1 px-4 py-2 border border-green-200 rounded-lg bg-cream-500 text-green-600">
                         <button type="button"
                                 class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                                 hx-get="{% url 'accessory_add_stock' accessory.pk %}"
@@ -109,13 +109,13 @@
                             </svg>
                         </button>
                     </div>
-                    <p class="mt-1 text-xs text-brown-500">Use the + button to add or remove stock</p>
+                    <p class="mt-1 text-xs text-green-600">Use the + button to add or remove stock</p>
                 </div>
 
                 <!-- Price per Unit -->
                 <div>
-                    <label for="id_price_per_unit" class="block text-sm font-medium text-brown-700 mb-2">
-                        Price per Unit () <span class="text-red-500">*</span>
+                    <label for="id_price_per_unit" class="block text-sm font-medium text-green-700 mb-2">
+                        Price per Unit () <span class="text-salmon-500">*</span>
                     </label>
                     <input type="number"
                            name="price_per_unit"
@@ -124,47 +124,47 @@
                            min="0"
                            step="0.01"
                            value="{{ form.price_per_unit.value|default:accessory.price_per_unit }}"
-                           class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                           class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
                            placeholder="0.00">
                     {% if form.price_per_unit.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.price_per_unit.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-salmon-500">{{ form.price_per_unit.errors.0 }}</p>
                     {% endif %}
                 </div>
             </div>
 
             <!-- Description -->
             <div>
-                <label for="id_description" class="block text-sm font-medium text-brown-700 mb-2">
+                <label for="id_description" class="block text-sm font-medium text-green-700 mb-2">
                     Description
                 </label>
                 <textarea name="description"
                           id="id_description"
                           rows="3"
-                          class="w-full px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400 resize-none"
+                          class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400 resize-none"
                           placeholder="Additional details about the accessory (brand, size, material...)">{{ form.description.value|default:accessory.description }}</textarea>
                 {% if form.description.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                <p class="mt-1 text-sm text-salmon-500">{{ form.description.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Meta info -->
-            <div class="bg-cream-50 rounded-lg p-4 border border-cream-200">
+            <div class="bg-cream-500 rounded-lg p-4 border border-cream-500">
                 <dl class="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <dt class="text-brown-500">Created</dt>
-                        <dd class="text-brown-800 font-medium">{{ accessory.created_at|date:"F j, Y" }}</dd>
+                        <dt class="text-green-600">Created</dt>
+                        <dd class="text-green-800 font-medium">{{ accessory.created_at|date:"F j, Y" }}</dd>
                     </div>
                     <div>
-                        <dt class="text-brown-500">Last Updated</dt>
-                        <dd class="text-brown-800 font-medium">{{ accessory.updated_at|date:"F j, Y" }}</dd>
+                        <dt class="text-green-600">Last Updated</dt>
+                        <dd class="text-green-800 font-medium">{{ accessory.updated_at|date:"F j, Y" }}</dd>
                     </div>
                 </dl>
             </div>
 
             <!-- Form Actions -->
-            <div class="flex items-center justify-between pt-4 border-t border-brown-100">
+            <div class="flex items-center justify-between pt-4 border-t border-green-100">
                 <a href="{% url 'accessory_delete' accessory.pk %}"
-                   class="text-red-600 hover:text-red-800 font-medium transition-colors">
+                   class="text-salmon-500 hover:text-salmon-500 font-medium transition-colors">
                     <svg class="w-5 h-5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -172,7 +172,7 @@
                 </a>
                 <div class="flex items-center space-x-4">
                     <a href="{% url 'accessory_list' %}"
-                       class="px-4 py-2 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                       class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
                         Cancel
                     </a>
                     <button type="submit"

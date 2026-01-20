@@ -6,36 +6,36 @@
 
 {% block content %}
 <div class="max-w-lg mx-auto mt-8">
-    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
+    <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
         <!-- Warning Header -->
-        <div class="px-6 py-4 bg-red-50 border-b border-red-100">
+        <div class="px-6 py-4 bg-salmon-50 border-b border-red-100">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-8 h-8 text-salmon-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <h2 class="text-lg font-semibold text-red-800">Delete Garment Type</h2>
-                    <p class="text-sm text-red-600">This action cannot be undone</p>
+                    <h2 class="text-lg font-semibold text-salmon-500">Delete Garment Type</h2>
+                    <p class="text-sm text-salmon-500">This action cannot be undone</p>
                 </div>
             </div>
         </div>
 
         <!-- Content -->
         <div class="p-6">
-            <p class="text-brown-700 mb-4">
-                Are you sure you want to delete the garment type <strong class="text-brown-900">{{ garment_type.name }}</strong>?
+            <p class="text-green-700 mb-4">
+                Are you sure you want to delete the garment type <strong class="text-green-900">{{ garment_type.name }}</strong>?
             </p>
 
             {% if order_count > 0 %}
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div class="bg-salmon-50 border border-salmon-200 rounded-lg p-4 mb-4">
                 <div class="flex items-start">
-                    <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-salmon-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                     <div class="ml-3">
-                        <p class="text-sm text-red-800">
+                        <p class="text-sm text-salmon-500">
                             <strong>Cannot delete:</strong> This garment type has <strong>{{ order_count }}</strong> order{{ order_count|pluralize }} associated with it.
                             You must first reassign or cancel those orders.
                         </p>
@@ -44,24 +44,24 @@
             </div>
             {% endif %}
 
-            <div class="bg-cream-50 border border-cream-200 rounded-lg p-4 mb-6">
-                <h4 class="text-sm font-medium text-brown-700 mb-2">Garment Type Details:</h4>
+            <div class="bg-cream-500 border border-cream-500 rounded-lg p-4 mb-6">
+                <h4 class="text-sm font-medium text-green-700 mb-2">Garment Type Details:</h4>
                 <dl class="text-sm space-y-1">
                     <div class="flex">
-                        <dt class="text-brown-500 w-32">Name:</dt>
-                        <dd class="text-brown-800">{{ garment_type.name }}</dd>
+                        <dt class="text-green-600 w-32">Name:</dt>
+                        <dd class="text-green-800">{{ garment_type.name }}</dd>
                     </div>
                     <div class="flex">
-                        <dt class="text-brown-500 w-32">Base Price:</dt>
-                        <dd class="text-brown-800">{{ garment_type.base_price|floatformat:2 }}</dd>
+                        <dt class="text-green-600 w-32">Base Price:</dt>
+                        <dd class="text-green-800">{{ garment_type.base_price|floatformat:2 }}</dd>
                     </div>
                     <div class="flex">
-                        <dt class="text-brown-500 w-32">Fabric Est.:</dt>
-                        <dd class="text-brown-800">{{ garment_type.estimated_fabric_meters }} meters</dd>
+                        <dt class="text-green-600 w-32">Fabric Est.:</dt>
+                        <dd class="text-green-800">{{ garment_type.estimated_fabric_meters }} meters</dd>
                     </div>
                     <div class="flex">
-                        <dt class="text-brown-500 w-32">Accessories:</dt>
-                        <dd class="text-brown-800">{{ garment_type.required_accessories.count }} required</dd>
+                        <dt class="text-green-600 w-32">Accessories:</dt>
+                        <dd class="text-green-800">{{ garment_type.required_accessories.count }} required</dd>
                     </div>
                 </dl>
             </div>
@@ -71,12 +71,12 @@
                 {% csrf_token %}
                 <div class="flex items-center justify-end space-x-4">
                     <a href="{% url 'garment_type_detail' garment_type.pk %}"
-                       class="px-4 py-2 text-brown-600 hover:text-brown-800 font-medium transition-colors">
+                       class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
                         Cancel
                     </a>
                     <button type="submit"
                             {% if order_count > 0 %}disabled{% endif %}
-                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="px-6 py-2 bg-salmon-500 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>

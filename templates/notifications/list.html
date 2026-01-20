@@ -6,11 +6,11 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <!-- Header with actions -->
-    <div class="bg-white rounded-lg shadow-sm border border-brown-100 mb-6">
-        <div class="px-6 py-4 border-b border-brown-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="bg-white rounded-lg shadow-sm border border-green-100 mb-6">
+        <div class="px-6 py-4 border-b border-green-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h2 class="text-lg font-semibold text-brown-800">All Notifications</h2>
-                <p class="text-sm text-brown-500">
+                <h2 class="text-lg font-semibold text-green-800">All Notifications</h2>
+                <p class="text-sm text-green-600">
                     {% if unread_count > 0 %}
                         You have {{ unread_count }} unread notification{{ unread_count|pluralize }}
                     {% else %}
@@ -24,7 +24,7 @@
                 <form method="post" action="{% url 'notification_mark_all_read' %}" class="inline">
                     {% csrf_token %}
                     <button type="submit" 
-                            class="px-4 py-2 text-sm bg-brown-100 text-brown-700 rounded-lg hover:bg-brown-200 transition-colors">
+                            class="px-4 py-2 text-sm bg-green-500 text-green-700 rounded-lg hover:bg-green-500 transition-colors">
                         Mark All as Read
                     </button>
                 </form>
@@ -35,7 +35,7 @@
                       onsubmit="return confirm('Are you sure you want to clear all notifications?')">
                     {% csrf_token %}
                     <button type="submit" 
-                            class="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                            class="px-4 py-2 text-sm bg-salmon-100 text-salmon-500 rounded-lg hover:bg-salmon-200 transition-colors">
                         Clear All
                     </button>
                 </form>
@@ -44,18 +44,18 @@
         </div>
         
         <!-- Filter tabs -->
-        <div class="px-6 py-3 bg-cream-50 border-b border-brown-100">
+        <div class="px-6 py-3 bg-cream-500 border-b border-green-100">
             <div class="flex gap-4">
                 <a href="?filter=all" 
-                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'all' %}bg-brown-600 text-white{% else %}text-brown-600 hover:bg-brown-100{% endif %}">
+                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'all' %}bg-green-600 text-white{% else %}text-green-600 hover:bg-green-500{% endif %}">
                     All ({{ total_count }})
                 </a>
                 <a href="?filter=unread" 
-                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'unread' %}bg-brown-600 text-white{% else %}text-brown-600 hover:bg-brown-100{% endif %}">
+                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'unread' %}bg-green-600 text-white{% else %}text-green-600 hover:bg-green-500{% endif %}">
                     Unread ({{ unread_count }})
                 </a>
                 <a href="?filter=read" 
-                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'read' %}bg-brown-600 text-white{% else %}text-brown-600 hover:bg-brown-100{% endif %}">
+                   class="px-4 py-2 text-sm rounded-lg transition-colors {% if filter_type == 'read' %}bg-green-600 text-white{% else %}text-green-600 hover:bg-green-500{% endif %}">
                     Read ({{ total_count|add:"-"|add:unread_count }})
                 </a>
             </div>

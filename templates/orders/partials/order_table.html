@@ -6,41 +6,41 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
 
 {% if orders %}
 <table class="w-full">
-    <thead class="bg-cream-50">
+    <thead class="bg-cream-500">
         <tr>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Order</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Customer</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider hidden md:table-cell">Garment</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider hidden lg:table-cell">Payment</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-brown-600 uppercase tracking-wider hidden sm:table-cell">Due Date</th>
-            <th class="px-6 py-3 text-right text-xs font-semibold text-brown-600 uppercase tracking-wider">Amount</th>
-            <th class="px-6 py-3 text-right text-xs font-semibold text-brown-600 uppercase tracking-wider">Actions</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Order</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Customer</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider hidden md:table-cell">Garment</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider hidden lg:table-cell">Payment</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider hidden sm:table-cell">Due Date</th>
+            <th class="px-6 py-3 text-right text-xs font-semibold text-green-600 uppercase tracking-wider">Amount</th>
+            <th class="px-6 py-3 text-right text-xs font-semibold text-green-600 uppercase tracking-wider">Actions</th>
         </tr>
     </thead>
     <tbody class="divide-y divide-brown-100">
         {% for order in orders %}
-        <tr class="hover:bg-cream-50 transition-colors" id="order-row-{{ order.pk }}">
+        <tr class="hover:bg-pink-5000 transition-colors" id="order-row-{{ order.pk }}">
             <td class="px-6 py-4 whitespace-nowrap">
                 <div>
-                    <a href="{% url 'order_detail' order.pk %}" class="text-brown-800 font-medium hover:text-brown-600 transition-colors">
+                    <a href="{% url 'order_detail' order.pk %}" class="text-green-800 font-medium hover:text-green-600 transition-colors">
                         #{{ order.order_number }}
                     </a>
-                    <p class="text-xs text-brown-400">{{ order.order_date|date:"M j, Y" }}</p>
+                    <p class="text-xs text-cream-600">{{ order.order_date|date:"M j, Y" }}</p>
                 </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                    <div class="w-8 h-8 bg-brown-500 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                         {{ order.customer.name|slice:":1"|upper }}
                     </div>
                     <div class="ml-3">
-                        <a href="{% url 'customer_detail' order.customer.pk %}" class="text-brown-700 hover:text-brown-800 text-sm">
+                        <a href="{% url 'customer_detail' order.customer.pk %}" class="text-green-700 hover:text-green-800 text-sm">
                             {{ order.customer.name|truncatechars:20 }}
                         </a>
                         {% if order.status != 'cancelled' and order.status != 'claimed' %}
                         <a href="{% url 'order_edit' order.pk %}"
-                           class="p-2 text-brown-500 hover:text-brown-700 hover:bg-brown-100 rounded-lg transition-colors"
+                           class="p-2 text-green-600 hover:text-green-700 hover:bg-green-500 rounded-lg transition-colors"
                            title="Edit Order">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -52,8 +52,8 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
             </td>
             <td class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
                 <div>
-                    <p class="text-brown-800 text-sm">{{ order.garment_type.name }}</p>
-                    <p class="text-xs text-brown-400">Qty: {{ order.quantity }}</p>
+                    <p class="text-green-800 text-sm">{{ order.garment_type.name }}</p>
+                    <p class="text-xs text-cream-600">Qty: {{ order.quantity }}</p>
                 </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
@@ -67,16 +67,16 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                     {% elif order.status == 'confirmed' %}
                         bg-indigo-100 text-indigo-800
                     {% elif order.status == 'pending' %}
-                        bg-yellow-100 text-yellow-800
+                        bg-pink-100 text-pink-500
                     {% elif order.status == 'cancelled' %}
-                        bg-red-100 text-red-800
+                        bg-salmon-100 text-salmon-500
                     {% else %}
                         bg-gray-100 text-gray-800
                     {% endif %}">
                     {{ order.get_status_display|default:order.status|title }}
                 </span>
                 {% if order.is_overdue and order.status not in 'completed,claimed,cancelled' %}
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-1">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-salmon-100 text-salmon-500 ml-1">
                     Overdue
                 </span>
                 {% endif %}
@@ -86,9 +86,9 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                     {% if order.payment_status == 'fully_paid' %}
                         bg-green-100 text-green-800
                     {% elif order.payment_status == 'partial' %}
-                        bg-yellow-100 text-yellow-800
+                        bg-pink-100 text-pink-500
                     {% else %}
-                        bg-red-100 text-red-800
+                        bg-salmon-100 text-salmon-500
                     {% endif %}">
                     {% if order.payment_status == 'fully_paid' %}
                         Paid
@@ -100,20 +100,20 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                 </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                <p class="text-sm {% if order.is_overdue %}text-red-600 font-medium{% else %}text-brown-600{% endif %}">
+                <p class="text-sm {% if order.is_overdue %}text-salmon-500 font-medium{% else %}text-green-600{% endif %}">
                     {{ order.due_date|date:"M j, Y"|default:"-" }}
                 </p>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">
-                <p class="text-brown-800 font-medium">{{ order.total_price }}</p>
+                <p class="text-green-800 font-medium">{{ order.total_price }}</p>
                 {% if order.balance_amount > 0 %}
-                <p class="text-xs text-red-500">Bal: {{ order.balance_amount }}</p>
+                <p class="text-xs text-salmon-500">Bal: {{ order.balance_amount }}</p>
                 {% endif %}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end space-x-1">
                     <a href="{% url 'order_detail' order.pk %}"
-                       class="p-2 text-brown-500 hover:text-brown-700 hover:bg-brown-100 rounded-lg transition-colors"
+                       class="p-2 text-green-600 hover:text-green-700 hover:bg-green-500 rounded-lg transition-colors"
                        title="View Details">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -129,16 +129,16 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
 
 <!-- Pagination -->
 {% if page_obj.has_other_pages %}
-<div class="px-6 py-4 bg-cream-50 border-t border-brown-100">
+<div class="px-6 py-4 bg-cream-500 border-t border-green-100">
     <div class="flex items-center justify-between">
-        <p class="text-sm text-brown-600">
+        <p class="text-sm text-green-600">
             Showing <span class="font-medium">{{ page_obj.start_index }}</span> to <span class="font-medium">{{ page_obj.end_index }}</span>
             of <span class="font-medium">{{ page_obj.paginator.count }}</span> orders
         </p>
         <nav class="flex items-center space-x-1">
             {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
-               class="px-3 py-2 text-brown-600 hover:bg-brown-100 rounded-lg transition-colors"
+               class="px-3 py-2 text-green-600 hover:bg-green-500 rounded-lg transition-colors"
                hx-get="{% url 'order_list' %}?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
                hx-target="#order-table-container"
                hx-select="#order-table-container"
@@ -151,10 +151,10 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
 
             {% for num in page_obj.paginator.page_range %}
                 {% if page_obj.number == num %}
-                <span class="px-3 py-2 bg-brown-600 text-white rounded-lg font-medium">{{ num }}</span>
+                <span class="px-3 py-2 bg-green-600 text-white rounded-lg font-medium">{{ num }}</span>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
-                   class="px-3 py-2 text-brown-600 hover:bg-brown-100 rounded-lg transition-colors"
+                   class="px-3 py-2 text-green-600 hover:bg-green-500 rounded-lg transition-colors"
                    hx-get="{% url 'order_list' %}?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
                    hx-target="#order-table-container"
                    hx-select="#order-table-container"
@@ -166,7 +166,7 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
 
             {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
-               class="px-3 py-2 text-brown-600 hover:bg-brown-100 rounded-lg transition-colors"
+               class="px-3 py-2 text-green-600 hover:bg-green-500 rounded-lg transition-colors"
                hx-get="{% url 'order_list' %}?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
                hx-target="#order-table-container"
                hx-select="#order-table-container"
@@ -180,8 +180,8 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
     </div>
 </div>
 {% else %}
-<div class="px-6 py-4 bg-cream-50 border-t border-brown-100">
-    <p class="text-sm text-brown-600">
+<div class="px-6 py-4 bg-cream-500 border-t border-green-100">
+    <p class="text-sm text-green-600">
         Showing <span class="font-medium">{{ orders|length }}</span> order{{ orders|length|pluralize }}
     </p>
 </div>
@@ -190,19 +190,19 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
 {% else %}
 <!-- Empty State -->
 <div class="px-6 py-12 text-center">
-    <svg class="w-12 h-12 mx-auto text-brown-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="w-12 h-12 mx-auto text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
     </svg>
     {% if search_query or status_filter %}
-    <h3 class="mt-4 text-lg font-medium text-brown-800">No orders found</h3>
-    <p class="mt-1 text-sm text-brown-500">
+    <h3 class="mt-4 text-lg font-medium text-green-800">No orders found</h3>
+    <p class="mt-1 text-sm text-green-600">
         {% if search_query %}No orders match your search "{{ search_query }}"{% endif %}
         {% if search_query and status_filter %} with {% endif %}
         {% if status_filter %}status "{{ status_filter }}"{% endif %}
     </p>
     <div class="mt-6">
         <a href="{% url 'order_list' %}"
-           class="inline-flex items-center px-4 py-2 text-brown-600 hover:text-brown-800 font-medium transition-colors"
+           class="inline-flex items-center px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors"
            hx-get="{% url 'order_list' %}"
            hx-target="#order-table-container"
            hx-select="#order-table-container"
@@ -211,11 +211,11 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
         </a>
     </div>
     {% else %}
-    <h3 class="mt-4 text-lg font-medium text-brown-800">No orders yet</h3>
-    <p class="mt-1 text-sm text-brown-500">Get started by creating your first order</p>
+    <h3 class="mt-4 text-lg font-medium text-green-800">No orders yet</h3>
+    <p class="mt-1 text-sm text-green-600">Get started by creating your first order</p>
     <div class="mt-6">
         <a href="{% url 'order_create' %}"
-           class="inline-flex items-center px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors">
+           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>

@@ -14,7 +14,7 @@
     
     <!-- Back Button -->
     <div>
-        <a href="{% url 'claims_list' %}" class="inline-flex items-center text-brown-600 hover:text-brown-800">
+        <a href="{% url 'claims_list' %}" class="inline-flex items-center text-green-600 hover:text-green-800">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -23,34 +23,34 @@
     </div>
     
     <!-- Order Summary Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
-        <div class="bg-brown-500 px-6 py-4">
+    <div class="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden">
+        <div class="bg-green-600 px-6 py-4">
             <h2 class="text-lg font-semibold text-white">Order {{ order.order_number }}</h2>
-            <p class="text-cream-200 text-sm">Ready for Customer Pickup</p>
+            <p class="text-cream-500 text-sm">Ready for Customer Pickup</p>
         </div>
         
         <div class="p-6 space-y-6">
             <!-- Customer Info -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h3 class="text-sm font-medium text-brown-500 mb-2">Customer Information</h3>
-                    <div class="bg-cream-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-green-600 mb-2">Customer Information</h3>
+                    <div class="bg-cream-500 rounded-lg p-4">
                         <div class="flex items-center mb-3">
-                            <div class="w-12 h-12 bg-brown-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white text-lg font-semibold">
                                 {{ order.customer.name|slice:":1"|upper }}
                             </div>
                             <div class="ml-3">
-                                <p class="font-semibold text-brown-800">{{ order.customer.name }}</p>
-                                <p class="text-sm text-brown-500">{{ order.customer.phone }}</p>
+                                <p class="font-semibold text-green-800">{{ order.customer.name }}</p>
+                                <p class="text-sm text-green-600">{{ order.customer.phone }}</p>
                             </div>
                         </div>
                         {% if order.customer.email %}
-                        <p class="text-sm text-brown-600">
+                        <p class="text-sm text-green-600">
                             <span class="font-medium">Email:</span> {{ order.customer.email }}
                         </p>
                         {% endif %}
                         {% if order.customer.address %}
-                        <p class="text-sm text-brown-600 mt-1">
+                        <p class="text-sm text-green-600 mt-1">
                             <span class="font-medium">Address:</span> {{ order.customer.address }}
                         </p>
                         {% endif %}
@@ -58,24 +58,24 @@
                 </div>
                 
                 <div>
-                    <h3 class="text-sm font-medium text-brown-500 mb-2">Order Details</h3>
-                    <div class="bg-cream-50 rounded-lg p-4 space-y-2">
+                    <h3 class="text-sm font-medium text-green-600 mb-2">Order Details</h3>
+                    <div class="bg-cream-500 rounded-lg p-4 space-y-2">
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Garment:</span>
-                            <span class="font-medium text-brown-800">{{ order.garment_type.name }}</span>
+                            <span class="text-green-600">Garment:</span>
+                            <span class="font-medium text-green-800">{{ order.garment_type.name }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Fabric:</span>
-                            <span class="font-medium text-brown-800">{{ order.fabric.name }}</span>
+                            <span class="text-green-600">Fabric:</span>
+                            <span class="font-medium text-green-800">{{ order.fabric.name }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Order Date:</span>
-                            <span class="font-medium text-brown-800">{{ order.created_at|date:"M d, Y" }}</span>
+                            <span class="text-green-600">Order Date:</span>
+                            <span class="font-medium text-green-800">{{ order.created_at|date:"M d, Y" }}</span>
                         </div>
                         {% if order.due_date %}
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Due Date:</span>
-                            <span class="font-medium text-brown-800">{{ order.due_date|date:"M d, Y" }}</span>
+                            <span class="text-green-600">Due Date:</span>
+                            <span class="font-medium text-green-800">{{ order.due_date|date:"M d, Y" }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -85,29 +85,29 @@
             <!-- Measurements -->
             {% if order.measurements %}
             <div>
-                <h3 class="text-sm font-medium text-brown-500 mb-2">Measurements</h3>
-                <div class="bg-cream-50 rounded-lg p-4">
-                    <pre class="text-sm text-brown-700 whitespace-pre-wrap">{{ order.measurements }}</pre>
+                <h3 class="text-sm font-medium text-green-600 mb-2">Measurements</h3>
+                <div class="bg-cream-500 rounded-lg p-4">
+                    <pre class="text-sm text-green-700 whitespace-pre-wrap">{{ order.measurements }}</pre>
                 </div>
             </div>
             {% endif %}
             
             <!-- Payment Summary -->
             <div>
-                <h3 class="text-sm font-medium text-brown-500 mb-2">Payment Summary</h3>
-                <div class="bg-cream-50 rounded-lg p-4 space-y-3">
+                <h3 class="text-sm font-medium text-green-600 mb-2">Payment Summary</h3>
+                <div class="bg-cream-500 rounded-lg p-4 space-y-3">
                     <div class="flex justify-between text-sm">
-                        <span class="text-brown-600">Total Amount:</span>
-                        <span class="font-medium text-brown-800">P{{ order.total_amount|floatformat:2 }}</span>
+                        <span class="text-green-600">Total Amount:</span>
+                        <span class="font-medium text-green-800">P{{ order.total_amount|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-brown-600">Amount Paid:</span>
+                        <span class="text-green-600">Amount Paid:</span>
                         <span class="font-medium text-green-600">P{{ total_paid|floatformat:2 }}</span>
                     </div>
-                    <div class="border-t border-brown-200 pt-3 flex justify-between">
-                        <span class="font-semibold text-brown-800">Remaining Balance:</span>
+                    <div class="border-t border-green-200 pt-3 flex justify-between">
+                        <span class="font-semibold text-green-800">Remaining Balance:</span>
                         {% if remaining_balance > 0 %}
-                        <span class="font-bold text-xl text-red-600">P{{ remaining_balance|floatformat:2 }}</span>
+                        <span class="font-bold text-xl text-salmon-500">P{{ remaining_balance|floatformat:2 }}</span>
                         {% else %}
                         <span class="font-bold text-xl text-green-600">FULLY PAID</span>
                         {% endif %}
@@ -118,27 +118,27 @@
             <!-- Payment History -->
             {% if order.payments.all %}
             <div>
-                <h3 class="text-sm font-medium text-brown-500 mb-2">Payment History</h3>
-                <div class="bg-cream-50 rounded-lg overflow-hidden">
+                <h3 class="text-sm font-medium text-green-600 mb-2">Payment History</h3>
+                <div class="bg-cream-500 rounded-lg overflow-hidden">
                     <table class="w-full text-sm">
-                        <thead class="bg-cream-100">
+                        <thead class="bg-cream-5000">
                             <tr>
-                                <th class="px-4 py-2 text-left text-brown-600">Date</th>
-                                <th class="px-4 py-2 text-left text-brown-600">Type</th>
-                                <th class="px-4 py-2 text-left text-brown-600">Method</th>
-                                <th class="px-4 py-2 text-right text-brown-600">Amount</th>
+                                <th class="px-4 py-2 text-left text-green-600">Date</th>
+                                <th class="px-4 py-2 text-left text-green-600">Type</th>
+                                <th class="px-4 py-2 text-left text-green-600">Method</th>
+                                <th class="px-4 py-2 text-right text-green-600">Amount</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-cream-100">
                             {% for payment in order.payments.all %}
                             <tr>
-                                <td class="px-4 py-2 text-brown-700">{{ payment.created_at|date:"M d, Y" }}</td>
+                                <td class="px-4 py-2 text-green-700">{{ payment.created_at|date:"M d, Y" }}</td>
                                 <td class="px-4 py-2">
                                     <span class="px-2 py-1 text-xs rounded-full {% if payment.payment_type == 'deposit' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">
                                         {{ payment.get_payment_type_display }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-2 text-brown-700 capitalize">{{ payment.payment_method }}</td>
+                                <td class="px-4 py-2 text-green-700 capitalize">{{ payment.payment_method }}</td>
                                 <td class="px-4 py-2 text-right font-medium text-green-600">P{{ payment.amount|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}
@@ -151,7 +151,7 @@
             <!-- Tailor Commission Info -->
             {% if order.tailoring_task %}
             <div>
-                <h3 class="text-sm font-medium text-brown-500 mb-2">Tailor Commission</h3>
+                <h3 class="text-sm font-medium text-green-600 mb-2">Tailor Commission</h3>
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
@@ -159,13 +159,13 @@
                                 {{ order.tailoring_task.tailor.first_name|slice:":1"|upper|default:order.tailoring_task.tailor.username|slice:":1"|upper }}
                             </div>
                             <div>
-                                <p class="font-medium text-brown-800">{{ order.tailoring_task.tailor.get_full_name|default:order.tailoring_task.tailor.username }}</p>
-                                <p class="text-sm text-brown-500">Assigned Tailor</p>
+                                <p class="font-medium text-green-800">{{ order.tailoring_task.tailor.get_full_name|default:order.tailoring_task.tailor.username }}</p>
+                                <p class="text-sm text-green-600">Assigned Tailor</p>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-lg font-bold text-green-600">PHP {{ order.tailoring_task.commission_amount|floatformat:2 }}</p>
-                            <p class="text-xs text-brown-500">{{ order.tailoring_task.commission_rate }}% commission</p>
+                            <p class="text-xs text-green-600">{{ order.tailoring_task.commission_rate }}% commission</p>
                         </div>
                     </div>
                     {% if not order.tailoring_task.commission_paid %}
@@ -194,17 +194,17 @@
     </div>
     
     <!-- Action Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-brown-100 p-6">
-        <h3 class="text-lg font-semibold text-brown-800 mb-4">Process Customer Claim</h3>
+    <div class="bg-white rounded-xl shadow-sm border border-green-100 p-6">
+        <h3 class="text-lg font-semibold text-green-800 mb-4">Process Customer Claim</h3>
         
         {% if remaining_balance > 0 %}
         <div class="mb-6">
             <label class="flex items-center space-x-3 cursor-pointer">
                 <input type="checkbox" x-model="collectBalance" 
-                       class="w-5 h-5 text-brown-500 border-brown-300 rounded focus:ring-brown-500">
-                <span class="text-brown-700">Collect remaining balance of <strong class="text-red-600">P{{ remaining_balance|floatformat:2 }}</strong></span>
+                       class="w-5 h-5 text-green-600 border-green-300 rounded focus:ring-green-500">
+                <span class="text-green-700">Collect remaining balance of <strong class="text-salmon-500">P{{ remaining_balance|floatformat:2 }}</strong></span>
             </label>
-            <p class="text-sm text-brown-500 mt-1 ml-8">Uncheck if customer will pay the balance later or has already paid through other means.</p>
+            <p class="text-sm text-green-600 mt-1 ml-8">Uncheck if customer will pay the balance later or has already paid through other means.</p>
         </div>
         {% endif %}
         
@@ -218,7 +218,7 @@
             </button>
             
             <a href="{% url 'order_detail' order.pk %}" 
-               class="inline-flex items-center justify-center px-6 py-3 bg-cream-100 text-brown-700 font-medium rounded-lg hover:bg-cream-200 transition-colors">
+               class="inline-flex items-center justify-center px-6 py-3 bg-cream-5000 text-green-700 font-medium rounded-lg hover:bg-pink-50000 transition-colors">
                 View Full Order
             </a>
         </div>
@@ -242,7 +242,7 @@
                  x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100">
                 
-                 <div class="bg-brown-500 px-6 py-4">
+                 <div class="bg-green-600 px-6 py-4">
                      <h3 class="text-lg font-semibold text-white">Confirm Claim</h3>
                  </div>
                 
@@ -255,7 +255,7 @@
                         </div>
                     </div>
                     
-                    <p class="text-center text-brown-700 mb-4">
+                    <p class="text-center text-green-700 mb-4">
                         You are about to mark order <strong>{{ order.order_number }}</strong> as claimed to 
                         <strong>{{ order.customer.name }}</strong>.
                     </p>
@@ -270,23 +270,23 @@
                         </div>
                     </div>
                     
-                    <div x-show="!collectBalance" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div x-show="!collectBalance" class="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-4">
                         <div class="flex items-center">
-                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-pink-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
-                            <span class="text-yellow-800">Order will be claimed <strong>without</strong> collecting the remaining balance.</span>
+                            <span class="text-pink-500">Order will be claimed <strong>without</strong> collecting the remaining balance.</span>
                         </div>
                     </div>
                     {% endif %}
                     
-                    <p class="text-center text-sm text-brown-500">This action cannot be undone.</p>
+                    <p class="text-center text-sm text-green-600">This action cannot be undone.</p>
                 </div>
                 
-                <div class="bg-cream-50 px-6 py-4 flex justify-end space-x-3">
+                <div class="bg-cream-500 px-6 py-4 flex justify-end space-x-3">
                     <button @click="showConfirmModal = false" 
                             :disabled="processing"
-                            class="px-4 py-2 bg-white border border-brown-200 text-brown-700 rounded-lg hover:bg-cream-100 transition-colors">
+                            class="px-4 py-2 bg-white border border-green-200 text-green-700 rounded-lg hover:bg-pink-50000 transition-colors">
                         Cancel
                     </button>
                     <form method="POST" action="{% url 'process_claim' order.pk %}" @submit="processing = true">

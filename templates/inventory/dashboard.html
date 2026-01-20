@@ -9,22 +9,22 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total Fabrics -->
-        <div class="bg-white rounded-lg shadow-sm p-5 border border-brown-100">
+        <div class="bg-white rounded-lg shadow-sm p-5 border border-green-100">
             <div class="flex items-center">
-                <div class="p-3 bg-brown-100 rounded-full">
-                    <svg class="w-6 h-6 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-3 bg-green-500 rounded-full">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-brown-500">Total Fabrics</p>
-                    <p class="text-2xl font-bold text-brown-800">{{ total_fabrics|default:"0" }}</p>
+                    <p class="text-sm font-medium text-green-600">Total Fabrics</p>
+                    <p class="text-2xl font-bold text-green-800">{{ total_fabrics|default:"0" }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Total Accessories -->
-        <div class="bg-white rounded-lg shadow-sm p-5 border border-brown-100">
+        <div class="bg-white rounded-lg shadow-sm p-5 border border-green-100">
             <div class="flex items-center">
                 <div class="p-3 bg-blue-100 rounded-full">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,29 +32,29 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-brown-500">Total Accessories</p>
-                    <p class="text-2xl font-bold text-brown-800">{{ total_accessories|default:"0" }}</p>
+                    <p class="text-sm font-medium text-green-600">Total Accessories</p>
+                    <p class="text-2xl font-bold text-green-800">{{ total_accessories|default:"0" }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Low Stock Items -->
-        <div class="bg-white rounded-lg shadow-sm p-5 border border-brown-100">
+        <div class="bg-white rounded-lg shadow-sm p-5 border border-green-100">
             <div class="flex items-center">
-                <div class="p-3 bg-red-100 rounded-full">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-3 bg-salmon-100 rounded-full">
+                    <svg class="w-6 h-6 text-salmon-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-brown-500">Low Stock Items</p>
-                    <p class="text-2xl font-bold text-red-600">{{ low_stock_count|default:"0" }}</p>
+                    <p class="text-sm font-medium text-green-600">Low Stock Items</p>
+                    <p class="text-2xl font-bold text-salmon-500">{{ low_stock_count|default:"0" }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Total Value -->
-        <div class="bg-white rounded-lg shadow-sm p-5 border border-brown-100">
+        <div class="bg-white rounded-lg shadow-sm p-5 border border-green-100">
             <div class="flex items-center">
                 <div class="p-3 bg-green-100 rounded-full">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,8 +62,8 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-brown-500">Total Value</p>
-                    <p class="text-2xl font-bold text-brown-800">{{ total_value|floatformat:2|default:"0.00" }}</p>
+                    <p class="text-sm font-medium text-green-600">Total Value</p>
+                    <p class="text-2xl font-bold text-green-800">{{ total_value|floatformat:2|default:"0.00" }}</p>
                 </div>
             </div>
         </div>
@@ -71,7 +71,7 @@
 
     <!-- Quick Actions -->
     <div class="flex flex-wrap gap-3">
-        <a href="{% url 'fabric_list' %}" class="inline-flex items-center px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm">
+        <a href="{% url 'fabric_list' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
@@ -83,7 +83,7 @@
             </svg>
             Manage Accessories
         </a>
-        <a href="{% url 'inventory_logs' %}" class="inline-flex items-center px-4 py-2 bg-cream-100 text-brown-700 rounded-lg hover:bg-cream-200 transition-colors border border-brown-200">
+        <a href="{% url 'inventory_logs' %}" class="inline-flex items-center px-4 py-2 bg-cream-5000 text-green-700 rounded-lg hover:bg-pink-50000 transition-colors border border-green-200">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -93,24 +93,24 @@
 
     <!-- Low Stock Alerts -->
     {% if low_stock_fabrics or low_stock_accessories %}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div class="bg-salmon-50 border border-salmon-200 rounded-lg p-4">
         <div class="flex items-start">
-            <svg class="w-6 h-6 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-salmon-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
             <div class="ml-3 flex-1">
-                <h3 class="text-sm font-semibold text-red-800">Low Stock Alert</h3>
-                <p class="text-sm text-red-700 mt-1">The following items need to be restocked:</p>
+                <h3 class="text-sm font-semibold text-salmon-500">Low Stock Alert</h3>
+                <p class="text-sm text-salmon-500 mt-1">The following items need to be restocked:</p>
                 <div class="mt-3 space-y-2">
                     {% for fabric in low_stock_fabrics %}
                     <div class="flex items-center justify-between bg-white rounded-lg p-3 border border-red-100">
                         <div class="flex items-center">
-                            <span class="w-3 h-3 rounded-full bg-brown-500 mr-3"></span>
-                            <span class="font-medium text-brown-800">{{ fabric.name }}</span>
-                            <span class="text-brown-500 ml-2">{{ fabric.color }}</span>
+                            <span class="w-3 h-3 rounded-full bg-green-600 mr-3"></span>
+                            <span class="font-medium text-green-800">{{ fabric.name }}</span>
+                            <span class="text-green-600 ml-2">{{ fabric.color }}</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="text-red-600 font-semibold">{{ fabric.stock_meters }} m</span>
+                            <span class="text-salmon-500 font-semibold">{{ fabric.stock_meters }} m</span>
                             <button type="button"
                                     class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
                                     hx-get="{% url 'fabric_add_stock' fabric.pk %}"
@@ -125,11 +125,11 @@
                     <div class="flex items-center justify-between bg-white rounded-lg p-3 border border-red-100">
                         <div class="flex items-center">
                             <span class="w-3 h-3 rounded-full bg-blue-500 mr-3"></span>
-                            <span class="font-medium text-brown-800">{{ accessory.name }}</span>
-                            <span class="text-brown-500 ml-2">({{ accessory.get_unit_display }})</span>
+                            <span class="font-medium text-green-800">{{ accessory.name }}</span>
+                            <span class="text-green-600 ml-2">({{ accessory.get_unit_display }})</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="text-red-600 font-semibold">{{ accessory.stock_quantity }} {{ accessory.unit }}</span>
+                            <span class="text-salmon-500 font-semibold">{{ accessory.stock_quantity }} {{ accessory.unit }}</span>
                             <button type="button"
                                     class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
                                     hx-get="{% url 'accessory_add_stock' accessory.pk %}"
@@ -149,60 +149,60 @@
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Recent Fabrics -->
-        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-brown-800">Recent Fabrics</h2>
-                <a href="{% url 'fabric_create' %}" class="text-sm text-brown-600 hover:text-brown-800 font-medium">+ Add New</a>
+        <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-green-100 bg-cream-5000 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-green-800">Recent Fabrics</h2>
+                <a href="{% url 'fabric_create' %}" class="text-sm text-green-600 hover:text-green-800 font-medium">+ Add New</a>
             </div>
             <div class="divide-y divide-brown-100">
                 {% for fabric in recent_fabrics %}
-                <div class="px-6 py-4 hover:bg-cream-50 transition-colors">
+                <div class="px-6 py-4 hover:bg-pink-5000 transition-colors">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-brown-100 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="font-medium text-brown-800">{{ fabric.name }}</p>
-                                <p class="text-sm text-brown-500">{{ fabric.color }}</p>
+                                <p class="font-medium text-green-800">{{ fabric.name }}</p>
+                                <p class="text-sm text-green-600">{{ fabric.color }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold {% if fabric.stock_meters <= 5 %}text-red-600{% elif fabric.stock_meters <= 15 %}text-yellow-600{% else %}text-green-600{% endif %}">
+                            <p class="font-semibold {% if fabric.stock_meters <= 5 %}text-salmon-500{% elif fabric.stock_meters <= 15 %}text-pink-500{% else %}text-green-600{% endif %}">
                                 {{ fabric.stock_meters }} m
                             </p>
-                            <p class="text-sm text-brown-500">{{ fabric.price_per_meter }}/m</p>
+                            <p class="text-sm text-green-600">{{ fabric.price_per_meter }}/m</p>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-brown-500">
-                    <svg class="w-12 h-12 mx-auto text-brown-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="px-6 py-8 text-center text-green-600">
+                    <svg class="w-12 h-12 mx-auto text-green-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                     <p>No fabrics added yet</p>
-                    <a href="{% url 'fabric_create' %}" class="text-brown-600 hover:text-brown-800 font-medium mt-2 inline-block">Add your first fabric</a>
+                    <a href="{% url 'fabric_create' %}" class="text-green-600 hover:text-green-800 font-medium mt-2 inline-block">Add your first fabric</a>
                 </div>
                 {% endfor %}
             </div>
             {% if recent_fabrics %}
-            <div class="px-6 py-3 bg-cream-50 border-t border-brown-100">
-                <a href="{% url 'fabric_list' %}" class="text-sm text-brown-600 hover:text-brown-800 font-medium">View all fabrics</a>
+            <div class="px-6 py-3 bg-cream-500 border-t border-green-100">
+                <a href="{% url 'fabric_list' %}" class="text-sm text-green-600 hover:text-green-800 font-medium">View all fabrics</a>
             </div>
             {% endif %}
         </div>
 
         <!-- Recent Accessories -->
-        <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-brown-100 bg-brown-50 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-brown-800">Recent Accessories</h2>
-                <a href="{% url 'accessory_create' %}" class="text-sm text-brown-600 hover:text-brown-800 font-medium">+ Add New</a>
+        <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-green-100 bg-cream-5000 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-green-800">Recent Accessories</h2>
+                <a href="{% url 'accessory_create' %}" class="text-sm text-green-600 hover:text-green-800 font-medium">+ Add New</a>
             </div>
             <div class="divide-y divide-brown-100">
                 {% for accessory in recent_accessories %}
-                <div class="px-6 py-4 hover:bg-cream-50 transition-colors">
+                <div class="px-6 py-4 hover:bg-pink-5000 transition-colors">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -211,55 +211,55 @@
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="font-medium text-brown-800">{{ accessory.name }}</p>
-                                <p class="text-sm text-brown-500">{{ accessory.get_unit_display }}</p>
+                                <p class="font-medium text-green-800">{{ accessory.name }}</p>
+                                <p class="text-sm text-green-600">{{ accessory.get_unit_display }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold {% if accessory.stock_quantity <= 10 %}text-red-600{% elif accessory.stock_quantity <= 30 %}text-yellow-600{% else %}text-green-600{% endif %}">
+                            <p class="font-semibold {% if accessory.stock_quantity <= 10 %}text-salmon-500{% elif accessory.stock_quantity <= 30 %}text-pink-500{% else %}text-green-600{% endif %}">
                                 {{ accessory.stock_quantity }} {{ accessory.unit }}
                             </p>
-                            <p class="text-sm text-brown-500">{{ accessory.price_per_unit }}/{{ accessory.unit }}</p>
+                            <p class="text-sm text-green-600">{{ accessory.price_per_unit }}/{{ accessory.unit }}</p>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-brown-500">
-                    <svg class="w-12 h-12 mx-auto text-brown-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="px-6 py-8 text-center text-green-600">
+                    <svg class="w-12 h-12 mx-auto text-green-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                     <p>No accessories added yet</p>
-                    <a href="{% url 'accessory_create' %}" class="text-brown-600 hover:text-brown-800 font-medium mt-2 inline-block">Add your first accessory</a>
+                    <a href="{% url 'accessory_create' %}" class="text-green-600 hover:text-green-800 font-medium mt-2 inline-block">Add your first accessory</a>
                 </div>
                 {% endfor %}
             </div>
             {% if recent_accessories %}
-            <div class="px-6 py-3 bg-cream-50 border-t border-brown-100">
-                <a href="{% url 'accessory_list' %}" class="text-sm text-brown-600 hover:text-brown-800 font-medium">View all accessories</a>
+            <div class="px-6 py-3 bg-cream-500 border-t border-green-100">
+                <a href="{% url 'accessory_list' %}" class="text-sm text-green-600 hover:text-green-800 font-medium">View all accessories</a>
             </div>
             {% endif %}
         </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="bg-white rounded-lg shadow-sm border border-brown-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-brown-100 bg-brown-50 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-brown-800">Recent Activity</h2>
-            <a href="{% url 'inventory_logs' %}" class="text-sm text-brown-600 hover:text-brown-800 font-medium">View all logs</a>
+    <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-green-100 bg-cream-5000 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-green-800">Recent Activity</h2>
+            <a href="{% url 'inventory_logs' %}" class="text-sm text-green-600 hover:text-green-800 font-medium">View all logs</a>
         </div>
         <div class="divide-y divide-brown-100">
             {% for log in recent_logs %}
-            <div class="px-6 py-4 hover:bg-cream-50 transition-colors">
+            <div class="px-6 py-4 hover:bg-pink-5000 transition-colors">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center
-                            {% if log.action == 'add' %}bg-green-100{% elif log.action == 'remove' %}bg-red-100{% else %}bg-blue-100{% endif %}">
+                            {% if log.action == 'add' %}bg-green-100{% elif log.action == 'remove' %}bg-salmon-100{% else %}bg-blue-100{% endif %}">
                             {% if log.action == 'add' %}
                             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                             </svg>
                             {% elif log.action == 'remove' %}
-                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-salmon-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                             </svg>
                             {% else %}
@@ -269,20 +269,20 @@
                             {% endif %}
                         </div>
                         <div class="ml-4">
-                            <p class="font-medium text-brown-800">
+                            <p class="font-medium text-green-800">
                                 {% if log.fabric %}{{ log.fabric.name }}{% else %}{{ log.accessory.name }}{% endif %}
                             </p>
-                            <p class="text-sm text-brown-500">
+                            <p class="text-sm text-green-600">
                                 {{ log.get_action_display }}: {{ log.previous_stock }} &rarr; {{ log.new_stock }}
                                 {% if log.created_by %}<span class="ml-1">by {{ log.created_by.get_full_name|default:log.created_by.username }}</span>{% endif %}
                             </p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm text-brown-500">{{ log.created_at|timesince }} ago</p>
+                        <p class="text-sm text-green-600">{{ log.created_at|timesince }} ago</p>
                         {% if log.quantity > 0 %}
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                            {% if log.action == 'add' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {% if log.action == 'add' %}bg-green-100 text-green-800{% else %}bg-salmon-100 text-salmon-500{% endif %}">
                             {% if log.action == 'add' %}+{% else %}-{% endif %}{{ log.quantity }}
                         </span>
                         {% endif %}
@@ -290,8 +290,8 @@
                 </div>
             </div>
             {% empty %}
-            <div class="px-6 py-8 text-center text-brown-500">
-                <svg class="w-12 h-12 mx-auto text-brown-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="px-6 py-8 text-center text-green-600">
+                <svg class="w-12 h-12 mx-auto text-green-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <p>No activity recorded yet</p>

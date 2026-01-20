@@ -12,7 +12,7 @@ Expects: task
     {% csrf_token %}
     
     <select name="status"
-            class="px-3 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 text-sm">
+            class="px-3 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 text-sm">
         <option value="assigned" {% if task.status == 'assigned' %}selected{% endif %}>Assigned</option>
         <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
         <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
@@ -22,7 +22,7 @@ Expects: task
     </select>
     
     <button type="submit"
-            class="px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors text-sm font-medium inline-flex items-center">
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium inline-flex items-center">
         <span class="htmx-indicator mr-2">
             <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

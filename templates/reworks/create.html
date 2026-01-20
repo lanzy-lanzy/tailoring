@@ -16,7 +16,7 @@
     
     <!-- Back Button -->
     <div>
-        <a href="{% url 'order_detail' order.pk %}" class="inline-flex items-center text-brown-600 hover:text-brown-800">
+        <a href="{% url 'order_detail' order.pk %}" class="inline-flex items-center text-green-600 hover:text-green-800">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -25,8 +25,8 @@
     </div>
     
     <!-- Order Summary Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-brown-100 overflow-hidden">
-        <div class="bg-yellow-500 px-6 py-4">
+    <div class="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden">
+        <div class="bg-pink-500 px-6 py-4">
             <h2 class="text-lg font-semibold text-white">Order {{ order.order_number }} - Rework Request</h2>
             <p class="text-yellow-100 text-sm">Creating rework for claimed order</p>
         </div>
@@ -35,34 +35,34 @@
             <!-- Customer Info -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h3 class="text-sm font-medium text-brown-500 mb-2">Customer Information</h3>
-                    <div class="bg-cream-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-green-600 mb-2">Customer Information</h3>
+                    <div class="bg-cream-500 rounded-lg p-4">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-brown-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white text-lg font-semibold">
                                 {{ order.customer.name|slice:":1"|upper }}
                             </div>
                             <div class="ml-3">
-                                <p class="font-semibold text-brown-800">{{ order.customer.name }}</p>
-                                <p class="text-sm text-brown-500">{{ order.customer.contact_number }}</p>
+                                <p class="font-semibold text-green-800">{{ order.customer.name }}</p>
+                                <p class="text-sm text-green-600">{{ order.customer.contact_number }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <div>
-                    <h3 class="text-sm font-medium text-brown-500 mb-2">Original Garment Details</h3>
-                    <div class="bg-cream-50 rounded-lg p-4 space-y-2">
+                    <h3 class="text-sm font-medium text-green-600 mb-2">Original Garment Details</h3>
+                    <div class="bg-cream-500 rounded-lg p-4 space-y-2">
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Garment:</span>
-                            <span class="font-medium text-brown-800">{{ order.garment_type.name }}</span>
+                            <span class="text-green-600">Garment:</span>
+                            <span class="font-medium text-green-800">{{ order.garment_type.name }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Fabric:</span>
-                            <span class="font-medium text-brown-800">{{ order.fabric.name }}</span>
+                            <span class="text-green-600">Fabric:</span>
+                            <span class="font-medium text-green-800">{{ order.fabric.name }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-brown-600">Original Status:</span>
-                            <span class="font-medium text-brown-800">Claimed</span>
+                            <span class="text-green-600">Original Status:</span>
+                            <span class="font-medium text-green-800">Claimed</span>
                         </div>
                     </div>
                 </div>
@@ -71,8 +71,8 @@
     </div>
     
     <!-- Rework Form -->
-    <div class="bg-white rounded-xl shadow-sm border border-brown-100 p-6">
-        <h3 class="text-lg font-semibold text-brown-800 mb-6">Rework Details</h3>
+    <div class="bg-white rounded-xl shadow-sm border border-green-100 p-6">
+        <h3 class="text-lg font-semibold text-green-800 mb-6">Rework Details</h3>
         
         <form method="POST" class="space-y-6">
             {% csrf_token %}
@@ -80,65 +80,65 @@
             <!-- Reason Section -->
             <div class="space-y-4">
                 <div>
-                    <label for="{{ form.reason.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                    <label for="{{ form.reason.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                         Reason for Rework *
                     </label>
                     {{ form.reason }}
                 </div>
                 
                 <div>
-                    <label for="{{ form.reason_description.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                    <label for="{{ form.reason_description.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                         Description *
                     </label>
                     {{ form.reason_description }}
-                    <p class="mt-1 text-sm text-brown-500">Provide detailed information about the issue or requested changes.</p>
+                    <p class="mt-1 text-sm text-green-600">Provide detailed information about the issue or requested changes.</p>
                 </div>
             </div>
             
             <!-- Charge Type Section -->
-            <div class="border-t border-brown-200 pt-6">
-                <h4 class="text-md font-semibold text-brown-800 mb-4">Charge Type</h4>
+            <div class="border-t border-green-200 pt-6">
+                <h4 class="text-md font-semibold text-green-800 mb-4">Charge Type</h4>
                 <div class="space-y-4">
                     <div>
-                        <label for="{{ form.charge_type.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                        <label for="{{ form.charge_type.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                             Is this rework free or paid?
                         </label>
                         {{ form.charge_type }}
-                        <p class="mt-1 text-sm text-brown-500">
+                        <p class="mt-1 text-sm text-green-600">
                             Select "Free" if the issue is due to shop error. Select "Paid" if it's a customer-requested change.
                         </p>
                     </div>
                     
                     <div x-show="chargeType === 'paid'" x-transition>
-                        <label for="{{ form.additional_cost.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                        <label for="{{ form.additional_cost.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                             Additional Cost
                         </label>
                         {{ form.additional_cost }}
-                        <p class="mt-1 text-sm text-brown-500">Enter the additional amount to charge the customer for this rework.</p>
+                        <p class="mt-1 text-sm text-green-600">Enter the additional amount to charge the customer for this rework.</p>
                     </div>
                 </div>
             </div>
             
             <!-- Materials Section -->
-            <div class="border-t border-brown-200 pt-6">
-                <h4 class="text-md font-semibold text-brown-800 mb-4">Materials Used</h4>
+            <div class="border-t border-green-200 pt-6">
+                <h4 class="text-md font-semibold text-green-800 mb-4">Materials Used</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="{{ form.fabric_used.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                        <label for="{{ form.fabric_used.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                             Fabric
                         </label>
                         {{ form.fabric_used }}
-                        <p class="mt-1 text-sm text-brown-500">Select if new fabric is needed.</p>
+                        <p class="mt-1 text-sm text-green-600">Select if new fabric is needed.</p>
                     </div>
                     
                     <div>
-                        <label for="{{ form.fabric_meters_used.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                        <label for="{{ form.fabric_meters_used.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                             Fabric Meters Used
                         </label>
                         {{ form.fabric_meters_used }}
                     </div>
                 </div>
-                <p class="mt-2 text-sm text-yellow-600">
+                <p class="mt-2 text-sm text-pink-500">
                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
@@ -147,33 +147,33 @@
             </div>
             
             <!-- Assignment Section -->
-            <div class="border-t border-brown-200 pt-6">
-                <h4 class="text-md font-semibold text-brown-800 mb-4">Assignment</h4>
+            <div class="border-t border-green-200 pt-6">
+                <h4 class="text-md font-semibold text-green-800 mb-4">Assignment</h4>
                 <div>
-                    <label for="{{ form.assigned_to.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                    <label for="{{ form.assigned_to.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                         Assign to Tailor
                     </label>
                     {{ form.assigned_to }}
-                    <p class="mt-1 text-sm text-brown-500">Leave blank to create rework without assignment.</p>
+                    <p class="mt-1 text-sm text-green-600">Leave blank to create rework without assignment.</p>
                 </div>
             </div>
             
             <!-- Notes Section -->
-            <div class="border-t border-brown-200 pt-6">
-                <h4 class="text-md font-semibold text-brown-800 mb-4">Additional Notes</h4>
+            <div class="border-t border-green-200 pt-6">
+                <h4 class="text-md font-semibold text-green-800 mb-4">Additional Notes</h4>
                 <div>
-                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-brown-700 mb-2">
+                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-green-700 mb-2">
                         Notes
                     </label>
                     {{ form.notes }}
-                    <p class="mt-1 text-sm text-brown-500">Any additional instructions or notes for the tailor.</p>
+                    <p class="mt-1 text-sm text-green-600">Any additional instructions or notes for the tailor.</p>
                 </div>
             </div>
             
             <!-- Submit Section -->
-            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-brown-200">
+            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-green-200">
                 <button type="submit" 
-                        class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-yellow-600 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors">
+                        class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-pink-500 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -181,7 +181,7 @@
                 </button>
                 
                 <a href="{% url 'order_detail' order.pk %}" 
-                   class="inline-flex items-center justify-center px-6 py-3 bg-cream-100 text-brown-700 font-medium rounded-lg hover:bg-cream-200 transition-colors">
+                   class="inline-flex items-center justify-center px-6 py-3 bg-cream-5000 text-green-700 font-medium rounded-lg hover:bg-pink-50000 transition-colors">
                     Cancel
                 </a>
             </div>

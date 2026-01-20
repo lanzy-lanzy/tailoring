@@ -69,11 +69,11 @@
         }
         
         /* Background colors */
-        .bg-brown-600 { background-color: #6D4A2A !important; }
-        .bg-brown-500 { background-color: #8B5E34 !important; }
-        .bg-brown-100 { background-color: #F0E6D8 !important; }
-        .bg-cream-100 { background-color: #FFF9E6 !important; }
-        .bg-cream-50 { background-color: #FFFDF7 !important; }
+        .bg-green-600 { background-color: #6D4A2A !important; }
+        .bg-green-600 { background-color: #8B5E34 !important; }
+        .bg-green-500 { background-color: #F0E6D8 !important; }
+        .bg-cream-5000 { background-color: #FFF9E6 !important; }
+        .bg-cream-500 { background-color: #FFFDF7 !important; }
         .bg-green-500 { background-color: #22c55e !important; }
         .bg-green-600 { background-color: #16a34a !important; }
         .bg-green-50 { background-color: #f0fdf4 !important; }
@@ -81,20 +81,20 @@
         
         /* Text colors */
         .text-white { color: white !important; }
-        .text-cream-200 { color: #FFF3CC !important; }
-        .text-cream-100 { color: #FFF9E6 !important; }
+        .text-cream-500 { color: #FFF3CC !important; }
+        .text-cream-500 { color: #FFF9E6 !important; }
         .text-green-600 { color: #16a34a !important; }
         .text-green-500 { color: #22c55e !important; }
         .text-green-700 { color: #15803d !important; }
         .text-green-800 { color: #166534 !important; }
-        .text-red-600 { color: #dc2626 !important; }
+        .text-salmon-500 { color: #dc2626 !important; }
         
         /* Border colors */
         .border-green-500 { border-color: #22c55e !important; }
         .border-green-600 { border-color: #16a34a !important; }
-        .border-brown-200 { border-color: #E0CCB0 !important; }
-        .border-brown-300 { border-color: #C9A97C !important; }
-        .border-brown-400 { border-color: #A67C52 !important; }
+        .border-green-200 { border-color: #E0CCB0 !important; }
+        .border-green-300 { border-color: #C9A97C !important; }
+        .border-green-400 { border-color: #A67C52 !important; }
     }
     
     @page {
@@ -107,14 +107,14 @@
 {% block content %}
 <!-- Action Buttons (no-print) -->
 <div class="max-w-4xl mx-auto mb-4 flex items-center justify-between no-print">
-    <a href="{% url 'order_detail' payment.order.pk %}" class="text-brown-600 hover:text-brown-800 font-medium transition-colors flex items-center">
+    <a href="{% url 'order_detail' payment.order.pk %}" class="text-green-600 hover:text-green-800 font-medium transition-colors flex items-center">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
         Back to Order
     </a>
     <button onclick="window.print()"
-            class="inline-flex items-center px-6 py-3 bg-brown-600 text-white rounded-xl hover:bg-brown-700 transition-colors shadow-lg font-semibold">
+            class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-lg font-semibold">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
         </svg>
@@ -126,15 +126,15 @@
 <div id="payment-receipt" class="receipt-page bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
     
     <!-- HEADER - Brown bar -->
-    <div class="bg-brown-600 text-white px-6 py-3">
+    <div class="bg-green-600 text-white px-6 py-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center">
-                <svg class="w-10 h-10 text-cream-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-10 h-10 text-cream-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
                 </svg>
                 <div class="ml-3">
                     <h1 class="text-2xl font-bold">El Senior Original Tailoring</h1>
-                    <p class="text-cream-200 text-xs">San Pablo, Dumingag, Zamboanga del Sur</p>
+                    <p class="text-cream-500 text-xs">San Pablo, Dumingag, Zamboanga del Sur</p>
                 </div>
             </div>
             <div class="{% if payment.order.remaining_balance <= 0 %}bg-green-600{% else %}bg-green-500{% endif %} text-white px-4 py-2 rounded-lg">
@@ -144,14 +144,14 @@
     </div>
     
     <!-- TITLE BAR - Cream -->
-    <div class="bg-cream-100 border-b border-brown-300 px-6 py-2 flex justify-between items-center">
+    <div class="bg-cream-5000 border-b border-green-300 px-6 py-2 flex justify-between items-center">
         <div>
-            <h2 class="text-xl font-bold text-brown-800">PAYMENT RECEIPT</h2>
-            <p class="text-brown-600 text-sm">Receipt #{{ payment.payment_number }}</p>
+            <h2 class="text-xl font-bold text-green-800">PAYMENT RECEIPT</h2>
+            <p class="text-green-600 text-sm">Receipt #{{ payment.payment_number }}</p>
         </div>
         <div class="text-right">
-            <p class="text-xs text-brown-500">Payment Date</p>
-            <p class="font-bold text-brown-800">{{ payment.payment_date|date:"M j, Y" }}</p>
+            <p class="text-xs text-green-600">Payment Date</p>
+            <p class="font-bold text-green-800">{{ payment.payment_date|date:"M j, Y" }}</p>
         </div>
     </div>
     
@@ -160,49 +160,49 @@
         
         <!-- Customer & Order Info -->
         <div class="grid grid-cols-2 gap-4 mb-3">
-            <div class="border border-brown-200 rounded overflow-hidden">
-                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                    <h3 class="font-bold text-brown-700 uppercase text-xs">Customer Information</h3>
+            <div class="border border-green-200 rounded overflow-hidden">
+                <div class="bg-green-500 px-3 py-1 border-b border-green-200">
+                    <h3 class="font-bold text-green-700 uppercase text-xs">Customer Information</h3>
                 </div>
                 <div class="p-2 text-sm space-y-1">
-                    <div class="flex"><span class="text-brown-500 w-16">Name:</span><span class="font-semibold text-brown-800">{{ payment.order.customer.name }}</span></div>
-                    <div class="flex"><span class="text-brown-500 w-16">Phone:</span><span class="text-brown-800">{{ payment.order.customer.contact_number }}</span></div>
+                    <div class="flex"><span class="text-green-600 w-16">Name:</span><span class="font-semibold text-green-800">{{ payment.order.customer.name }}</span></div>
+                    <div class="flex"><span class="text-green-600 w-16">Phone:</span><span class="text-green-800">{{ payment.order.customer.contact_number }}</span></div>
                 </div>
             </div>
             
-            <div class="border border-brown-200 rounded overflow-hidden">
-                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                    <h3 class="font-bold text-brown-700 uppercase text-xs">Order Information</h3>
+            <div class="border border-green-200 rounded overflow-hidden">
+                <div class="bg-green-500 px-3 py-1 border-b border-green-200">
+                    <h3 class="font-bold text-green-700 uppercase text-xs">Order Information</h3>
                 </div>
                 <div class="p-2 text-sm space-y-1">
-                    <div class="flex"><span class="text-brown-500 w-20">Order #:</span><span class="font-mono font-bold text-brown-800">{{ payment.order.order_number }}</span></div>
-                    <div class="flex"><span class="text-brown-500 w-20">Due Date:</span><span class="text-brown-800 font-medium">{{ payment.order.due_date|date:"M j, Y" }}</span></div>
+                    <div class="flex"><span class="text-green-600 w-20">Order #:</span><span class="font-mono font-bold text-green-800">{{ payment.order.order_number }}</span></div>
+                    <div class="flex"><span class="text-green-600 w-20">Due Date:</span><span class="text-green-800 font-medium">{{ payment.order.due_date|date:"M j, Y" }}</span></div>
                 </div>
             </div>
         </div>
         
         <!-- Garment Details -->
-        <div class="border border-brown-200 rounded overflow-hidden mb-3">
-            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                <h3 class="font-bold text-brown-700 uppercase text-xs">Garment Details</h3>
+        <div class="border border-green-200 rounded overflow-hidden mb-3">
+            <div class="bg-green-500 px-3 py-1 border-b border-green-200">
+                <h3 class="font-bold text-green-700 uppercase text-xs">Garment Details</h3>
             </div>
             <div class="p-2">
                 <div class="grid grid-cols-4 gap-3 text-sm">
                     <div>
-                        <span class="text-brown-500 text-xs block">Garment Type</span>
-                        <p class="font-bold text-brown-800">{{ payment.order.garment_type.name }}</p>
+                        <span class="text-green-600 text-xs block">Garment Type</span>
+                        <p class="font-bold text-green-800">{{ payment.order.garment_type.name }}</p>
                     </div>
                     <div>
-                        <span class="text-brown-500 text-xs block">Fabric</span>
-                        <p class="font-semibold text-brown-800">{{ payment.order.fabric.name }} ({{ payment.order.fabric.color }})</p>
+                        <span class="text-green-600 text-xs block">Fabric</span>
+                        <p class="font-semibold text-green-800">{{ payment.order.fabric.name }} ({{ payment.order.fabric.color }})</p>
                     </div>
                     <div>
-                        <span class="text-brown-500 text-xs block">Fabric Used</span>
-                        <p class="font-semibold text-brown-800">{{ payment.order.fabric_meters_used|default:"N/A" }} meters</p>
+                        <span class="text-green-600 text-xs block">Fabric Used</span>
+                        <p class="font-semibold text-green-800">{{ payment.order.fabric_meters_used|default:"N/A" }} meters</p>
                     </div>
                     <div>
-                        <span class="text-brown-500 text-xs block">Quantity</span>
-                        <p class="font-bold text-brown-800">{{ payment.order.quantity }}</p>
+                        <span class="text-green-600 text-xs block">Quantity</span>
+                        <p class="font-bold text-green-800">{{ payment.order.quantity }}</p>
                     </div>
                 </div>
             </div>
@@ -218,25 +218,25 @@
         <!-- Payment Section - Two Columns -->
         <div class="grid grid-cols-2 gap-4 mb-3">
             <!-- Payment History -->
-            <div class="border border-brown-200 rounded overflow-hidden">
-                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                    <h3 class="font-bold text-brown-700 uppercase text-xs">All Payments</h3>
+            <div class="border border-green-200 rounded overflow-hidden">
+                <div class="bg-green-500 px-3 py-1 border-b border-green-200">
+                    <h3 class="font-bold text-green-700 uppercase text-xs">All Payments</h3>
                 </div>
                 <div class="p-2">
                     <table class="w-full text-xs">
-                        <thead class="bg-cream-100">
+                        <thead class="bg-cream-5000">
                             <tr>
-                                <th class="px-2 py-1 text-left text-brown-600">Date</th>
-                                <th class="px-2 py-1 text-left text-brown-600">Type</th>
-                                <th class="px-2 py-1 text-right text-brown-600">Amount</th>
+                                <th class="px-2 py-1 text-left text-green-600">Date</th>
+                                <th class="px-2 py-1 text-left text-green-600">Type</th>
+                                <th class="px-2 py-1 text-right text-green-600">Amount</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-cream-200">
                             {% for p in payment.order.payments.all %}
                             <tr{% if p.pk == payment.pk %} class="bg-green-50"{% endif %}>
-                                <td class="px-2 py-1 text-brown-700">{{ p.payment_date|date:"M j" }}</td>
-                                <td class="px-2 py-1 text-brown-700">{{ p.get_payment_type_display|default:p.payment_type|title }}</td>
-                                <td class="px-2 py-1 text-right font-semibold {% if p.pk == payment.pk %}text-green-600{% else %}text-brown-600{% endif %}">P{{ p.amount|floatformat:2 }}</td>
+                                <td class="px-2 py-1 text-green-700">{{ p.payment_date|date:"M j" }}</td>
+                                <td class="px-2 py-1 text-green-700">{{ p.get_payment_type_display|default:p.payment_type|title }}</td>
+                                <td class="px-2 py-1 text-right font-semibold {% if p.pk == payment.pk %}text-green-600{% else %}text-green-600{% endif %}">P{{ p.amount|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -245,21 +245,21 @@
             </div>
             
             <!-- Payment Summary -->
-            <div class="border border-brown-200 rounded overflow-hidden">
-                <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                    <h3 class="font-bold text-brown-700 uppercase text-xs">Payment Summary</h3>
+            <div class="border border-green-200 rounded overflow-hidden">
+                <div class="bg-green-500 px-3 py-1 border-b border-green-200">
+                    <h3 class="font-bold text-green-700 uppercase text-xs">Payment Summary</h3>
                 </div>
                 <div class="p-2 space-y-1 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-brown-600">Total Order Amount:</span>
-                        <span class="text-brown-800 font-medium">P{{ payment.order.total_price|floatformat:2 }}</span>
+                        <span class="text-green-600">Total Order Amount:</span>
+                        <span class="text-green-800 font-medium">P{{ payment.order.total_price|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-brown-700">Total Paid:</span>
+                        <span class="text-green-700">Total Paid:</span>
                         <span class="text-green-600 font-semibold">P{{ payment.order.total_paid|floatformat:2 }}</span>
                     </div>
-                    <div class="flex justify-between pt-1 border-t-2 border-brown-300">
-                        <span class="font-bold text-brown-800">Balance Due:</span>
+                    <div class="flex justify-between pt-1 border-t-2 border-green-300">
+                        <span class="font-bold text-green-800">Balance Due:</span>
                         {% if payment.order.remaining_balance <= 0 %}
                         <span class="text-green-600 font-bold text-lg flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,7 +268,7 @@
                             PAID
                         </span>
                         {% else %}
-                        <span class="text-red-600 font-bold text-lg">P{{ payment.order.remaining_balance|floatformat:2 }}</span>
+                        <span class="text-salmon-500 font-bold text-lg">P{{ payment.order.remaining_balance|floatformat:2 }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -277,11 +277,11 @@
         
         {% if payment.notes %}
         <!-- Notes -->
-        <div class="border border-brown-200 rounded overflow-hidden mb-3">
-            <div class="bg-brown-100 px-3 py-1 border-b border-brown-200">
-                <h3 class="font-bold text-brown-700 uppercase text-xs">Notes</h3>
+        <div class="border border-green-200 rounded overflow-hidden mb-3">
+            <div class="bg-green-500 px-3 py-1 border-b border-green-200">
+                <h3 class="font-bold text-green-700 uppercase text-xs">Notes</h3>
             </div>
-            <div class="p-2 text-sm text-brown-700">
+            <div class="p-2 text-sm text-green-700">
                 {{ payment.notes }}
             </div>
         </div>
@@ -289,15 +289,15 @@
     </div>
     
     <!-- FOOTER -->
-    <div class="border-t-2 border-brown-300 bg-cream-50 px-6 py-3">
+    <div class="border-t-2 border-green-300 bg-cream-500 px-6 py-3">
         
         <!-- Stamp + Signatures Row -->
         <div class="flex items-center justify-between mb-3">
             <!-- Customer Signature -->
             <div class="text-center flex-1">
-                <div class="border-b-2 border-brown-400 mb-1 h-10 mx-4"></div>
-                <p class="font-semibold text-brown-700 text-sm">Customer Signature</p>
-                <p class="text-xs text-brown-500">{{ payment.order.customer.name }}</p>
+                <div class="border-b-2 border-green-400 mb-1 h-10 mx-4"></div>
+                <p class="font-semibold text-green-700 text-sm">Customer Signature</p>
+                <p class="text-xs text-green-600">{{ payment.order.customer.name }}</p>
             </div>
             
             <!-- Payment Stamp -->
@@ -310,26 +310,26 @@
             
             <!-- Authorized Signature -->
             <div class="text-center flex-1">
-                <div class="border-b-2 border-brown-400 mb-1 h-10 mx-4"></div>
-                <p class="font-semibold text-brown-700 text-sm">Received By</p>
-                <p class="text-xs text-brown-500">{{ payment.received_by.first_name|default:payment.received_by.username }}</p>
+                <div class="border-b-2 border-green-400 mb-1 h-10 mx-4"></div>
+                <p class="font-semibold text-green-700 text-sm">Received By</p>
+                <p class="text-xs text-green-600">{{ payment.received_by.first_name|default:payment.received_by.username }}</p>
             </div>
         </div>
         
         <!-- Thank You -->
-        <div class="text-center bg-brown-100 rounded py-2 px-4 mb-3">
-            <p class="text-brown-700 font-bold">Thank you for your payment!</p>
+        <div class="text-center bg-green-500 rounded py-2 px-4 mb-3">
+            <p class="text-green-700 font-bold">Thank you for your payment!</p>
             {% if payment.order.remaining_balance > 0 %}
-            <p class="text-brown-600 text-xs">Remaining balance: P{{ payment.order.remaining_balance|floatformat:2 }} - Due upon pickup</p>
+            <p class="text-green-600 text-xs">Remaining balance: P{{ payment.order.remaining_balance|floatformat:2 }} - Due upon pickup</p>
             {% else %}
             <p class="text-green-600 text-xs font-semibold">Order is fully paid - Ready for pickup on {{ payment.order.due_date|date:"M j, Y" }}</p>
             {% endif %}
         </div>
         
         <!-- Terms & Contact -->
-        <div class="grid grid-cols-2 gap-4 text-xs text-brown-600 border-t border-brown-200 pt-2">
+        <div class="grid grid-cols-2 gap-4 text-xs text-green-600 border-t border-green-200 pt-2">
             <div>
-                <p class="font-bold text-brown-700 mb-1">Payment Information:</p>
+                <p class="font-bold text-green-700 mb-1">Payment Information:</p>
                 <ul class="list-disc list-inside space-y-0.5">
                     <li>Receipt #{{ payment.payment_number }}</li>
                     <li>Method: {{ payment.get_payment_method_display|default:payment.payment_method|title }}</li>
@@ -337,10 +337,10 @@
                 </ul>
             </div>
             <div class="text-right">
-                <p class="font-bold text-brown-700 mb-1">Contact:</p>
+                <p class="font-bold text-green-700 mb-1">Contact:</p>
                 <p>San Pablo, Dumingag</p>
                 <p>Zamboanga del Sur</p>
-                <p class="mt-1 text-brown-400">Order #{{ payment.order.order_number }}</p>
+                <p class="mt-1 text-cream-600">Order #{{ payment.order.order_number }}</p>
             </div>
         </div>
     </div>
