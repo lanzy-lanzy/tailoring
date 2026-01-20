@@ -1414,7 +1414,7 @@ def generate_orders_report(orders, stats, start_date, end_date, generated_by=Non
         ["Completed Orders", str(stats.get("completed", 0))],
         ["In Progress", str(stats.get("in_progress", 0))],
         ["Pending", str(stats.get("pending", 0))],
-        ["Delivered", str(stats.get("delivered", 0))],
+        ["Claimed", str(stats.get("delivered", 0))],
         ["Cancelled", str(stats.get("cancelled", 0))],
     ]
     elements.extend(create_summary_table(summary_data, "Orders Summary"))

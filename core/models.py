@@ -218,7 +218,7 @@ class Order(models.Model):
         ('pending', 'Pending'),
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
-        ('delivered', 'Delivered'),
+        ('delivered', 'Claimed'),
         ('for_adjustment', 'For Adjustment/Rework'),
         ('ready_for_reclaim', 'Ready for Re-Claim'),
         ('cancelled', 'Cancelled'),
@@ -324,8 +324,8 @@ class TailoringTask(models.Model):
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),
         ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('approved', 'Approved'),
+        ('completed', 'Awaiting Approval'),
+        ('approved', 'Order Completed'),
     ]
     
     order = models.OneToOneField(

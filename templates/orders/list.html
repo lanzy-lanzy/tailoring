@@ -51,7 +51,7 @@
                     <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
                     <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
                     <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
-                    <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                    <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Claimed</option>
                     <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
                 </select>
             </div>
@@ -124,7 +124,7 @@
         <div class="bg-white rounded-lg shadow-sm p-4 border border-brown-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-purple-600 uppercase">Delivered</p>
+<p class="text-xs font-medium text-purple-600 uppercase">Claimed</p>
                     <p class="text-2xl font-bold text-brown-800">{{ stats.delivered|default:"0" }}</p>
                 </div>
                 <div class="p-2 bg-purple-100 rounded-full">

@@ -111,7 +111,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm text-brown-600">{{ order.garment_type.name }}</td>
-                        <td class="px-6 py-4 text-sm font-medium text-brown-800">P{{ order.total_amount|floatformat:2 }}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-brown-800">P{{ order.total_price|floatformat:2 }}</td>
                         <td class="px-6 py-4 text-sm text-green-600">P{{ order.total_paid|floatformat:2 }}</td>
                         <td class="px-6 py-4">
                             {% if order.remaining_balance > 0 %}

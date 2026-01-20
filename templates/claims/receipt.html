@@ -143,8 +143,8 @@
     <!-- TITLE BAR -->
     <div class="bg-cream-100 border-b border-brown-300 px-6 py-2 flex justify-between items-center">
         <div>
-            <h2 class="text-xl font-bold text-brown-800">DELIVERY RECEIPT</h2>
-            <p class="text-brown-600 text-sm">Order #{{ order.order_number }}</p>
+            <h2 class="text-xl font-bold text-brown-800">{% if order.reworks.exists %}RE-CLAIM RECEIPT{% else %}CLAIM RECEIPT{% endif %}</h2>
+            <p class="text-brown-600 text-sm">Order #{{ order.order_number }}{% if order.reworks.exists %} (After Rework){% endif %}</p>
         </div>
         <div class="text-right">
             <p class="text-xs text-brown-500">Claim Date</p>

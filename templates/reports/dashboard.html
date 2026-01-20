@@ -308,7 +308,7 @@
                         </div>
                         <div class="w-full bg-cream-100 rounded-full h-2">
                             <div class="h-2 rounded-full
-                                {% if status.status == 'completed' or status.status == 'delivered' %}bg-green-500
+                                {% if status.status == 'completed' or status.status == 'claimed' %}bg-green-500
                                 {% elif status.status == 'in_progress' %}bg-blue-500
                                 {% elif status.status == 'pending' %}bg-yellow-500
                                 {% else %}bg-red-500{% endif %}"

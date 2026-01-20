@@ -29,17 +29,17 @@
             <a href="{% url 'task_list' %}?status=completed"
                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
                       {% if status_filter == 'completed' %}bg-orange-500 text-white{% else %}bg-white text-orange-600 border border-orange-200 hover:bg-orange-50{% endif %}">
-                Completed
+                Awaiting Approval
             </a>
             <a href="{% url 'task_list' %}?status=approved"
                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
                       {% if status_filter == 'approved' %}bg-green-500 text-white{% else %}bg-white text-green-600 border border-green-200 hover:bg-green-50{% endif %}">
-                Approved
+                Order Completed
             </a>
         </div>
 
-        <!-- Search (for admin) -->
-        {% if user.profile.is_admin %}
+        <!-- Search Bar -->
+        {% if not is_htmx_request %}
         <div class="relative max-w-md">
             <input type="text"
                    id="task-search"

@@ -1,4 +1,4 @@
-﻿{% comment %}
+{% comment %}
 Order Table Partial - Used for HTMX updates
 This partial renders the order table content and pagination.
 Expects: orders (queryset), page_obj (pagination object), search_query (string), status_filter (string)
@@ -38,7 +38,7 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                         <a href="{% url 'customer_detail' order.customer.pk %}" class="text-brown-700 hover:text-brown-800 text-sm">
                             {{ order.customer.name|truncatechars:20 }}
                         </a>
-                        {% if order.status != 'cancelled' and order.status != 'delivered' %}
+                        {% if order.status != 'cancelled' and order.status != 'claimed' %}
                         <a href="{% url 'order_edit' order.pk %}"
                            class="p-2 text-brown-500 hover:text-brown-700 hover:bg-brown-100 rounded-lg transition-colors"
                            title="Edit Order">
@@ -60,7 +60,7 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                     {% if order.status == 'completed' %}
                         bg-green-100 text-green-800
-                    {% elif order.status == 'delivered' %}
+                    {% elif order.status == 'claimed' %}
                         bg-purple-100 text-purple-800
                     {% elif order.status == 'in_progress' %}
                         bg-blue-100 text-blue-800
@@ -75,7 +75,7 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
                     {% endif %}">
                     {{ order.get_status_display|default:order.status|title }}
                 </span>
-                {% if order.is_overdue and order.status not in 'completed,delivered,cancelled' %}
+                {% if order.is_overdue and order.status not in 'completed,claimed,cancelled' %}
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-1">
                     Overdue
                 </span>

@@ -226,7 +226,7 @@ def admin_dashboard(request):
 @login_required
 @tailor_required
 def tailor_dashboard(request):
-    """Tailor dashboard with assigned tasks"""
+    """Tailor dashboard with assigned tasks and reworks"""
     tasks = (
         TailoringTask.objects.filter(tailor=request.user)
         .exclude(status="approved")
@@ -240,11 +240,27 @@ def tailor_dashboard(request):
         tailor=request.user, status="approved"
     ).count()
 
+    # Get assigned reworks
+    reworks = (
+        Rework.objects.filter(assigned_to=request.user)
+        .exclude(status="completed")
+        .select_related("order", "order__customer", "order__garment_type")
+        .order_by("-created_date")
+    )
+    
+    completed_reworks = Rework.objects.filter(
+        assigned_to=request.user, status="completed"
+    ).count()
+
     context = {
         "tasks": tasks,
         "completed_tasks": completed_tasks,
         "pending_count": tasks.filter(status="assigned").count(),
         "in_progress_count": tasks.filter(status="in_progress").count(),
+        "reworks": reworks,
+        "completed_reworks": completed_reworks,
+        "pending_reworks": reworks.filter(status="pending").count(),
+        "in_progress_reworks": reworks.filter(status="in_progress").count(),
     }
 
     return render(request, "dashboard/tailor.html", context)
@@ -258,12 +274,28 @@ def tailor_dashboard(request):
 def customer_list(request):
     """List all customers"""
     search = request.GET.get("search", "")
-    customers = Customer.objects.all()
+    all_customers = Customer.objects.all()
+    customers = all_customers
 
     if search:
         customers = customers.filter(
             Q(name__icontains=search) | Q(contact_number__icontains=search)
         )
+
+    # Calculate stats (from unfiltered queryset)
+    total_customers = all_customers.count()
+    
+    # New customers this month
+    from datetime import datetime
+    now = timezone.now()
+    first_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    new_this_month = all_customers.filter(created_at__gte=first_of_month).count()
+    
+    # Customers with active orders
+    active_statuses = ['pending', 'in_progress', 'completed']
+    with_active_orders = all_customers.filter(
+        orders__status__in=active_statuses
+    ).distinct().count()
 
     paginator = Paginator(customers, 20)
     page = request.GET.get("page", 1)
@@ -275,7 +307,13 @@ def customer_list(request):
         )
 
     return render(
-        request, "customers/list.html", {"customers": customers, "search": search}
+        request, "customers/list.html", {
+            "customers": customers, 
+            "search": search,
+            "total_customers": total_customers,
+            "new_this_month": new_this_month,
+            "with_active_orders": with_active_orders,
+        }
     )
 
 
@@ -387,6 +425,24 @@ def inventory_dashboard(request):
     fabrics = Fabric.objects.all()
     accessories = Accessory.objects.all()
 
+    # Calculate stats
+    total_fabrics = fabrics.count()
+    total_accessories = accessories.count()
+    
+    # Low stock thresholds
+    low_stock_fabrics = fabrics.filter(stock_meters__lte=5)
+    low_stock_accessories = accessories.filter(stock_quantity__lte=10)
+    low_stock_count = low_stock_fabrics.count() + low_stock_accessories.count()
+    
+    # Calculate total inventory value
+    fabric_value = sum(f.stock_meters * f.price_per_meter for f in fabrics)
+    accessory_value = sum(a.stock_quantity * a.price_per_unit for a in accessories)
+    total_value = fabric_value + accessory_value
+    
+    # Recent items (last 5)
+    recent_fabrics = fabrics.order_by('-created_at')[:5]
+    recent_accessories = accessories.order_by('-created_at')[:5]
+
     # Recent inventory logs
     recent_logs = InventoryLog.objects.select_related(
         "fabric", "accessory", "order", "created_by"
@@ -396,6 +452,14 @@ def inventory_dashboard(request):
         "fabrics": fabrics,
         "accessories": accessories,
         "recent_logs": recent_logs,
+        "total_fabrics": total_fabrics,
+        "total_accessories": total_accessories,
+        "low_stock_count": low_stock_count,
+        "low_stock_fabrics": low_stock_fabrics,
+        "low_stock_accessories": low_stock_accessories,
+        "total_value": total_value,
+        "recent_fabrics": recent_fabrics,
+        "recent_accessories": recent_accessories,
     }
 
     return render(request, "inventory/dashboard.html", context)
@@ -407,7 +471,18 @@ def inventory_dashboard(request):
 def fabric_list(request):
     """List all fabrics"""
     fabrics = Fabric.objects.all()
-    return render(request, "inventory/fabric_list.html", {"fabrics": fabrics})
+    
+    # Calculate stats
+    total_fabrics = fabrics.count()
+    total_meters = sum(f.stock_meters for f in fabrics)
+    low_stock_count = fabrics.filter(stock_meters__lte=5).count()
+    
+    return render(request, "inventory/fabric_list.html", {
+        "fabrics": fabrics,
+        "total_fabrics": total_fabrics,
+        "total_meters": total_meters,
+        "low_stock_count": low_stock_count,
+    })
 
 
 @login_required
@@ -557,8 +632,19 @@ def fabric_delete(request, pk):
 def accessory_list(request):
     """List all accessories"""
     accessories = Accessory.objects.all()
+    
+    # Calculate stats
+    total_accessories = accessories.count()
+    total_value = sum(a.stock_quantity * a.price_per_unit for a in accessories)
+    low_stock_count = accessories.filter(stock_quantity__lte=10).count()
+    
     return render(
-        request, "inventory/accessory_list.html", {"accessories": accessories}
+        request, "inventory/accessory_list.html", {
+            "accessories": accessories,
+            "total_accessories": total_accessories,
+            "total_value": total_value,
+            "low_stock_count": low_stock_count,
+        }
     )
 
 
@@ -915,7 +1001,23 @@ def order_list(request):
     status_filter = request.GET.get("status", "")
     search = request.GET.get("search", "")
 
-    orders = Order.objects.select_related(
+    all_orders = Order.objects.all()
+    
+    # Calculate stats (from unfiltered queryset)
+    today = timezone.now().date()
+    stats = {
+        'total': all_orders.count(),
+        'pending': all_orders.filter(status='pending').count(),
+        'in_progress': all_orders.filter(status='in_progress').count(),
+        'completed': all_orders.filter(status='completed').count(),
+        'delivered': all_orders.filter(status='delivered').count(),
+        'overdue': all_orders.filter(
+            due_date__lt=today,
+            status__in=['pending', 'in_progress']
+        ).count(),
+    }
+
+    orders = all_orders.select_related(
         "customer", "garment_type", "fabric", "created_by"
     ).prefetch_related("payments")
 
@@ -944,6 +1046,7 @@ def order_list(request):
             "status_filter": status_filter,
             "search": search,
             "status_choices": Order.STATUS_CHOICES,
+            "stats": stats,
         },
     )
 
@@ -1454,11 +1557,19 @@ def task_create(request):
 def task_list(request):
     """List tasks (filtered by role)"""
     if hasattr(request.user, "profile") and request.user.profile.is_tailor:
-        tasks = TailoringTask.objects.filter(tailor=request.user)
+        base_tasks = TailoringTask.objects.filter(tailor=request.user)
     else:
-        tasks = TailoringTask.objects.all()
+        base_tasks = TailoringTask.objects.all()
 
-    tasks = tasks.select_related(
+    # Calculate stats from unfiltered queryset
+    stats = {
+        'assigned': base_tasks.filter(status='assigned').count(),
+        'in_progress': base_tasks.filter(status='in_progress').count(),
+        'completed': base_tasks.filter(status='completed').count(),
+        'approved': base_tasks.filter(status='approved').count(),
+    }
+
+    tasks = base_tasks.select_related(
         "order", "order__customer", "order__garment_type", "tailor"
     ).order_by("-created_at")
 
@@ -1477,6 +1588,8 @@ def task_list(request):
             "tasks": tasks,
             "status_filter": status_filter,
             "status_choices": TailoringTask.STATUS_CHOICES,
+            "stats": stats,
+            "today": timezone.now().date(),
         },
     )
 
@@ -1622,6 +1735,35 @@ def task_approve(request, pk):
 @admin_required
 def payment_list(request):
     """List all payments"""
+    from django.db.models import Sum
+    from decimal import Decimal
+    
+    all_payments = Payment.objects.filter(status='completed')
+    
+    # Calculate stats
+    total_collected = all_payments.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    
+    # Today's payments
+    today = timezone.now().date()
+    today_payments = all_payments.filter(payment_date__date=today)
+    today_total = today_payments.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    
+    # Payment count
+    payment_count = all_payments.count()
+    
+    # Outstanding balance (sum of remaining balances from all active orders)
+    active_orders = Order.objects.exclude(status__in=['cancelled', 'delivered'])
+    outstanding = Decimal('0')
+    for order in active_orders:
+        outstanding += order.remaining_balance
+    
+    stats = {
+        'total_collected': total_collected,
+        'today_total': today_total,
+        'payment_count': payment_count,
+        'outstanding': outstanding,
+    }
+    
     payments = Payment.objects.select_related(
         "order", "order__customer", "received_by"
     ).order_by("-created_at")
@@ -1630,7 +1772,7 @@ def payment_list(request):
     page = request.GET.get("page", 1)
     payments = paginator.get_page(page)
 
-    return render(request, "payments/list.html", {"payments": payments})
+    return render(request, "payments/list.html", {"payments": payments, "stats": stats})
 
 
 @login_required
@@ -1799,7 +1941,18 @@ def user_list(request):
     from django.contrib.auth.models import User
 
     users = User.objects.select_related("profile").all()
-    return render(request, "users/list.html", {"users": users})
+    
+    # Calculate stats
+    total_users = users.count()
+    admin_count = users.filter(profile__role='admin').count()
+    tailor_count = users.filter(profile__role='tailor').count()
+    
+    return render(request, "users/list.html", {
+        "users": users,
+        "total_users": total_users,
+        "admin_count": admin_count,
+        "tailor_count": tailor_count,
+    })
 
 
 @login_required
@@ -2433,6 +2586,8 @@ def rework_create(request, order_pk):
                     # Create rework
                     rework = Rework.objects.create(
                         order=order,
+                        original_garment_type=order.garment_type.name,
+                        original_customer_name=order.customer.name,
                         reason=reason,
                         reason_description=reason_description,
                         charge_type=charge_type,
@@ -2534,9 +2689,8 @@ def rework_create(request, order_pk):
 
 
 @login_required
-@admin_required
 def rework_detail(request, pk):
-    """Rework detail view"""
+    """Rework detail view - accessible by admins and assigned tailors"""
     rework = get_object_or_404(
         Rework.objects.select_related(
             "order",
@@ -2549,15 +2703,30 @@ def rework_detail(request, pk):
         ).prefetch_related("materials__accessory"),
         pk=pk,
     )
+    
+    # Check if user has access (admin or assigned tailor)
+    is_admin = request.user.profile.is_admin if hasattr(request.user, 'profile') else False
+    is_assigned = rework.assigned_to == request.user
+    
+    if not is_admin and not is_assigned:
+        messages.error(request, "You don't have permission to view this rework.")
+        return redirect("tailor_dashboard")
 
     return render(request, "reworks/detail.html", {"rework": rework})
 
 
 @login_required
-@admin_required
 def rework_update_status(request, pk):
-    """Update rework status"""
+    """Update rework status - accessible by admins and assigned tailors"""
     rework = get_object_or_404(Rework, pk=pk)
+    
+    # Check if user has access (admin or assigned tailor)
+    is_admin = request.user.profile.is_admin if hasattr(request.user, 'profile') else False
+    is_assigned = rework.assigned_to == request.user
+    
+    if not is_admin and not is_assigned:
+        messages.error(request, "You don't have permission to update this rework.")
+        return redirect("tailor_dashboard")
 
     if request.method == "POST":
         new_status = request.POST.get("status")
@@ -2664,10 +2833,17 @@ def rework_assign(request, pk):
 
 
 @login_required
-@admin_required
 def rework_add_material(request, pk):
-    """Add accessory material to rework"""
+    """Add accessory material to rework - accessible by admins and assigned tailors"""
     rework = get_object_or_404(Rework, pk=pk)
+    
+    # Check if user has access (admin or assigned tailor)
+    is_admin = request.user.profile.is_admin if hasattr(request.user, 'profile') else False
+    is_assigned = rework.assigned_to == request.user
+    
+    if not is_admin and not is_assigned:
+        messages.error(request, "You don't have permission to add materials to this rework.")
+        return redirect("tailor_dashboard")
 
     if request.method == "POST":
         accessory_id = request.POST.get("accessory")
@@ -2724,11 +2900,18 @@ def rework_add_material(request, pk):
 
 
 @login_required
-@admin_required
 def rework_remove_material(request, pk, material_pk):
-    """Remove material from rework and restore inventory"""
+    """Remove material from rework and restore inventory - accessible by admins and assigned tailors"""
     rework = get_object_or_404(Rework, pk=pk)
     material = get_object_or_404(ReworkMaterial, pk=material_pk, rework=rework)
+    
+    # Check if user has access (admin or assigned tailor)
+    is_admin = request.user.profile.is_admin if hasattr(request.user, 'profile') else False
+    is_assigned = rework.assigned_to == request.user
+    
+    if not is_admin and not is_assigned:
+        messages.error(request, "You don't have permission to remove materials from this rework.")
+        return redirect("tailor_dashboard")
 
     if request.method == "POST":
         with transaction.atomic():
