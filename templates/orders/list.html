@@ -12,44 +12,34 @@
         <div class="flex flex-col sm:flex-row gap-4 flex-1">
             <!-- Search -->
             <div class="relative flex-1 max-w-md">
-                <input type="text"
-                       id="order-search"
-                       name="search"
-                       placeholder="Search orders, customers..."
-                       value="{{ search_query|default:'' }}"
-                       class="w-full pl-10 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
-                       hx-get="{% url 'order_list' %}"
-                       hx-trigger="keyup changed delay:300ms, search"
-                       hx-target="#order-table-container"
-                       hx-select="#order-table-container"
-                       hx-push-url="true"
-                       hx-include="[name='search'], [name='status']">
-                <svg class="absolute left-3 top-2.5 w-5 h-5 text-brown-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                <input type="text" id="order-search" name="search" placeholder="Search orders, customers, tailor..."
+                    value="{{ search_query|default:'' }}"
+                    class="w-full pl-10 pr-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800 placeholder-brown-400"
+                    oninput="handleSearch(this)">
+                <svg class="absolute left-3 top-2.5 w-5 h-5 text-brown-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span class="htmx-indicator absolute right-3 top-2.5">
+                <span id="search-loading" class="hidden absolute right-3 top-2.5">
                     <svg class="animate-spin w-5 h-5 text-brown-400" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
                     </svg>
                 </span>
             </div>
 
             <!-- Status Filter -->
             <div class="flex items-center space-x-2">
-                <select name="status"
-                        id="status-filter"
-                        class="px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800"
-                        hx-get="{% url 'order_list' %}"
-                        hx-trigger="change"
-                        hx-target="#order-table-container"
-                        hx-select="#order-table-container"
-                        hx-push-url="true"
-                        hx-include="[name='search'], [name='status']">
+                <select name="status" id="status-filter"
+                    class="px-4 py-2 border border-brown-200 rounded-lg focus:ring-2 focus:ring-brown-400 focus:border-transparent bg-white text-brown-800">
                     <option value="">All Statuses</option>
                     <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
-                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
-                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress
+                    </option>
                     <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
                     <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Claimed</option>
                     <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
@@ -59,9 +49,9 @@
 
         <!-- Add Order Button -->
         <a href="{% url 'order_create' %}"
-           class="inline-flex items-center px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm">
+            class="inline-flex items-center px-4 py-2 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors shadow-sm">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             New Order
         </a>
@@ -77,7 +67,8 @@
                 </div>
                 <div class="p-2 bg-brown-100 rounded-full">
                     <svg class="w-5 h-5 text-brown-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                 </div>
             </div>
@@ -90,7 +81,8 @@
                 </div>
                 <div class="p-2 bg-yellow-100 rounded-full">
                     <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
@@ -103,7 +95,8 @@
                 </div>
                 <div class="p-2 bg-blue-100 rounded-full">
                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
                     </svg>
                 </div>
             </div>
@@ -116,7 +109,7 @@
                 </div>
                 <div class="p-2 bg-green-100 rounded-full">
                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
             </div>
@@ -124,12 +117,13 @@
         <div class="bg-white rounded-lg shadow-sm p-4 border border-brown-100">
             <div class="flex items-center justify-between">
                 <div>
-<p class="text-xs font-medium text-purple-600 uppercase">Claimed</p>
+                    <p class="text-xs font-medium text-purple-600 uppercase">Claimed</p>
                     <p class="text-2xl font-bold text-brown-800">{{ stats.delivered|default:"0" }}</p>
                 </div>
                 <div class="p-2 bg-purple-100 rounded-full">
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
                 </div>
             </div>
@@ -142,7 +136,8 @@
                 </div>
                 <div class="p-2 bg-red-100 rounded-full">
                     <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
@@ -158,18 +153,123 @@
 
 {% block extra_js %}
 <script>
-    // Close modal when clicking outside or pressing escape
-    document.addEventListener('keydown', function(e) {
+    let searchTimeout;
+    let abortController = null;
+
+    function handleSearch(inputElement) {
+        const searchValue = inputElement.value.trim();
+        const statusFilter = document.getElementById('status-filter').value;
+
+        // Clear any pending timeout
+        clearTimeout(searchTimeout);
+
+        // Cancel any in-flight requests
+        if (abortController) {
+            abortController.abort();
+        }
+
+        if (searchValue.length >= 2 || searchValue.length === 0) {
+            // Show loading state
+            showSearchLoading(true);
+
+            // Delay search to debounce
+            searchTimeout = setTimeout(function () {
+                performSearch(searchValue, statusFilter);
+            }, 300);
+        }
+    }
+
+    function showSearchLoading(show) {
+        const indicator = document.getElementById('search-loading');
+        if (indicator) {
+            if (show) {
+                indicator.classList.remove('hidden');
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }
+    }
+
+    function performSearch(searchValue, statusValue) {
+        const params = new URLSearchParams();
+
+        if (searchValue) {
+            params.append('search', searchValue);
+        }
+        if (statusValue) {
+            params.append('status', statusValue);
+        }
+
+        const url = '{% url "order_list" %}' + (params.toString() ? '?' + params.toString() : '');
+
+        // Create new abort controller for this request
+        abortController = new AbortController();
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'HX-Request': 'true'
+            },
+            signal: abortController.signal
+        })
+            .then(response => response.text())
+            .then(html => {
+                // The server returns the table content directly for HX-Request
+                // So we just set it as the innerHTML of the container
+                document.getElementById('order-table-container').innerHTML = html;
+
+                // Update URL without triggering page reload
+                window.history.replaceState({}, '', url);
+
+                // Hide loading state
+                showSearchLoading(false);
+                abortController = null;
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError') {
+                    console.error('Search error:', error);
+                }
+                showSearchLoading(false);
+                abortController = null;
+            });
+    }
+
+    // Handle status filter change
+    document.getElementById('status-filter').addEventListener('change', function () {
+        const searchValue = document.getElementById('order-search').value.trim();
+        const statusValue = this.value;
+
+        showSearchLoading(true);
+
+        // Clear any pending search timeout
+        clearTimeout(searchTimeout);
+
+        // Cancel any in-flight requests
+        if (abortController) {
+            abortController.abort();
+        }
+
+        performSearch(searchValue, statusValue);
+    });
+
+    // Close modal when pressing escape
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            document.getElementById('modal-container').innerHTML = '';
+            const modalContainer = document.getElementById('modal-container');
+            if (modalContainer) {
+                modalContainer.innerHTML = '';
+            }
         }
     });
 
     // Listen for successful form submissions to refresh the table
-    document.body.addEventListener('htmx:afterSwap', function(evt) {
+    document.body.addEventListener('htmx:afterSwap', function (evt) {
         if (evt.detail.target.id === 'modal-container' && evt.detail.xhr.status === 200) {
             if (evt.detail.xhr.getResponseHeader('HX-Trigger') === 'orderListChanged') {
-                htmx.trigger('#order-table-container', 'refresh');
+                // Re-apply current filters when refreshing
+                const searchValue = document.getElementById('order-search').value.trim();
+                const statusValue = document.getElementById('status-filter').value;
+                performSearch(searchValue, statusValue);
             }
         }
     });

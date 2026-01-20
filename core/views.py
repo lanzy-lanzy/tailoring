@@ -999,7 +999,7 @@ def garment_type_delete(request, pk):
 def order_list(request):
     """List all orders"""
     status_filter = request.GET.get("status", "")
-    search = request.GET.get("search", "")
+    search_query = request.GET.get("search", "").strip()
 
     all_orders = Order.objects.all()
     
@@ -1024,31 +1024,34 @@ def order_list(request):
     if status_filter:
         orders = orders.filter(status=status_filter)
 
-    if search:
+    if search_query:
         orders = orders.filter(
-            Q(order_number__icontains=search) | Q(customer__name__icontains=search)
-        )
+            Q(order_number__icontains=search_query) | 
+            Q(customer__name__icontains=search_query) |
+            Q(customer__contact_number__icontains=search_query) |
+            Q(tailoring_task__tailor__first_name__icontains=search_query) |
+            Q(tailoring_task__tailor__last_name__icontains=search_query)
+        ).distinct()
 
     orders = orders.order_by("-created_at")
 
     paginator = Paginator(orders, 20)
     page = request.GET.get("page", 1)
-    orders = paginator.get_page(page)
+    page_obj = paginator.get_page(page)
+
+    context = {
+        "orders": page_obj,  # Preserve 'orders' for partials/loop
+        "page_obj": page_obj,
+        "status_filter": status_filter,
+        "search_query": search_query,
+        "status_choices": Order.STATUS_CHOICES,
+        "stats": stats,
+    }
 
     if request.headers.get("HX-Request"):
-        return render(request, "orders/partials/order_table.html", {"orders": orders})
+        return render(request, "orders/partials/order_table.html", context)
 
-    return render(
-        request,
-        "orders/list.html",
-        {
-            "orders": orders,
-            "status_filter": status_filter,
-            "search": search,
-            "status_choices": Order.STATUS_CHOICES,
-            "stats": stats,
-        },
-    )
+    return render(request, "orders/list.html", context)
 
 
 @login_required
