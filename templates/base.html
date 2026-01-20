@@ -91,6 +91,24 @@
             }
         }
 
+        /* Custom Scrollbar for Sidebar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
         .print-only {
             display: none;
         }
@@ -109,180 +127,245 @@
 
         <!-- Sidebar -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-900 border-r border-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto no-print">
+            class="fixed inset-y-0 left-0 z-30 w-72 bg-slate-950 border-r border-slate-800/50 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto no-print shadow-2xl overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
 
-            <!-- Logo -->
-            <div class="flex items-center justify-center h-16 bg-slate-950 border-b border-slate-800">
-                <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
-                </svg>
-                <span class="ml-2 text-xl font-bold text-cream-100">El Senior Original Tailoring</span>
+            <!-- Logo Section with Glassmorphism -->
+            <div class="sticky top-0 z-20 flex flex-col items-center justify-center py-8 px-6 bg-slate-950/80 backdrop-blur-md border-b border-white/5">
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-teal-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center border border-white/10 shadow-xl overflow-hidden transform group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-10 h-10 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                        </svg>
+                        <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-emerald-500/10 to-transparent"></div>
+                    </div>
+                </div>
+                <h2 class="mt-4 text-center">
+                    <span class="block text-xs uppercase tracking-[0.2em] text-emerald-500 font-bold mb-1 opacity-80">El Senior Original</span>
+                    <span class="block text-xl font-black text-white tracking-tight">Tailoring System</span>
+                </h2>
             </div>
 
             <!-- Navigation -->
-            <nav class="mt-6 px-3">
-                <div class="space-y-1">
-                    <!-- Dashboard -->
-                    <a href="{% url 'dashboard' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if request.path == '/dashboard/' %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if request.path == '/dashboard/' %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        Dashboard
-                    </a>
+            <nav class="mt-4 px-4 pb-8 space-y-6">
+                <!-- Core Group -->
+                <div>
+                    <h3 class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-2 px-4">Core Center</h3>
+                    <div class="space-y-1">
+                        <!-- Dashboard -->
+                        <a href="{% url 'dashboard' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if request.path == '/dashboard/' %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if request.path == '/dashboard/' %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
 
-                    {% if user.profile.is_admin %}
-                    <!-- Customers -->
-                    <a href="{% url 'customer_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'customers' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'customers' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Customers
-                    </a>
+                        {% if user.profile.is_admin %}
+                        <!-- Customers -->
+                        <a href="{% url 'customer_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'customers' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'customers' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Customers</span>
+                        </a>
 
-                    <!-- Orders -->
-                    <a href="{% url 'order_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'orders' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'orders' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                        Orders
-                    </a>
+                        <!-- Orders -->
+                        <a href="{% url 'order_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'orders' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'orders' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Orders</span>
+                        </a>
 
-                    <!-- Inventory -->
-                    <a href="{% url 'inventory_dashboard' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'inventory' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'inventory' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                        Inventory
-                    </a>
-
-                    <!-- Garments -->
-                    <a href="{% url 'garment_type_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'garments' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'garments' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
-                        Garment Types
-                    </a>
-
-                    <!-- Payments -->
-                    <a href="{% url 'payment_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'payments' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'payments' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Payments
-                    </a>
-
-                    <!-- Unclaimed Order-->
-                    <a href="{% url 'claims_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'claims' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'claims' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                        </svg>
-                        Unclaimed Order
-                    </a>
-
-                    <!-- Reworks -->
-                    <a href="{% url 'rework_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'reworks' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'reworks' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 15m-15.356-2A8.001 8.001 0 0014.001 6.998V6a2 2 0 00-2-2H5a2 2 0 00-2 2v4h1a1 1 0 011 1h6l-3.5 3.5a1 1 0 011.414-.586l3.5-3.5A1 1 0 0112 12v9h-4a1 1 0 01-1-1V6a1 1 0 011-1H6l-3.5-3.5A1 1 0 011.414-.586L.5 7.5A1 1 0 010 6.5V3a1 1 0 011-1H2a1 1 0 01-1 1V6a2 2 0 012 2h15a2 2 0 012-2V6a2 2 0 00-2-2H6z" />
-                        </svg>
-                        Reworks
-                    </a>
-
-                    <!-- Users -->
-                    <a href="{% url 'user_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'users' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'users' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        Users
-                    </a>
-
-                    <!-- Reports -->
-                    <a href="{% url 'reports_dashboard' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'reports' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'reports' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        Reports
-                    </a>
-
-                    <!-- Commission Reports (Admin) -->
-                    <a href="{% url 'admin_commission_report' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'commissions/admin' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'commissions/admin' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Commissions
-                    </a>
-                    {% endif %}
-
-                    <!-- Tasks (visible to all) -->
-                    <a href="{% url 'task_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'tasks' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'tasks' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                        </svg>
-                        Tasks
-                    </a>
-
-                    <!-- My Commissions (for tailors) -->
-                    {% if user.profile.is_tailor %}
-                    <a href="{% url 'commission_dashboard' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'commissions' in request.path and 'admin' not in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'commissions' in request.path and 'admin' not in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        My Commissions
-                    </a>
-                    {% endif %}
-
-                    <!-- Notifications -->
-                    <a href="{% url 'notification_list' %}"
-                        class="flex items-center px-4 py-3 text-slate-300 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group {% if 'notifications' in request.path %}bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 rounded-l-none{% endif %}">
-                        <svg class="w-5 h-5 mr-3 {% if 'notifications' in request.path %}text-emerald-500{% else %}group-hover:text-emerald-400{% endif %}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        Notifications
-                        {% if unread_notification_count > 0 %}
-                        <span class="ml-auto bg-emerald-500 text-white text-xs rounded-full px-2 py-0.5">{{ unread_notification_count }}</span>
+                        <!-- Tasks -->
+                        <a href="{% url 'task_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'tasks' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'tasks' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Tasks</span>
+                        </a>
                         {% endif %}
-                    </a>
+                    </div>
+                </div>
+
+                <!-- Logistics & Operations -->
+                <div>
+                    <h3 class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-2 px-4">Logistics</h3>
+                    <div class="space-y-1">
+                        {% if user.profile.is_admin %}
+                        <!-- Inventory -->
+                        <a href="{% url 'inventory_dashboard' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'inventory' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'inventory' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Inventory</span>
+                        </a>
+
+                        <!-- Garments -->
+                        <a href="{% url 'garment_type_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'garments' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'garments' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Garment Types</span>
+                        </a>
+
+                        <!-- Unclaimed Order-->
+                        <a href="{% url 'claims_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'claims' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'claims' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Unclaimed Order</span>
+                        </a>
+
+                        <!-- Reworks -->
+                        <a href="{% url 'rework_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'reworks' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'reworks' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 15m-15.356-2A8.001 8.001 0 0014.001 6.998V6a2 2 0 00-2-2H5a2 2 0 00-2 2v4h1a1 1 0 011 1h6l-3.5 3.5a1 1 0 011.414-.586l3.5-3.5A1 1 0 0112 12v9h-4a1 1 0 01-1-1V6a1 1 0 011-1H6l-3.5-3.5A1 1 0 011.414-.586L.5 7.5A1 1 0 010 6.5V3a1 1 0 011-1H2a1 1 0 01-1 1V6a2 2 0 012 2h15a2 2 0 012-2V6a2 2 0 00-2-2H6z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Reworks</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Financial & Admin -->
+                <div>
+                    <h3 class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-2 px-4">Financials</h3>
+                    <div class="space-y-1">
+                        {% if user.profile.is_admin %}
+                        <!-- Payments -->
+                        <a href="{% url 'payment_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'payments' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'payments' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Payments</span>
+                        </a>
+
+                        <!-- Commission Reports (Admin) -->
+                        <a href="{% url 'admin_commission_report' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'commissions/admin' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'commissions/admin' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Commissions</span>
+                        </a>
+                        {% endif %}
+
+                        <!-- My Commissions (for tailors) -->
+                        {% if user.profile.is_tailor %}
+                        <a href="{% url 'commission_dashboard' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'commissions' in request.path and 'admin' not in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'commissions' in request.path and 'admin' not in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">My Commissions</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Admin & Systems -->
+                <div>
+                    <h3 class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-2 px-4">Insights & System</h3>
+                    <div class="space-y-1">
+                        {% if user.profile.is_admin %}
+                        <!-- Reports -->
+                        <a href="{% url 'reports_dashboard' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'reports' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'reports' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Reports</span>
+                        </a>
+
+                        <!-- Users -->
+                        <a href="{% url 'user_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'users' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'users' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Users</span>
+                        </a>
+                        {% endif %}
+
+                        <!-- Notifications -->
+                        <a href="{% url 'notification_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'notifications' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'notifications' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Notifications</span>
+                            {% if unread_notification_count > 0 %}
+                            <span class="ml-auto bg-emerald-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[1.5rem] text-center shadow-[0_0_10px_rgba(16,185,129,0.5)]">{{ unread_notification_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
                 </div>
             </nav>
         </aside>
