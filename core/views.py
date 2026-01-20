@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
-from django.db import transaction
-from django.db.models import Sum, Count, Q
+from django.db import transaction, IntegrityError
+from django.db.models import Sum, Count, Q, ProtectedError
 from django.utils import timezone
 from django.core.paginator import Paginator
 from decimal import Decimal
@@ -637,12 +637,24 @@ def fabric_delete(request, pk):
     fabric = get_object_or_404(Fabric, pk=pk)
 
     if request.method == "POST":
-        fabric.delete()
-        messages.success(request, "Fabric deleted successfully.")
-
-        if request.headers.get("HX-Request"):
-            return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
-        return redirect("inventory_dashboard")
+        try:
+            fabric.delete()
+            messages.success(request, "Fabric deleted successfully.")
+            if request.headers.get("HX-Request"):
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+            return redirect("inventory_dashboard")
+        except ProtectedError:
+            messages.error(request, f"Cannot delete '{fabric.name}' because it is referenced by existing orders.")
+            if request.headers.get("HX-Request"):
+                # We return a message OOB but what about the modal? 
+                # The user likely has a delete confirmation modal open.
+                # If we return only messages_oob, the modal stays open?
+                # Actually, usually delete is a full page or a modal that expects a reload/redirect.
+                # In accessory_list.html:
+                # <a href="{% url 'accessory_delete' accessory.pk %}" ...
+                # It's an <a> link, not HTMX. Oh wait, let's check accessory_delete.
+                return render(request, "partials/messages_oob.html")
+            return redirect("inventory_dashboard")
 
     return render(
         request,
@@ -827,12 +839,17 @@ def accessory_delete(request, pk):
     accessory = get_object_or_404(Accessory, pk=pk)
 
     if request.method == "POST":
-        accessory.delete()
-        messages.success(request, "Accessory deleted successfully.")
-
-        if request.headers.get("HX-Request"):
-            return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
-        return redirect("inventory_dashboard")
+        try:
+            accessory.delete()
+            messages.success(request, "Accessory deleted successfully.")
+            if request.headers.get("HX-Request"):
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+            return redirect("inventory_dashboard")
+        except ProtectedError:
+            messages.error(request, f"Cannot delete '{accessory.name}' because it is referenced by existing orders.")
+            if request.headers.get("HX-Request"):
+                return render(request, "partials/messages_oob.html")
+            return redirect("inventory_dashboard")
 
     return render(
         request,
@@ -987,21 +1004,30 @@ def garment_type_add_accessory(request, pk):
     if request.method == "POST":
         form = GarmentTypeAccessoryForm(request.POST)
         if form.is_valid():
-            gta = form.save(commit=False)
-            gta.garment_type = garment_type
-            gta.save()
-            messages.success(request, "Accessory requirement added.")
+            try:
+                gta = form.save(commit=False)
+                gta.garment_type = garment_type
+                gta.save()
+                messages.success(request, "Accessory requirement added.")
 
-            if request.headers.get("HX-Request"):
-                return render(
-                    request,
-                    "garments/partials/accessories_list_partial.html",
-                    {"garment_type": garment_type},
-                )
-            return redirect("garment_type_detail", pk=pk)
+                if request.headers.get("HX-Request"):
+                    return render(
+                        request,
+                        "garments/partials/accessories_list_partial.html",
+                        {"garment_type": garment_type},
+                    )
+                return redirect("garment_type_detail", pk=pk)
+            except IntegrityError:
+                messages.error(request, "This accessory is already added to the garment type.")
     else:
         form = GarmentTypeAccessoryForm()
 
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "garments/partials/add_accessory_form.html",
+            {"form": form, "garment_type": garment_type},
+        )
     return render(
         request,
         "garments/partials/add_accessory_form.html",
@@ -1035,16 +1061,23 @@ def garment_type_delete(request, pk):
     """Delete garment type"""
     garment_type = get_object_or_404(GarmentType, pk=pk)
 
-    if request.method == "POST":
-        garment_type.delete()
-        messages.success(request, "Garment type deleted successfully.")
+    order_count = Order.objects.filter(garment_type=garment_type).count()
 
-        if request.headers.get("HX-Request"):
-            return HttpResponse(status=204, headers={"HX-Redirect": "/garments/"})
-        return redirect("garment_type_list")
+    if request.method == "POST":
+        try:
+            garment_type.delete()
+            messages.success(request, "Garment type deleted successfully.")
+            if request.headers.get("HX-Request"):
+                return HttpResponse(status=204, headers={"HX-Redirect": "/garments/"})
+            return redirect("garment_type_list")
+        except ProtectedError:
+            messages.error(request, f"Cannot delete '{garment_type.name}' because it is referenced by existing orders.")
+            if request.headers.get("HX-Request"):
+                return render(request, "partials/messages_oob.html")
+            return redirect("garment_type_list")
 
     return render(
-        request, "garments/delete_confirm.html", {"garment_type": garment_type}
+        request, "garments/delete_confirm.html", {"garment_type": garment_type, "order_count": order_count}
     )
 
 
