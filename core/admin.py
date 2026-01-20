@@ -5,7 +5,7 @@ from .models import (
     UserProfile, Customer, Fabric, Accessory, 
     GarmentType, GarmentTypeAccessory, Order, 
     OrderAccessory, TailoringTask, Payment, 
-    InventoryLog, SMSLog
+    InventoryLog, SMSLog, Rework, ReworkMaterial
 )
 
 
@@ -169,6 +169,48 @@ class SMSLogAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     search_fields = ('customer__name', 'phone_number', 'order__order_number')
     readonly_fields = ('created_at', 'sent_at')
+
+
+class ReworkMaterialInline(admin.TabularInline):
+    model = ReworkMaterial
+    extra = 0
+    readonly_fields = ('accessory', 'quantity_used')
+
+
+@admin.register(Rework)
+class ReworkAdmin(admin.ModelAdmin):
+    list_display = ('rework_number', 'order', 'original_customer_name', 'reason', 'charge_type', 'status', 'assigned_to', 'created_date')
+    list_filter = ('status', 'charge_type', 'reason', 'created_date')
+    search_fields = ('rework_number', 'order__order_number', 'original_customer_name')
+    readonly_fields = ('rework_number', 'created_date', 'started_date', 'completed_date')
+    inlines = [ReworkMaterialInline]
+    
+    fieldsets = (
+        ('Rework Information', {
+            'fields': ('rework_number', 'order', 'original_garment_type', 'original_customer_name')
+        }),
+        ('Reason & Charges', {
+            'fields': ('reason', 'reason_description', 'charge_type', 'additional_cost')
+        }),
+        ('Materials', {
+            'fields': ('fabric_used', 'fabric_meters_used'),
+            'classes': ('collapse',)
+        }),
+        ('Assignment & Status', {
+            'fields': ('status', 'assigned_to', 'notes')
+        }),
+        ('Dates', {
+            'fields': ('created_date', 'started_date', 'completed_date', 'created_by'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(ReworkMaterial)
+class ReworkMaterialAdmin(admin.ModelAdmin):
+    list_display = ('rework', 'accessory', 'quantity_used')
+    list_filter = ('accessory',)
+    search_fields = ('rework__rework_number', 'accessory__name')
 
 
 # Customize admin site header
