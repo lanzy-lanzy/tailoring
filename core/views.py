@@ -1934,6 +1934,73 @@ def send_order_ready_sms(order):
         return False
 
 
+def send_rework_ready_sms(rework):
+    """Send SMS notification when rework is completed and ready for re-claim"""
+    api_key = getattr(settings, "SEMAPHORE_API_KEY", None)
+    sender_name = getattr(settings, "SEMAPHORE_SENDER_NAME", None)
+    order = rework.order
+
+    if not api_key:
+        SMSLog.objects.create(
+            customer=order.customer,
+            order=order,
+            phone_number=order.customer.contact_number,
+            message="API key not configured",
+            status="failed",
+            response="SEMAPHORE_API_KEY not set in settings",
+        )
+        return False
+
+    message = (
+        f"Good day, {order.customer.name}! "
+        f"Great news from El Senior Original Tailoring - the adjustments on your {order.garment_type.name} "
+        f"(Order #{order.order_number}, Rework #{rework.rework_number}) have been completed. "
+        f"Your order is now ready for re-claim. "
+        f"Thank you for your patience! - El Senior Team"
+    )
+
+    phone = order.customer.contact_number
+    phone = phone.replace(" ", "").replace("-", "")
+    if not phone.startswith("+63") and not phone.startswith("63"):
+        if phone.startswith("0"):
+            phone = "63" + phone[1:]
+
+    sms_log = SMSLog.objects.create(
+        customer=order.customer,
+        order=order,
+        phone_number=phone,
+        message=message,
+        status="pending",
+    )
+
+    try:
+        data = {"apikey": api_key, "number": phone, "message": message}
+
+        if sender_name:
+            data["sendername"] = sender_name
+
+        response = requests.post(
+            "https://api.semaphore.co/api/v4/messages", data=data, timeout=30
+        )
+
+        if response.status_code == 200:
+            sms_log.status = "sent"
+            sms_log.sent_at = timezone.now()
+        else:
+            sms_log.status = "failed"
+
+        sms_log.response = response.text
+        sms_log.save()
+
+        return response.status_code == 200
+
+    except Exception as e:
+        sms_log.status = "failed"
+        sms_log.response = str(e)
+        sms_log.save()
+        return False
+
+
 # ============== User Management ==============
 
 
@@ -2759,6 +2826,9 @@ def rework_update_status(request, pk):
                 order = rework.order
                 order.status = "ready_for_reclaim"
                 order.save()
+
+                # Send SMS to customer
+                send_rework_ready_sms(rework)
 
                 # Notify assigned tailor
                 if rework.assigned_to:

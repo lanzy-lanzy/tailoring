@@ -170,14 +170,14 @@
                         Payments
                     </a>
 
-                    <!-- Unclaim Order-->
+                    <!-- Unclaimed Order-->
                     <a href="{% url 'claims_list' %}"
                         class="flex items-center px-4 py-3 text-cream-100 rounded-lg hover:bg-brown-600 transition-colors {% if 'claims' in request.path %}bg-brown-600{% endif %}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                         </svg>
-                        Unclaim Order
+                        Unclaimed Order
                     </a>
 
                     <!-- Reworks -->
@@ -252,8 +252,7 @@
                         </svg>
                         Notifications
                         {% if unread_notification_count > 0 %}
-                        <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{
-                            unread_notification_count }}</span>
+                        <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ unread_notification_count }}</span>
                         {% endif %}
                     </a>
                 </div>
@@ -331,8 +330,7 @@
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open"
                                 class="flex items-center space-x-3 text-brown-600 hover:text-brown-800 focus:outline-none">
-                                <span class="hidden md:block font-medium">{{ user.get_full_name|default:user.username
-                                    }}</span>
+                                <span class="hidden md:block font-medium">{{ user.get_full_name|default:user.username }}</span>
                                 <div
                                     class="w-10 h-10 bg-brown-500 rounded-full flex items-center justify-center text-white font-semibold">
                                     {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
