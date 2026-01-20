@@ -192,10 +192,6 @@ class GarmentTypeForm(forms.ModelForm):
             }),
             'description': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
-                'placeholder': 'Garment Type Name'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
                 'placeholder': 'Description',
                 'rows': 3
             }),
@@ -479,13 +475,22 @@ class PaymentForm(forms.ModelForm):
 
 
 class StockAddForm(forms.Form):
-    """Form for adding stock to inventory"""
+    """Form for adjustment of stock in inventory"""
+    ACTION_CHOICES = [
+        ('add', 'Add Stock'),
+        ('remove', 'Remove Stock'),
+    ]
+    action = forms.ChoiceField(
+        choices=ACTION_CHOICES,
+        initial='add',
+        widget=forms.RadioSelect(attrs={'class': 'sr-only'})
+    )
     quantity = forms.DecimalField(
         min_value=0,
         widget=forms.NumberInput(attrs={
-            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
-            'placeholder': 'Quantity to add',
-            'step': '0.01',
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 font-bold text-center',
+            'placeholder': 'Quantity',
+            'step': 'any',
             'min': '0'
         })
     )
@@ -578,4 +583,3 @@ class ReworkUpdateForm(forms.ModelForm):
                 'rows': 3
             }),
         }
-

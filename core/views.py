@@ -566,7 +566,7 @@ def fabric_edit(request, pk):
 @login_required
 @admin_required
 def fabric_add_stock(request, pk):
-    """Add stock to fabric"""
+    """Add or remove stock from fabric"""
     fabric = get_object_or_404(Fabric, pk=pk)
 
     if request.method == "POST":
@@ -574,26 +574,51 @@ def fabric_add_stock(request, pk):
         if form.is_valid():
             quantity = form.cleaned_data["quantity"]
             notes = form.cleaned_data["notes"]
+            action = form.cleaned_data.get("action", "add")
 
             old_stock = fabric.stock_meters
-            fabric.stock_meters += quantity
-            fabric.save()
-
-            InventoryLog.objects.create(
-                item_type="fabric",
-                fabric=fabric,
-                action="add",
-                quantity=quantity,
-                previous_stock=old_stock,
-                new_stock=fabric.stock_meters,
-                notes=notes,
-                created_by=request.user,
-            )
-
-            messages.success(request, f"Added {quantity}m to {fabric.name}.")
+            
+            if action == 'remove':
+                if quantity > fabric.stock_meters:
+                    messages.error(request, f"Cannot remove {quantity}m. Only {fabric.stock_meters}m in stock.")
+                    return render(
+                        request,
+                        "inventory/partials/add_stock_form.html",
+                        {"form": form, "item": fabric, "item_type": "fabric"},
+                    )
+                else:
+                    fabric.stock_meters -= quantity
+                    fabric.save()
+                    InventoryLog.objects.create(
+                        item_type="fabric",
+                        fabric=fabric,
+                        action="remove", 
+                        quantity=quantity,
+                        previous_stock=old_stock,
+                        new_stock=fabric.stock_meters,
+                        notes=notes,
+                        created_by=request.user,
+                    )
+                    messages.success(request, f"Removed {quantity}m from {fabric.name}.")
+            else:
+                fabric.stock_meters += quantity
+                fabric.save()
+                InventoryLog.objects.create(
+                    item_type="fabric",
+                    fabric=fabric,
+                    action="add",
+                    quantity=quantity,
+                    previous_stock=old_stock,
+                    new_stock=fabric.stock_meters,
+                    notes=notes,
+                    created_by=request.user,
+                )
+                messages.success(request, f"Added {quantity}m to {fabric.name}.")
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Trigger": "stockUpdated"})
+                response = render(request, "partials/messages_oob.html")
+                response["HX-Trigger"] = "inventoryUpdated"
+                return response
             return redirect("inventory_dashboard")
     else:
         form = StockAddForm()
@@ -731,7 +756,7 @@ def accessory_edit(request, pk):
 @login_required
 @admin_required
 def accessory_add_stock(request, pk):
-    """Add stock to accessory"""
+    """Add or remove stock from accessory"""
     accessory = get_object_or_404(Accessory, pk=pk)
 
     if request.method == "POST":
@@ -739,26 +764,51 @@ def accessory_add_stock(request, pk):
         if form.is_valid():
             quantity = form.cleaned_data["quantity"]
             notes = form.cleaned_data["notes"]
+            action = form.cleaned_data.get("action", "add")
 
             old_stock = accessory.stock_quantity
-            accessory.stock_quantity += quantity
-            accessory.save()
-
-            InventoryLog.objects.create(
-                item_type="accessory",
-                accessory=accessory,
-                action="add",
-                quantity=quantity,
-                previous_stock=old_stock,
-                new_stock=accessory.stock_quantity,
-                notes=notes,
-                created_by=request.user,
-            )
-
-            messages.success(request, f"Added {quantity} to {accessory.name}.")
+            
+            if action == 'remove':
+                if quantity > accessory.stock_quantity:
+                    messages.error(request, f"Cannot remove {quantity}. Only {accessory.stock_quantity} in stock.")
+                    return render(
+                        request,
+                        "inventory/partials/add_stock_form.html",
+                        {"form": form, "item": accessory, "item_type": "accessory"},
+                    )
+                else:
+                    accessory.stock_quantity -= quantity
+                    accessory.save()
+                    InventoryLog.objects.create(
+                        item_type="accessory",
+                        accessory=accessory,
+                        action="remove",
+                        quantity=quantity,
+                        previous_stock=old_stock,
+                        new_stock=accessory.stock_quantity,
+                        notes=notes,
+                        created_by=request.user,
+                    )
+                    messages.success(request, f"Removed {quantity} from {accessory.name}.")
+            else:
+                accessory.stock_quantity += quantity
+                accessory.save()
+                InventoryLog.objects.create(
+                    item_type="accessory",
+                    accessory=accessory,
+                    action="add",
+                    quantity=quantity,
+                    previous_stock=old_stock,
+                    new_stock=accessory.stock_quantity,
+                    notes=notes,
+                    created_by=request.user,
+                )
+                messages.success(request, f"Added {quantity} to {accessory.name}.")
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Trigger": "stockUpdated"})
+                response = render(request, "partials/messages_oob.html")
+                response["HX-Trigger"] = "inventoryUpdated"
+                return response
             return redirect("inventory_dashboard")
     else:
         form = StockAddForm()
@@ -943,8 +993,10 @@ def garment_type_add_accessory(request, pk):
             messages.success(request, "Accessory requirement added.")
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(
-                    status=204, headers={"HX-Trigger": "accessoryAdded"}
+                return render(
+                    request,
+                    "garments/partials/accessories_list_partial.html",
+                    {"garment_type": garment_type},
                 )
             return redirect("garment_type_detail", pk=pk)
     else:
@@ -968,7 +1020,12 @@ def garment_type_remove_accessory(request, pk, accessory_pk):
     messages.success(request, "Accessory requirement removed.")
 
     if request.headers.get("HX-Request"):
-        return HttpResponse(status=204, headers={"HX-Trigger": "accessoryRemoved"})
+        garment_type = GarmentType.objects.get(pk=pk)
+        return render(
+            request,
+            "garments/partials/accessories_list_partial.html",
+            {"garment_type": garment_type},
+        )
     return redirect("garment_type_detail", pk=pk)
 
 

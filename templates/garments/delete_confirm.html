@@ -67,16 +67,17 @@
             </div>
 
             <!-- Actions -->
-            <form method="post" action="{% url 'garment_type_delete' garment_type.pk %}">
+            <form method="post" action="{% url 'garment_type_delete' garment_type.pk %}" up-submit up-target="#main-content" up-layer="parent">
                 {% csrf_token %}
                 <div class="flex items-center justify-end space-x-4">
-                    <a href="{% url 'garment_type_detail' garment_type.pk %}"
-                       class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
+                    <button type="button" 
+                            up-dismiss
+                            class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
                         Cancel
-                    </a>
+                    </button>
                     <button type="submit"
                             {% if order_count > 0 %}disabled{% endif %}
-                            class="px-6 py-2 bg-salmon-500 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>

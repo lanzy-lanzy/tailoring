@@ -1,0 +1,66 @@
+{% if garment_type.required_accessories.all %}
+<div class="overflow-x-auto">
+    <table class="w-full">
+        <thead class="bg-cream-500">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Accessory</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Unit</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Quantity Required</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Current Stock</th>
+                <th class="px-6 py-3 text-right text-xs font-semibold text-green-600 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-brown-100">
+            {% for req in garment_type.required_accessories.all %}
+            <tr class="hover:bg-pink-5000 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-green-800 font-medium">{{ req.accessory.name }}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-green-600">
+                    {{ req.accessory.get_unit_display }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-green-800 font-medium">
+                    {{ req.quantity_required }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if req.accessory.stock_quantity >= req.quantity_required %}
+                            bg-green-100 text-green-800
+                        {% else %}
+                            bg-salmon-100 text-salmon-500
+                        {% endif %}">
+                        {{ req.accessory.stock_quantity }} {{ req.accessory.unit }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                    <form method="post" 
+                          action="{% url 'garment_type_remove_accessory' garment_type.pk req.pk %}"
+                          class="inline"
+                          hx-post="{% url 'garment_type_remove_accessory' garment_type.pk req.pk %}"
+                          hx-target="#accessories-list"
+                          hx-swap="innerHTML"
+                          hx-confirm="Remove this accessory requirement?">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="p-2 text-salmon-500 hover:text-salmon-500 hover:bg-salmon-100 rounded-lg transition-colors"
+                                title="Remove">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="px-6 py-12 text-center">
+    <svg class="w-12 h-12 mx-auto text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+    </svg>
+    <h3 class="mt-4 text-lg font-medium text-green-800">No accessories required</h3>
+    <p class="mt-1 text-sm text-green-600">Add accessories needed to make this garment type.</p>
+</div>
+{% endif %}

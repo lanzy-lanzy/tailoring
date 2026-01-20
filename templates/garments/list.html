@@ -35,6 +35,8 @@
 
         <!-- Add Garment Type Button -->
         <a href="{% url 'garment_type_create' %}"
+           up-layer="new modal"
+           up-target="#main-content"
            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -106,7 +108,10 @@
                      {% for garment in garment_types %}
                      <tr class="hover:bg-pink-5000 transition-colors">
                          <td class="px-6 py-4 whitespace-nowrap">
-                             <a href="{% url 'garment_type_detail' garment.pk %}" class="text-green-800 font-medium hover:text-green-600 transition-colors">
+                             <a href="{% url 'garment_type_detail' garment.pk %}" 
+                                up-layer="new modal"
+                                up-target="#main-content"
+                                class="text-green-800 font-medium hover:text-green-600 transition-colors">
                                  {{ garment.name }}
                              </a>
                              {% if garment.description %}
@@ -150,6 +155,8 @@
                          <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end space-x-2">
                                 <a href="{% url 'garment_type_detail' garment.pk %}" 
+                                   up-layer="new modal"
+                                   up-target="#main-content"
                                    class="p-2 text-green-600 hover:text-green-700 hover:bg-green-500 rounded-lg transition-colors"
                                    title="View Details">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,6 +165,8 @@
                                     </svg>
                                 </a>
                                 <a href="{% url 'garment_type_edit' garment.pk %}" 
+                                   up-layer="new modal"
+                                   up-target="#main-content"
                                    class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
                                    title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,6 +174,8 @@
                                     </svg>
                                 </a>
                                 <a href="{% url 'garment_type_delete' garment.pk %}" 
+                                   up-layer="new modal"
+                                   up-target="#main-content"
                                    class="p-2 text-salmon-500 hover:text-salmon-500 hover:bg-salmon-100 rounded-lg transition-colors"
                                    title="Delete">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,9 +184,9 @@
                                 </a>
                             </div>
                         </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                     </tr>
+                     {% endfor %}
+                 </tbody>
             </table>
         </div>
 
@@ -211,6 +222,8 @@
             <p class="mt-1 text-sm text-green-600">Get started by creating your first garment type.</p>
             <div class="mt-6">
                 <a href="{% url 'garment_type_create' %}"
+                   up-layer="new modal"
+                   up-target="#main-content"
                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

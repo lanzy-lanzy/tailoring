@@ -28,7 +28,7 @@
             <p class="text-sm text-green-600 mt-1">Define a new garment type with its pricing and requirements</p>
         </div>
 
-        <form method="post" action="{% url 'garment_type_create' %}" class="p-6 space-y-6">
+        <form method="post" action="{% url 'garment_type_create' %}" up-submit up-target="#main-content" up-layer="parent" class="p-6 space-y-6">
             {% csrf_token %}
 
             <!-- Name -->
@@ -170,10 +170,11 @@
 
             <!-- Form Actions -->
             <div class="flex items-center justify-end space-x-4 pt-4 border-t border-green-100">
-                <a href="{% url 'garment_type_list' %}"
-                   class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
+                <button type="button" 
+                        up-dismiss
+                        class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors">
                     Cancel
-                </a>
+                </button>
                 <button type="submit"
                         class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium">
                     <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
