@@ -2312,6 +2312,8 @@ def reports_dashboard(request):
         ).count(),
         "pending_orders": orders_in_range.filter(status="pending").count(),
         "in_progress_orders": orders_in_range.filter(status="in_progress").count(),
+        "unclaimed_orders": orders_in_range.filter(status="completed").count(),
+        "claimed_orders": orders_in_range.filter(status="delivered").count(),
     }
 
     context = {
@@ -3378,7 +3380,143 @@ def tailor_commission_report(request):
 
     # Create response
     response = HttpResponse(pdf, content_type="application/pdf")
-    filename = f"commission_report_{tailor.username}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    filename = f"tailor_performance_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    return response
+
+
+@login_required
+@admin_required
+def export_unclaimed_orders_pdf(request):
+    """Export unclaimed orders report as PDF (completed but not delivered)"""
+    from datetime import timedelta, datetime
+    from django.db.models import Sum, Count
+    from .reports import generate_unclaimed_orders_report
+
+    today = timezone.now().date()
+
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+
+    if start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            start_date = today - timedelta(days=30)
+            end_date = today
+    else:
+        start_date = today - timedelta(days=30)
+        end_date = today
+
+    orders = (
+        Order.objects.filter(
+            status="completed",
+            completed_date__date__gte=start_date,
+            completed_date__date__lte=end_date,
+        )
+        .select_related("customer", "garment_type")
+        .prefetch_related("payments")
+        .order_by("-completed_date")
+    )
+
+    total_value = float(orders.aggregate(total=Sum("total_price"))["total"] or 0)
+    total_collected = sum(order.total_paid for order in orders)
+    outstanding_balance = sum(order.remaining_balance for order in orders)
+
+    fully_paid = sum(1 for order in orders if order.total_paid >= order.total_price)
+    partially_paid = sum(1 for order in orders if 0 < order.total_paid < order.total_price)
+    unpaid = sum(1 for order in orders if order.total_paid == 0)
+
+    stats = {
+        "total_unclaimed": orders.count(),
+        "total_value": total_value,
+        "total_collected": total_collected,
+        "outstanding_balance": outstanding_balance,
+        "fully_paid": fully_paid,
+        "partially_paid": partially_paid,
+        "unpaid": unpaid,
+    }
+
+    pdf = generate_unclaimed_orders_report(
+        orders=list(orders),
+        stats=stats,
+        start_date=start_date,
+        end_date=end_date,
+        generated_by=request.user.get_full_name() or request.user.username,
+    )
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    filename = f"unclaimed_orders_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    return response
+
+
+@login_required
+@admin_required
+def export_claimed_orders_pdf(request):
+    """Export claimed/delivered orders report as PDF"""
+    from datetime import timedelta, datetime
+    from django.db.models import Sum, Count
+    from .reports import generate_claimed_orders_report
+
+    today = timezone.now().date()
+
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+
+    if start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            start_date = today - timedelta(days=30)
+            end_date = today
+    else:
+        start_date = today - timedelta(days=30)
+        end_date = today
+
+    orders = (
+        Order.objects.filter(
+            status="delivered",
+            order_date__date__gte=start_date,
+            order_date__date__lte=end_date,
+        )
+        .select_related("customer", "garment_type")
+        .prefetch_related("payments")
+        .order_by("-updated_at")
+    )
+
+    total_value = float(orders.aggregate(total=Sum("total_price"))["total"] or 0)
+    total_collected = sum(order.total_paid for order in orders)
+    outstanding_balance = sum(order.remaining_balance for order in orders)
+
+    fully_paid = sum(1 for order in orders if order.total_paid >= order.total_price)
+    partially_paid = sum(1 for order in orders if 0 < order.total_paid < order.total_price)
+    unpaid = sum(1 for order in orders if order.total_paid == 0)
+
+    stats = {
+        "total_claimed": orders.count(),
+        "total_value": total_value,
+        "total_collected": total_collected,
+        "outstanding_balance": outstanding_balance,
+        "fully_paid": fully_paid,
+        "partially_paid": partially_paid,
+        "unpaid": unpaid,
+    }
+
+    pdf = generate_claimed_orders_report(
+        orders=list(orders),
+        stats=stats,
+        start_date=start_date,
+        end_date=end_date,
+        generated_by=request.user.get_full_name() or request.user.username,
+    )
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    filename = f"claimed_orders_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
     return response

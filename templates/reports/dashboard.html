@@ -103,6 +103,23 @@
                             </svg>
                             Commission Report
                         </a>
+                        <hr class="my-2 border-green-100">
+                        <a href="{% url 'export_unclaimed_orders' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}"
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-green-700 hover:bg-pink-500">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                            Unclaimed Orders Report
+                        </a>
+                        <a href="{% url 'export_claimed_orders' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}"
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-green-700 hover:bg-pink-500">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Claimed Orders Report
+                        </a>
                     </div>
                 </div>
             </div>
@@ -173,6 +190,41 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Claimed/Unclaimed Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="{% url 'export_unclaimed_orders' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" 
+            class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white hover:from-orange-600 hover:to-orange-700 transition-colors">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-80">Unclaimed Orders</p>
+                    <p class="text-3xl font-bold">{{ stats.unclaimed_orders|default:"0" }}</p>
+                    <p class="text-sm opacity-80 mt-1">Completed but not picked up</p>
+                </div>
+                <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'export_claimed_orders' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}"
+            class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white hover:from-green-600 hover:to-green-700 transition-colors">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-80">Claimed Orders</p>
+                    <p class="text-3xl font-bold">{{ stats.claimed_orders|default:"0" }}</p>
+                    <p class="text-sm opacity-80 mt-1">Delivered to customers</p>
+                </div>
+                <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </a>
     </div>
 
     <!-- Quick Stats Row -->

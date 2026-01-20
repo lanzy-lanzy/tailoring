@@ -133,6 +133,16 @@ urlpatterns = [
         views.export_tailor_performance_pdf,
         name="export_tailor_performance",
     ),
+    path(
+        "reports/export/unclaimed-orders/",
+        views.export_unclaimed_orders_pdf,
+        name="export_unclaimed_orders",
+    ),
+    path(
+        "reports/export/claimed-orders/",
+        views.export_claimed_orders_pdf,
+        name="export_claimed_orders",
+    ),
     # Claims/Pickup
     path("claims/", views.claims_list, name="claims_list"),
     path("claims/<int:pk>/process/", views.process_claim, name="process_claim"),
