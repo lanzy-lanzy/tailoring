@@ -1,25 +1,74 @@
-<div class="p-6">
-    <h3 class="text-lg font-semibold text-red-800 mb-2">Delete Commission Rate</h3>
-    <p class="text-gray-600 mb-4">
-        Are you sure you want to delete the commission rate for 
-        <strong>{{ commission.tailor.get_full_name|default:commission.tailor.username }}</strong> 
-        for <strong>{{ commission.garment_type.name }}</strong>?
-    </p>
-    
-    <p class="text-sm text-gray-500 mb-4">
-        This will cause the system to fall back to the default 15% commission rate for this tailor and garment type.
-    </p>
-    
-    <form method="post">
-        {% csrf_token %}
-        <div class="flex justify-end gap-3">
-            <a href="{% url 'tailor_garment_commission_list' %}"
-               class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                Cancel
-            </a>
-            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                Delete
-            </button>
+<div id="commission-delete-container" class="relative overflow-hidden bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white/10">
+    <!-- Gradient Glows -->
+    <div class="absolute -top-24 -left-24 w-64 h-64 bg-rose-500/20 rounded-full blur-[80px] pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-red-500/20 rounded-full blur-[80px] pointer-events-none"></div>
+
+    <div class="relative">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-white tracking-tight">Delete Commission Rate</h2>
+                <p class="text-slate-400 text-sm font-medium">This action cannot be undone.</p>
+            </div>
         </div>
-    </form>
+
+        <!-- Commission Info Card -->
+        <div class="mb-6 p-6 bg-rose-500/5 rounded-3xl border border-rose-500/10">
+            <p class="text-slate-300 mb-4">
+                Are you sure you want to delete the commission rate for:
+            </p>
+            <div class="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">Tailor</p>
+                    <p class="text-lg font-bold text-white">{{ commission.tailor.get_full_name|default:commission.tailor.username }}</p>
+                </div>
+                <div class="w-px h-8 bg-white/10"></div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">Garment Type</p>
+                    <p class="text-lg font-bold text-white">{{ commission.garment_type.name }}</p>
+                </div>
+                <div class="w-px h-8 bg-white/10"></div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">Rate</p>
+                    <p class="text-lg font-bold text-white">{{ commission.commission_rate }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning -->
+        <div class="flex items-start gap-3 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20 mb-8">
+            <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <p class="text-amber-200/80 text-sm">
+                This will cause the system to fall back to the <strong class="text-amber-300">default 15% commission rate</strong> for this tailor and garment type.
+            </p>
+        </div>
+
+        <!-- Actions -->
+        <form method="post" 
+              up-submit
+              up-layer="parent"
+              up-accept-location="{% url 'tailor_garment_commission_list' %}">
+            {% csrf_token %}
+            <div class="flex items-center justify-end gap-4">
+                <button type="button"
+                   @click="if (window.up) up.layer.dismiss(); else window.location.href='{% url 'tailor_garment_commission_list' %}'"
+                   class="px-8 py-4 bg-slate-800 text-slate-400 font-bold rounded-2xl hover:bg-slate-700 hover:text-white transition-all duration-300 text-sm">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="px-10 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-400 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_30px_rgba(244,63,94,0.3)] text-sm flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete Rate
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
