@@ -220,4 +220,25 @@ urlpatterns = [
         views.admin_tailor_performance_report,
         name="admin_tailor_performance_report",
     ),
+    # Tailor Garment Commission Rates
+    path(
+        "commissions/tailor-garment-rates/",
+        views.tailor_garment_commission_list,
+        name="tailor_garment_commission_list",
+    ),
+    path(
+        "commissions/tailor-garment-rates/create/",
+        views.tailor_garment_commission_create,
+        name="tailor_garment_commission_create",
+    ),
+    path(
+        "commissions/tailor-garment-rates/<int:pk>/edit/",
+        views.tailor_garment_commission_edit,
+        name="tailor_garment_commission_edit",
+    ),
+    path(
+        "commissions/tailor-garment-rates/<int:pk>/delete/",
+        views.tailor_garment_commission_delete,
+        name="tailor_garment_commission_delete",
+    ),
 ]

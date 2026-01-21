@@ -303,6 +303,21 @@
                             </div>
                             <span class="font-medium">Commissions</span>
                         </a>
+
+                        <!-- Tailor Garment Commission Rates (Admin) -->
+                        {% if user.profile.is_admin %}
+                        <a href="{% url 'tailor_garment_commission_list' %}"
+                            class="flex items-center px-4 py-2.5 text-slate-400 rounded-xl hover:bg-white/5 hover:text-white transition-all duration-200 group {% if 'tailor-garment-rates' in request.path %}bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20{% endif %}">
+                            <div class="w-8 h-8 flex items-center justify-center mr-2 rounded-lg bg-slate-900/50 group-hover:bg-emerald-500/10 transition-colors">
+                                <svg class="w-5 h-5 {% if 'tailor-garment-rates' in request.path %}text-emerald-400{% else %}group-hover:text-emerald-400{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 00-1.065 2.572c-1.756.426-1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-1.94.516-4.058-.655-5.638-.461-.39.046-.824-.098-1.208-.155a.998.998 0 00-.752-.702 7.47 7.47 0 01-.752.702c-.384.057-.818.109-1.208.155-1.58-.194-3.698.975-5.638-.461a1.724 1.724 0 00-2.572 1.066c.94 1.543.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573-1.065zm9.35 4.953c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31-.826 2.37-2.37a1.724 1.724 0 00-1.066-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 00-1.065-2.573c-1.94-.516-4.058.655-5.638.461-.39-.046-.824.098-1.208.155a.998.998 0 00-.752.702 7.47 7.47 0 01.752-.702c-.384-.057-.818-.109-1.208-.155-1.58.194-3.698-.975-5.638.461a1.724 1.724 0 00-2.572-1.066c.94-1.543-.826-3.31 2.37-2.37a1.724 1.724 0 00-2.573 1.065z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Garment Rates</span>
+                        </a>
+                        {% endif %}
                         {% endif %}
 
                         <!-- My Commissions (for tailors) -->

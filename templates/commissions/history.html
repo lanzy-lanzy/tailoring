@@ -1,133 +1,147 @@
 {% extends 'base.html' %}
 
-{% block title %}Commission History - El Senior Original Tailoring{% endblock %}
+{% block title %}Commission Audit - El Senior Original Tailoring{% endblock %}
 
-{% block page_title %}Commission History{% endblock %}
+{% block page_title %}Commission Audit Logs{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <!-- Summary Card -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Filters & Stats Header -->
+    <div class="bg-slate-900 rounded-[2rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 via-transparent to-teal-500/5"></div>
+        <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div>
-                <h2 class="text-lg font-semibold text-green-800">Commission Records</h2>
-                <p class="text-sm text-green-600">
-                    {{ total_count }} records | Total: <span class="font-semibold text-green-600">PHP {{ total_amount|floatformat:2 }}</span>
-                </p>
+                <div class="flex items-center gap-3 mb-2">
+                    <h2 class="text-3xl font-black text-white tracking-tight">Financial Audit</h2>
+                    <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full">
+                        {{ total_count }} Entries Detected
+                    </span>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="text-xs font-black text-emerald-500/50 mr-1 uppercase">Cumulative Value</span>
+                    <span class="text-2xl font-black text-white tracking-tighter">PHP {{ total_amount|floatformat:2 }}</span>
+                </div>
             </div>
-            
-            <a href="{% url 'commission_dashboard' %}" 
-               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Back to Dashboard
-            </a>
+
+            <div class="flex items-center gap-4">
+                <a href="{% url 'commission_dashboard' %}" 
+                   class="inline-flex items-center px-6 py-3.5 bg-white/5 text-slate-300 font-black uppercase tracking-widest text-[10px] rounded-2xl border border-white/10 hover:bg-white/10 hover:text-white transition-all group/back">
+                    <svg class="w-4 h-4 mr-2 transform group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Return to Hub
+                </a>
+            </div>
+        </div>
+
+        <!-- Refined Filter Bar -->
+        <div class="relative mt-8 pt-8 border-t border-white/5">
+            <form method="get" class="flex flex-wrap items-end gap-4">
+                <div class="min-w-[160px]">
+                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1.5 ml-1">Status Protocol</label>
+                    <select name="status" class="w-full bg-slate-800/50 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none appearance-none cursor-pointer">
+                        <option value="">All Transactions</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Reserve</option>
+                        <option value="credited" {% if status_filter == 'credited' %}selected{% endif %}>Active Credit</option>
+                        <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Finalized Payout</option>
+                    </select>
+                </div>
+                
+                <div class="min-w-[160px]">
+                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1.5 ml-1">From Temporal</label>
+                    <input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}"
+                           class="w-full bg-slate-800/50 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                
+                <div class="min-w-[160px]">
+                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1.5 ml-1">To Temporal</label>
+                    <input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}"
+                           class="w-full bg-slate-800/50 border border-slate-700 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="px-6 py-2.5 bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
+                        Filter Audit
+                    </button>
+                    <a href="{% url 'commission_history' %}" class="px-4 py-2.5 bg-slate-800 text-slate-400 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-slate-700 transition-all">
+                        Reset
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <form method="get" class="flex flex-wrap items-end gap-4">
-            <div>
-                <label class="block text-xs text-green-600 mb-1">Status</label>
-                <select name="status" class="px-3 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    <option value="">All Status</option>
-                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
-                    <option value="credited" {% if status_filter == 'credited' %}selected{% endif %}>Credited</option>
-                    <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid Out</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs text-green-600 mb-1">From Date</label>
-                <input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}"
-                       class="px-3 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            </div>
-            <div>
-                <label class="block text-xs text-green-600 mb-1">To Date</label>
-                <input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}"
-                       class="px-3 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            </div>
-            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                Filter
-            </button>
-            <a href="{% url 'commission_history' %}" class="px-4 py-2 text-green-600 hover:text-green-800">
-                Clear
-            </a>
-        </form>
-    </div>
-
-    <!-- Commission Table -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- Audit Ledger -->
+    <div class="bg-white rounded-[2rem] shadow-xl border border-emerald-100 overflow-hidden">
         {% if commissions %}
         <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-cream-5000">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Commission #</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Date</th>
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-emerald-50/50">
+                        <th class="px-8 py-6 text-[10px] font-black text-emerald-700 uppercase tracking-widest">Descriptor</th>
+                        <th class="px-8 py-6 text-[10px] font-black text-emerald-700 uppercase tracking-widest">Temporal Point</th>
                         {% if user.profile.is_admin %}
-                        <th class="px-6 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Tailor</th>
+                        <th class="px-8 py-6 text-[10px] font-black text-emerald-700 uppercase tracking-widest">Master Talent</th>
                         {% endif %}
-                        <th class="px-6 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Order</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Customer</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Garment</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-green-600 uppercase tracking-wider">Order Value</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-green-600 uppercase tracking-wider">Rate</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-green-600 uppercase tracking-wider">Commission</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-green-600 uppercase tracking-wider">Status</th>
+                        <th class="px-8 py-6 text-[10px] font-black text-emerald-700 uppercase tracking-widest">Order / Line</th>
+                        <th class="px-8 py-6 text-[10px] font-black text-emerald-700 uppercase tracking-widest text-right">Yield</th>
+                        <th class="px-8 py-6 text-[10px] font-black text-emerald-700 uppercase tracking-widest text-center">Protocol Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-brown-100">
+                <tbody class="divide-y divide-emerald-50">
                     {% for c in commissions %}
-                    <tr class="hover:bg-pink-5000 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm font-medium text-green-800">{{ c.commission_number }}</span>
+                    <tr class="group hover:bg-emerald-50/30 transition-all duration-300">
+                        <td class="px-8 py-6">
+                            <span class="text-sm font-black text-slate-800 tracking-tight group-hover:text-emerald-600 transition-colors">#{{ c.commission_number }}</span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
-                            {{ c.earned_date|date:"M d, Y" }}
-                            <br>
-                            <span class="text-xs text-cream-600">{{ c.earned_date|time:"g:i A" }}</span>
+                        <td class="px-8 py-6">
+                            <p class="text-sm font-bold text-slate-700 leading-none">{{ c.earned_date|date:"d M Y" }}</p>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{{ c.earned_date|time:"g:i A" }}</p>
                         </td>
                         {% if user.profile.is_admin %}
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
-                            {{ c.tailor.get_full_name|default:c.tailor.username }}
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-emerald-400 text-[10px] font-black">
+                                    {{ c.tailor.get_full_name|default:c.tailor.username|slice:":1"|upper }}
+                                </div>
+                                <span class="text-sm font-bold text-slate-700 tracking-tight">{{ c.tailor.get_full_name|default:c.tailor.username }}</span>
+                            </div>
                         </td>
                         {% endif %}
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if c.order %}
-                            <a href="{% url 'order_detail' c.order.pk %}" class="text-sm font-medium text-green-800 hover:text-green-600">
-                                {{ c.order.order_number }}
-                            </a>
-                            {% else %}
-                            <span class="text-sm text-cream-600">N/A</span>
-                            {% endif %}
+                        <td class="px-8 py-6">
+                            <div class="flex flex-col">
+                                {% if c.order %}
+                                <a href="{% url 'order_detail' c.order.pk %}" class="text-sm font-black text-slate-800 hover:text-emerald-600 transition-colors tracking-tight">
+                                    {{ c.order.order_number }}
+                                </a>
+                                {% else %}
+                                <span class="text-xs text-slate-400 font-bold italic">N/A</span>
+                                {% endif %}
+                                <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-0.5">{{ c.garment_type }}</span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
-                            {{ c.customer_name|truncatechars:25 }}
+                        <td class="px-8 py-6 text-right">
+                            <div class="flex flex-col items-end">
+                                <span class="text-lg font-black text-emerald-600 tracking-tighter shadow-emerald-500/10 group-hover:scale-110 transition-transform">PHP {{ c.commission_amount|floatformat:2 }}</span>
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{{ c.commission_rate }}% Rate</span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
-                            {{ c.garment_type }}
-                            {% if c.quantity > 1 %}
-                            <span class="text-xs text-cream-600">(x{{ c.quantity }})</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600">
-                            PHP {{ c.order_amount|floatformat:2 }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-green-600">
-                            {{ c.commission_rate }}%
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                            <span class="text-sm font-semibold text-green-600">PHP {{ c.commission_amount|floatformat:2 }}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <td class="px-8 py-6 text-center">
                             {% if c.status == 'pending' %}
-                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-pink-100 text-pink-500">Pending</span>
+                            <span class="inline-flex items-center px-4 py-1.5 bg-amber-50 text-amber-600 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-amber-100">
+                                <span class="w-1 h-1 bg-amber-500 rounded-full mr-2"></span>
+                                Reserved
+                            </span>
                             {% elif c.status == 'credited' %}
-                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">Credited</span>
+                            <span class="inline-flex items-center px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-100">
+                                <span class="w-1 h-1 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                                Credited
+                            </span>
                             {% elif c.status == 'paid' %}
-                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">Paid Out</span>
+                            <span class="inline-flex items-center px-4 py-1.5 bg-slate-900 text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-slate-900/10">
+                                <span class="w-1 h-1 bg-emerald-400 rounded-full mr-2"></span>
+                                Finalized
+                            </span>
                             {% endif %}
                         </td>
                     </tr>
@@ -136,26 +150,30 @@
             </table>
         </div>
         
-        <!-- Pagination -->
+        <!-- Modern Pagination -->
         {% if commissions.has_other_pages %}
-        <div class="px-6 py-4 border-t border-green-100 flex items-center justify-between">
-            <div class="text-sm text-green-600">
-                Showing {{ commissions.start_index }} - {{ commissions.end_index }} of {{ commissions.paginator.count }}
+        <div class="px-8 py-6 border-t border-emerald-50 bg-emerald-50/20 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                Displaying Segment {{ commissions.start_index }} — {{ commissions.end_index }} of {{ commissions.paginator.count }} Recorded Yields
             </div>
             <div class="flex gap-2">
                 {% if commissions.has_previous %}
                 <a href="?page={{ commissions.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from|date:'Y-m-d' }}{% endif %}{% if date_to %}&date_to={{ date_to|date:'Y-m-d' }}{% endif %}" 
-                   class="px-3 py-1 border border-green-200 rounded text-green-600 hover:bg-pink-50000">
-                    Previous
+                   class="p-2 bg-white border border-emerald-100 rounded-xl text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                    </svg>
                 </a>
                 {% endif %}
                 
-                <span class="px-3 py-1 bg-green-600 text-white rounded">{{ commissions.number }}</span>
+                <span class="px-5 py-2 bg-slate-900 text-emerald-400 text-xs font-black rounded-xl shadow-lg shadow-slate-900/10">{{ commissions.number }}</span>
                 
                 {% if commissions.has_next %}
                 <a href="?page={{ commissions.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_from %}&date_from={{ date_from|date:'Y-m-d' }}{% endif %}{% if date_to %}&date_to={{ date_to|date:'Y-m-d' }}{% endif %}" 
-                   class="px-3 py-1 border border-green-200 rounded text-green-600 hover:bg-pink-50000">
-                    Next
+                   class="p-2 bg-white border border-emerald-100 rounded-xl text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </a>
                 {% endif %}
             </div>
@@ -163,14 +181,20 @@
         {% endif %}
         
         {% else %}
-        <div class="px-6 py-12 text-center">
-            <svg class="w-12 h-12 text-green-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <h3 class="text-lg font-medium text-green-800 mb-1">No commission records found</h3>
-            <p class="text-green-600">Try adjusting your filters or check back later.</p>
+        <div class="px-8 py-24 text-center">
+            <div class="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mx-auto mb-6">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 tracking-tight">No Temporal Data</h3>
+            <p class="text-slate-500 mt-2 font-medium">Try adjusting your filters or expanding your time frame.</p>
+            <a href="{% url 'commission_history' %}" class="mt-8 inline-block px-8 py-3 bg-emerald-500 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
+                Refresh Ledger
+            </a>
         </div>
         {% endif %}
     </div>
 </div>
 {% endblock %}
+

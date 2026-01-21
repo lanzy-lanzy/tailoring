@@ -27,6 +27,7 @@ from .models import (
     SMSLog,
     Notification,
     TailorCommission,
+    TailorGarmentCommission,
     Rework,
     ReworkMaterial,
 )
@@ -43,6 +44,7 @@ from .forms import (
     PaymentForm,
     StockAddForm,
     ReworkCreateForm,
+    TailorGarmentCommissionForm,
 )
 from django.conf import settings
 
@@ -3538,10 +3540,164 @@ def export_unclaimed_orders_pdf(request):
     )
 
     response = HttpResponse(pdf, content_type="application/pdf")
-    filename = f"unclaimed_orders_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    filename = f"tailor_performance_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
     return response
+
+
+# ============== Tailor Garment Commission Management ==============
+
+
+@login_required
+@admin_required
+def tailor_garment_commission_list(request):
+    """List all tailor garment commission rates"""
+    tailor_filter = request.GET.get("tailor")
+    garment_filter = request.GET.get("garment")
+
+    commissions = TailorGarmentCommission.objects.select_related(
+        "tailor", "tailor__profile", "garment_type"
+    ).all()
+
+    if tailor_filter:
+        commissions = commissions.filter(tailor_id=tailor_filter)
+
+    if garment_filter:
+        commissions = commissions.filter(garment_type_id=garment_filter)
+
+    # Get filter options
+    tailors = User.objects.filter(profile__role="tailor", is_active=True).order_by(
+        "first_name", "last_name"
+    )
+    garment_types = GarmentType.objects.all().order_by("name")
+
+    return render(
+        request,
+        "commissions/tailor_garment_rates.html",
+        {
+            "commissions": commissions,
+            "tailors": tailors,
+            "garment_types": garment_types,
+            "tailor_filter": tailor_filter,
+            "garment_filter": garment_filter,
+        },
+    )
+
+
+@login_required
+@admin_required
+def tailor_garment_commission_create(request):
+    """Create new tailor garment commission rate"""
+    if request.method == "POST":
+        tailor_id = request.POST.get("tailor")
+        garment_type_id = request.POST.get("garment_type")
+        commission_rate = request.POST.get("commission_rate")
+        is_active = request.POST.get("is_active") == "on"
+
+        tailor = get_object_or_404(User, pk=tailor_id, profile__role="tailor")
+        garment_type = get_object_or_404(GarmentType, pk=garment_type_id)
+
+        try:
+            commission = TailorGarmentCommission.objects.create(
+                tailor=tailor,
+                garment_type=garment_type,
+                commission_rate=Decimal(commission_rate),
+                is_active=is_active,
+            )
+            messages.success(
+                request,
+                f"Commission rate of {commission_rate}% created for {tailor.get_full_name()} - {garment_type.name}",
+            )
+
+            # For Unpoly requests, redirect to accept location
+            if request.headers.get("UP-Request"):
+                return redirect("tailor_garment_commission_list")
+            
+            if request.headers.get("HX-Request"):
+                return HttpResponse(
+                    status=204, headers={"HX-Redirect": "/commissions/tailor-garment-rates/"}
+                )
+            return redirect("tailor_garment_commission_list")
+        except IntegrityError:
+            messages.error(
+                request,
+                "Commission rate already exists for this tailor and garment type.",
+            )
+
+    return render(
+        request,
+        "commissions/partials/tailor_garment_commission_form.html",
+        {
+            "tailors": User.objects.filter(profile__role="tailor", is_active=True).order_by(
+                "first_name", "last_name"
+            ),
+            "garment_types": GarmentType.objects.all().order_by("name"),
+        },
+    )
+
+
+@login_required
+@admin_required
+def tailor_garment_commission_edit(request, pk):
+    """Edit existing tailor garment commission rate"""
+    commission = get_object_or_404(TailorGarmentCommission, pk=pk)
+
+    if request.method == "POST":
+        form = TailorGarmentCommissionForm(request.POST, instance=commission)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                f"Commission rate updated for {commission.tailor.get_full_name()} - {commission.garment_type.name}",
+            )
+
+            # For Unpoly requests, redirect to accept location
+            if request.headers.get("UP-Request"):
+                return redirect("tailor_garment_commission_list")
+            
+            if request.headers.get("HX-Request"):
+                return HttpResponse(
+                    status=204, headers={"HX-Redirect": "/commissions/tailor-garment-rates/"}
+                )
+            return redirect("tailor_garment_commission_list")
+    else:
+        form = TailorGarmentCommissionForm(instance=commission)
+
+    return render(
+        request,
+        "commissions/partials/tailor_garment_commission_form.html",
+        {"form": form, "commission": commission},
+    )
+
+
+@login_required
+@admin_required
+def tailor_garment_commission_delete(request, pk):
+    """Delete tailor garment commission rate"""
+    commission = get_object_or_404(TailorGarmentCommission, pk=pk)
+
+    if request.method == "POST":
+        tailor_name = commission.tailor.get_full_name()
+        garment_name = commission.garment_type.name
+        commission.delete()
+        messages.success(
+            request,
+            f"Commission rate deleted for {tailor_name} - {garment_name}",
+        )
+
+        if request.headers.get("HX-Request"):
+            return HttpResponse(
+                status=204, headers={"HX-Redirect": "/commissions/tailor-garment-rates/"}
+            )
+        return redirect("tailor_garment_commission_list")
+
+    return render(
+        request,
+        "commissions/partials/tailor_garment_commission_delete.html",
+        {"commission": commission},
+    )
+
 
 
 @login_required
@@ -3707,6 +3863,7 @@ def admin_commission_report(request):
         "start_date": start_date,
         "end_date": end_date,
         "report_type": report_type,
+        "report_types": ["weekly", "monthly", "yearly"],
         "total_commissions": total_commissions,
         "total_orders_value": total_orders_value,
         "total_tasks": total_tasks,

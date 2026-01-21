@@ -319,6 +319,44 @@ class OrderAccessory(models.Model):
         return f"{self.order.order_number} - {self.accessory.name}"
 
 
+class TailorGarmentCommission(models.Model):
+    """Dynamic commission rates per tailor per garment type"""
+    tailor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='garment_commissions'
+    )
+    garment_type = models.ForeignKey(
+        GarmentType,
+        on_delete=models.CASCADE,
+        related_name='tailor_commissions'
+    )
+    commission_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('15.00'),
+        validators=[MinValueValidator(Decimal('0')), MinValueValidator(Decimal('100'))],
+        help_text="Commission percentage for this tailor and garment type"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this commission rate is currently active"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['tailor', 'garment_type']
+        verbose_name = "Tailor Garment Commission"
+        verbose_name_plural = "Tailor Garment Commissions"
+        indexes = [
+            models.Index(fields=['tailor', 'garment_type']),
+        ]
+    
+    def __str__(self):
+        return f"{self.tailor.get_full_name() or self.tailor.username} - {self.garment_type.name}: {self.commission_rate}%"
+
+
 class TailoringTask(models.Model):
     """Task assigned to tailors"""
     STATUS_CHOICES = [
@@ -346,7 +384,7 @@ class TailoringTask(models.Model):
     commission_rate = models.DecimalField(
         max_digits=5,
         decimal_places=2,
-        default=Decimal('10.00'),
+        default=Decimal('15.00'),
         help_text="Commission percentage for this task"
     )
     commission_amount = models.DecimalField(
@@ -382,8 +420,23 @@ class TailoringTask(models.Model):
     def __str__(self):
         return f"Task for {self.order.order_number} - {self.tailor}"
     
+    def get_commission_rate(self):
+        """Get commission rate from TailorGarmentCommission or default to 15%"""
+        if self.tailor and self.order and self.order.garment_type:
+            try:
+                rate_obj = TailorGarmentCommission.objects.get(
+                    tailor=self.tailor,
+                    garment_type=self.order.garment_type,
+                    is_active=True
+                )
+                return rate_obj.commission_rate
+            except TailorGarmentCommission.DoesNotExist:
+                pass
+        return Decimal('15.00')
+    
     def calculate_commission(self):
         """Calculate commission based on order total price and commission rate"""
+        self.commission_rate = self.get_commission_rate()
         if self.order and self.order.total_price:
             self.commission_amount = (self.order.total_price * self.commission_rate) / Decimal('100')
         return self.commission_amount

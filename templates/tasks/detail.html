@@ -177,7 +177,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Measurements -->
         <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-green-100 bg-cream-5000">
@@ -199,6 +199,35 @@
             </div>
         </div>
 
+        <!-- Commission Info -->
+        <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-green-100 bg-cream-5000">
+                <h3 class="text-lg font-semibold text-green-800">Commission</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between py-2 border-b border-green-100">
+                        <span class="text-green-600">Order Amount</span>
+                        <span class="text-green-800 font-medium">PHP {{ task.order.total_price|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-green-100">
+                        <span class="text-green-600">Commission Rate</span>
+                        <span class="text-green-800 font-medium">{{ task.commission_rate }}%</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-green-100">
+                        <span class="text-green-600">Commission Amount</span>
+                        <span class="text-green-800 font-medium">PHP {{ task.commission_amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="text-green-600">Status</span>
+                        <span class="{% if task.commission_paid %}text-green-600{% else %}text-amber-600{% endif %} font-medium">
+                            {% if task.commission_paid %}Paid{% else %}Pending{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Task Timeline -->
         <div class="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-green-100 bg-cream-5000">

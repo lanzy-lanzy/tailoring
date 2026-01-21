@@ -5,7 +5,7 @@ from decimal import Decimal
 from .models import (
     UserProfile, Customer, Fabric, Accessory,
     GarmentType, GarmentTypeAccessory, Order,
-    TailoringTask, Payment, Rework
+    TailoringTask, Payment, Rework, TailorGarmentCommission
 )
 
 
@@ -583,3 +583,29 @@ class ReworkUpdateForm(forms.ModelForm):
                 'rows': 3
             }),
         }
+
+
+class TailorGarmentCommissionForm(forms.ModelForm):
+    """Form for managing tailor garment commission rates"""
+    class Meta:
+        model = TailorGarmentCommission
+        fields = ['commission_rate', 'is_active']
+        widgets = {
+            'commission_rate': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
+                'placeholder': 'Commission Rate (%)',
+                'step': '0.01',
+                'min': '0',
+                'max': '100'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500'
+            }),
+        }
+    
+    def clean_commission_rate(self):
+        rate = self.cleaned_data.get('commission_rate')
+        if rate is not None and (rate < 0 or rate > 100):
+            raise forms.ValidationError('Commission rate must be between 0 and 100.')
+        return rate
+
