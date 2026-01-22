@@ -303,7 +303,7 @@ def customer_list(request):
     page = request.GET.get("page", 1)
     customers = paginator.get_page(page)
 
-    if request.headers.get("HX-Request"):
+    if request.headers.get("HX-Request") or request.headers.get("X-Up-Target"):
         return render(
             request, "customers/partials/customer_table.html", {"customers": customers}
         )
@@ -335,17 +335,21 @@ def customer_create(request):
                 return HttpResponse(
                     status=204,
                     headers={
-                        "HX-Trigger": "customerCreated",
-                        "HX-Redirect": "/customers/",
+                        "HX-Trigger": '{"customerCreated": true, "customerListChanged": true}',
                     },
                 )
+            if request.headers.get("X-Up-Target"):
+                response = redirect("customer_list")
+                response["X-Up-Accept-Layer"] = "true"
+                return response
             return redirect("customer_list")
     else:
         form = CustomerForm()
 
+    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
     template = (
         "customers/partials/customer_form.html"
-        if request.headers.get("HX-Request")
+        if is_ajax
         else "customers/create.html"
     )
     return render(request, template, {"form": form, "customer": None})
@@ -369,17 +373,21 @@ def customer_edit(request, pk):
                 return HttpResponse(
                     status=204,
                     headers={
-                        "HX-Trigger": "customerUpdated",
-                        "HX-Redirect": "/customers/",
+                        "HX-Trigger": '{"customerUpdated": true, "customerListChanged": true}',
                     },
                 )
+            if request.headers.get("X-Up-Target"):
+                response = redirect("customer_list")
+                response["X-Up-Accept-Layer"] = "true"
+                return response
             return redirect("customer_list")
     else:
         form = CustomerForm(instance=customer)
 
+    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
     template = (
         "customers/partials/customer_form.html"
-        if request.headers.get("HX-Request")
+        if is_ajax
         else "customers/edit.html"
     )
     return render(request, template, {"form": form, "customer": customer})
@@ -390,10 +398,39 @@ def customer_edit(request, pk):
 def customer_detail(request, pk):
     """Customer detail view"""
     customer = get_object_or_404(Customer, pk=pk)
-    orders = customer.orders.all().order_by("-created_at")[:10]
+    all_orders = customer.orders.all().order_by("-created_at")
+    
+    # Get counts from full queryset before slicing
+    active_orders_count = all_orders.filter(status='in_progress').count()
+    completed_orders_count = all_orders.filter(status__in=['completed', 'claimed']).count()
+    total_spent = sum(order.total_price or 0 for order in all_orders)
+    
+    # Slice for display
+    orders = all_orders[:10]
+
+    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
+
+    if is_ajax:
+        return render(
+            request, "customers/partials/customer_detail_partial.html",
+            {
+                "customer": customer,
+                "orders": orders,
+                "active_orders_count": active_orders_count,
+                "completed_orders_count": completed_orders_count,
+                "total_spent": total_spent,
+            }
+        )
 
     return render(
-        request, "customers/detail.html", {"customer": customer, "orders": orders}
+        request, "customers/detail.html",
+        {
+            "customer": customer,
+            "orders": orders,
+            "active_orders_count": active_orders_count,
+            "completed_orders_count": completed_orders_count,
+            "total_spent": total_spent,
+        }
     )
 
 
@@ -406,15 +443,46 @@ def customer_delete(request, pk):
     if request.method == "POST":
         if customer.orders.exists():
             messages.error(request, "Cannot delete customer with existing orders.")
+            if request.headers.get("HX-Request"):
+                return HttpResponse(
+                    status=400,
+                    headers={
+                        "HX-Trigger": '{"customerDeleteError": true}',
+                    },
+                )
+            # For Unpoly, re-render the delete form with error message
+            if request.headers.get("X-Up-Target"):
+                return render(
+                    request,
+                    "customers/partials/customer_delete_partial.html",
+                    {"customer": customer}
+                )
+            return redirect("customer_list")
         else:
             customer.delete()
             messages.success(request, "Customer deleted successfully.")
+            if request.headers.get("HX-Request"):
+                return HttpResponse(
+                    status=204,
+                    headers={
+                        "HX-Trigger": '{"customerDeleted": true, "customerListChanged": true}',
+                        "HX-Redirect": "/customers/",
+                    },
+                )
+            # For Unpoly, redirect to customer list - the up-layer="parent" will handle closing modal
+            if request.headers.get("X-Up-Target"):
+                response = redirect("customer_list")
+                response["X-Up-Accept-Layer"] = "true"
+                return response
+            return redirect("customer_list")
 
-        if request.headers.get("HX-Request"):
-            return HttpResponse(status=204, headers={"HX-Redirect": "/customers/"})
-        return redirect("customer_list")
-
-    return render(request, "customers/delete_confirm.html", {"customer": customer})
+    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
+    template = (
+        "customers/partials/customer_delete_partial.html"
+        if is_ajax
+        else "customers/delete_confirm.html"
+    )
+    return render(request, template, {"customer": customer})
 
 
 # ============== Inventory Management ==============
