@@ -3,8 +3,8 @@ Add Stock Form Partial - HTMX modal for adding/removing stock
 Expects: item (Fabric or Accessory), item_type ('fabric' or 'accessory')
 {% endcomment %}
 
-<!-- Modal Backdrop -->
-<div class="fixed inset-0 z-50 overflow-y-auto"
+<!-- Modal Backdrop Container -->
+<div class="fixed inset-0 z-[100] overflow-hidden pointer-events-none"
      x-data="{ 
         open: true, 
         action: 'add', 
@@ -13,15 +13,16 @@ Expects: item (Fabric or Accessory), item_type ('fabric' or 'accessory')
      }"
      x-show="open"
      x-cloak
-     @keydown.escape.window="open = false; document.getElementById('modal-container').innerHTML = ''">
+     @keydown.escape.window="$dispatch('close-modal')">
     
-    <!-- Backdrop overlay -->
-    <div class="fixed inset-0 bg-black/50 transition-opacity"
-         @click="open = false; document.getElementById('modal-container').innerHTML = ''"></div>
+    <!-- Backdrop overlay - Captures clicks to close -->
+    <div class="fixed inset-0 bg-black/50 transition-opacity pointer-events-auto"
+         @click="$dispatch('close-modal')"></div>
 
-<!-- Modal panel -->
-    <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all"
+    <!-- Modal panel container - Centered flex, passes through events -->
+    <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <!-- Modal panel - Captures events for input -->
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all pointer-events-auto"
              @click.stop
              x-show="open"
              x-transition:enter="ease-out duration-300"
@@ -39,7 +40,7 @@ Expects: item (Fabric or Accessory), item_type ('fabric' or 'accessory')
                 </div>
                 <button type="button"
                         class="p-2 text-cream-600 hover:text-green-600 hover:bg-green-500 rounded-lg transition-colors"
-                        @click="open = false; document.getElementById('modal-container').innerHTML = ''">
+                        @click="$dispatch('close-modal')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -105,18 +106,17 @@ Expects: item (Fabric or Accessory), item_type ('fabric' or 'accessory')
                             <input type="number"
                                    name="quantity"
                                    id="id_quantity"
-                                   x-model="quantity"
+                                   x-model.number="quantity"
                                    required
                                    min="0"
                                    step="any"
                                    class="w-full px-4 py-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400 text-lg"
                                    placeholder="0"
-                                   autofocus>
-                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                <span class="text-green-600">
-                                    {% if item_type == 'fabric' %}meters{% else %}{{ item.unit }}{% endif %}
-                                </span>
-                            </div>
+                                   autofocus
+                                   autocomplete="off">
+                            <span class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-green-600">
+                                {% if item_type == 'fabric' %}meters{% else %}{{ item.unit }}{% endif %}
+                            </span>
                         </div>
                         {% if form.quantity.errors %}
                         <p class="mt-1 text-sm text-salmon-500">{{ form.quantity.errors.0 }}</p>
@@ -156,7 +156,7 @@ Expects: item (Fabric or Accessory), item_type ('fabric' or 'accessory')
                 <div class="px-6 py-4 border-t border-green-100 bg-cream-500 rounded-b-lg flex items-center justify-end space-x-3">
                     <button type="button"
                             class="px-4 py-2 text-green-600 hover:text-green-800 font-medium transition-colors"
-                            @click="open = false; document.getElementById('modal-container').innerHTML = ''">
+                            @click="$dispatch('close-modal')">
                         Cancel
                     </button>
                     <button type="submit"

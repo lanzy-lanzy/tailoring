@@ -208,8 +208,8 @@ def admin_dashboard(request):
     ).order_by("-created_at")[:10]
 
     # Low stock alerts
-    low_stock_fabrics = Fabric.objects.filter(stock_meters__lt=5)
-    low_stock_accessories = Accessory.objects.filter(stock_quantity__lt=10)
+    low_stock_fabrics = Fabric.objects.filter(stock_meters__lte=5)
+    low_stock_accessories = Accessory.objects.filter(stock_quantity__lte=10)
 
     # Tasks awaiting approval
     pending_approvals = TailoringTask.objects.filter(status="completed").select_related(
@@ -337,21 +337,16 @@ def customer_create(request):
                 return HttpResponse(
                     status=204,
                     headers={
-                        "HX-Trigger": '{"customerCreated": true, "customerListChanged": true}',
+                        "HX-Redirect": "/customers/",
                     },
                 )
-            if request.headers.get("X-Up-Target"):
-                response = redirect("customer_list")
-                response["X-Up-Accept-Layer"] = "true"
-                return response
             return redirect("customer_list")
     else:
         form = CustomerForm()
 
-    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
     template = (
         "customers/partials/customer_form.html"
-        if is_ajax
+        if request.headers.get("HX-Request")
         else "customers/create.html"
     )
     return render(request, template, {"form": form, "customer": None})
@@ -375,21 +370,16 @@ def customer_edit(request, pk):
                 return HttpResponse(
                     status=204,
                     headers={
-                        "HX-Trigger": '{"customerUpdated": true, "customerListChanged": true}',
+                        "HX-Redirect": "/customers/",
                     },
                 )
-            if request.headers.get("X-Up-Target"):
-                response = redirect("customer_list")
-                response["X-Up-Accept-Layer"] = "true"
-                return response
             return redirect("customer_list")
     else:
         form = CustomerForm(instance=customer)
 
-    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
     template = (
         "customers/partials/customer_form.html"
-        if is_ajax
+        if request.headers.get("HX-Request")
         else "customers/edit.html"
     )
     return render(request, template, {"form": form, "customer": customer})
@@ -446,14 +436,6 @@ def customer_delete(request, pk):
         if customer.orders.exists():
             messages.error(request, "Cannot delete customer with existing orders.")
             if request.headers.get("HX-Request"):
-                return HttpResponse(
-                    status=400,
-                    headers={
-                        "HX-Trigger": '{"customerDeleteError": true}',
-                    },
-                )
-            # For Unpoly, re-render the delete form with error message
-            if request.headers.get("X-Up-Target"):
                 return render(
                     request,
                     "customers/partials/customer_delete_partial.html",
@@ -467,24 +449,16 @@ def customer_delete(request, pk):
                 return HttpResponse(
                     status=204,
                     headers={
-                        "HX-Trigger": '{"customerDeleted": true, "customerListChanged": true}',
+                        "HX-Trigger": "customerListChanged",
                         "HX-Redirect": "/customers/",
                     },
                 )
-            # For Unpoly, redirect to customer list - the up-layer="parent" will handle closing modal
-            if request.headers.get("X-Up-Target"):
-                response = redirect("customer_list")
-                response["X-Up-Accept-Layer"] = "true"
-                return response
             return redirect("customer_list")
 
-    is_ajax = request.headers.get("HX-Request") or request.headers.get("X-Up-Target")
-    template = (
-        "customers/partials/customer_delete_partial.html"
-        if is_ajax
-        else "customers/delete_confirm.html"
-    )
-    return render(request, template, {"customer": customer})
+    if request.headers.get("HX-Request"):
+        return render(request, "customers/partials/customer_delete_partial.html", {"customer": customer})
+    
+    return render(request, "customers/delete_confirm.html", {"customer": customer})
 
 
 # ============== Inventory Management ==============
@@ -542,19 +516,40 @@ def inventory_dashboard(request):
 @admin_required
 def fabric_list(request):
     """List all fabrics"""
+    search_query = request.GET.get("search", "").strip()
     fabrics = Fabric.objects.all()
+
+    if search_query:
+        fabrics = fabrics.filter(
+            Q(material__name__icontains=search_query) | 
+            Q(color__name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
     
-    # Calculate stats
-    total_fabrics = fabrics.count()
-    total_meters = sum(f.stock_meters for f in fabrics)
-    low_stock_count = fabrics.filter(stock_meters__lte=5).count()
+    # Calculate stats (global or filtered? User didn't specify, but usually global for cards)
+    total_fabrics = Fabric.objects.count()
+    total_meters = Fabric.objects.aggregate(total=Sum('stock_meters'))['total'] or 0
+    low_stock_count = Fabric.objects.filter(stock_meters__lte=5).count()
     
-    return render(request, "inventory/fabric_list.html", {
-        "fabrics": fabrics,
+    # Pagination
+    paginator = Paginator(fabrics, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        "fabrics": page_obj,
+        "page_obj": page_obj,
+        "is_paginated": page_obj.has_other_pages(),
         "total_fabrics": total_fabrics,
         "total_meters": total_meters,
         "low_stock_count": low_stock_count,
-    })
+        "search_query": search_query,
+    }
+
+    if request.headers.get("HX-Request"):
+        return render(request, "inventory/fabric_list.html", context)
+
+    return render(request, "inventory/fabric_list.html", context)
 
 
 @login_required
@@ -581,7 +576,7 @@ def fabric_create(request):
             messages.success(request, f'Fabric "{fabric.material.name if fabric.material else "Unknown"}" created successfully.')
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/fabrics/"})
             return redirect("inventory_dashboard")
     else:
         form = FabricForm()
@@ -622,7 +617,7 @@ def fabric_edit(request, pk):
             messages.success(request, f'Fabric "{fabric.material.name if fabric.material else "Unknown"}" updated successfully.')
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/fabrics/"})
             return redirect("inventory_dashboard")
     else:
         form = FabricForm(instance=fabric)
@@ -713,20 +708,24 @@ def fabric_delete(request, pk):
             fabric.delete()
             messages.success(request, "Fabric deleted successfully.")
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/fabrics/"})
             return redirect("inventory_dashboard")
         except ProtectedError:
             messages.error(request, f"Cannot delete '{fabric.material.name if fabric.material else 'Unknown'}' because it is referenced by existing orders.")
             if request.headers.get("HX-Request"):
-                # We return a message OOB but what about the modal? 
-                # The user likely has a delete confirmation modal open.
-                # If we return only messages_oob, the modal stays open?
-                # Actually, usually delete is a full page or a modal that expects a reload/redirect.
-                # In accessory_list.html:
-                # <a href="{% url 'accessory_delete' accessory.pk %}" ...
-                # It's an <a> link, not HTMX. Oh wait, let's check accessory_delete.
-                return render(request, "partials/messages_oob.html")
+                return render(
+                    request,
+                    "inventory/partials/inventory_delete_partial.html",
+                    {"item": fabric, "item_type": "fabric"}
+                )
             return redirect("inventory_dashboard")
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "inventory/partials/inventory_delete_partial.html",
+            {"item": fabric, "item_type": "fabric"}
+        )
 
     return render(
         request,
@@ -852,7 +851,7 @@ def accessory_create(request):
             )
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/accessories/"})
             return redirect("inventory_dashboard")
     else:
         form = AccessoryForm()
@@ -894,7 +893,7 @@ def accessory_edit(request, pk):
             )
 
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/accessories/"})
             return redirect("inventory_dashboard")
     else:
         form = AccessoryForm(instance=accessory)
@@ -985,13 +984,24 @@ def accessory_delete(request, pk):
             accessory.delete()
             messages.success(request, "Accessory deleted successfully.")
             if request.headers.get("HX-Request"):
-                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
+                return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/accessories/"})
             return redirect("inventory_dashboard")
         except ProtectedError:
             messages.error(request, f"Cannot delete '{accessory.name}' because it is referenced by existing orders.")
             if request.headers.get("HX-Request"):
-                return render(request, "partials/messages_oob.html")
+                return render(
+                    request,
+                    "inventory/partials/inventory_delete_partial.html",
+                    {"item": accessory, "item_type": "accessory"}
+                )
             return redirect("inventory_dashboard")
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "inventory/partials/inventory_delete_partial.html",
+            {"item": accessory, "item_type": "accessory"}
+        )
 
     return render(
         request,
@@ -1202,7 +1212,6 @@ def garment_type_remove_accessory(request, pk, accessory_pk):
 def garment_type_delete(request, pk):
     """Delete garment type"""
     garment_type = get_object_or_404(GarmentType, pk=pk)
-
     order_count = Order.objects.filter(garment_type=garment_type).count()
 
     if request.method == "POST":
@@ -1215,8 +1224,19 @@ def garment_type_delete(request, pk):
         except ProtectedError:
             messages.error(request, f"Cannot delete '{garment_type.name}' because it is referenced by existing orders.")
             if request.headers.get("HX-Request"):
-                return render(request, "partials/messages_oob.html")
+                return render(
+                    request,
+                    "garments/partials/garment_delete_partial.html",
+                    {"garment_type": garment_type, "order_count": order_count}
+                )
             return redirect("garment_type_list")
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "garments/partials/garment_delete_partial.html",
+            {"garment_type": garment_type, "order_count": order_count}
+        )
 
     return render(
         request, "garments/delete_confirm.html", {"garment_type": garment_type, "order_count": order_count}
@@ -2978,7 +2998,7 @@ def rework_create(request, order_pk):
     else:
         form = ReworkCreateForm()
         form.fields["fabric_used"].choices = [("", "---------")] + [
-            (f.pk, f.name) for f in Fabric.objects.all()
+            (f.pk, str(f)) for f in Fabric.objects.all()
         ]
         form.fields["assigned_to"].choices = [("", "---------")] + [
             (u.pk, u.get_full_name() or u.username)

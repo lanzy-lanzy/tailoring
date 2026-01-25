@@ -149,20 +149,6 @@ class FabricForm(forms.ModelForm):
             }),
         }
 
-    def clean_color(self):
-        color = self.cleaned_data.get('color')
-        if color:
-            # Check for duplicate colors
-            queryset = Fabric.objects.filter(color=color)
-            
-            # If we are editing an existing record, exclude it from the check
-            if self.instance.pk:
-                queryset = queryset.exclude(pk=self.instance.pk)
-            
-            if queryset.exists():
-                raise forms.ValidationError(f"A fabric with the color '{color.name}' already exists.")
-        
-        return color
 
 
 class AccessoryForm(forms.ModelForm):
@@ -197,20 +183,6 @@ class AccessoryForm(forms.ModelForm):
             }),
         }
 
-    def clean_color(self):
-        color = self.cleaned_data.get('color')
-        if color:
-            # Case-insensitive check for duplicate colors
-            queryset = Fabric.objects.filter(color__iexact=color)
-            
-            # If we are editing an existing record, exclude it from the check
-            if self.instance.pk:
-                queryset = queryset.exclude(pk=self.instance.pk)
-            
-            if queryset.exists():
-                raise forms.ValidationError(f"A fabric with the color '{color}' already exists.")
-        
-        return color
 
 
 class GarmentTypeForm(forms.ModelForm):
