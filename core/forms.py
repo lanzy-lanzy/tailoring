@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from decimal import Decimal
 from .models import (
-    UserProfile, Customer, Fabric, Accessory,
+    UserProfile, Customer, Fabric, FabricColor, FabricMaterial, Accessory,
     GarmentType, GarmentTypeAccessory, Order,
     TailoringTask, Payment, Rework, TailorGarmentCommission
 )
@@ -112,18 +112,24 @@ class CustomerForm(forms.ModelForm):
 
 class FabricForm(forms.ModelForm):
     """Form for managing fabrics"""
+    material = forms.ModelChoiceField(
+        queryset=FabricMaterial.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+        })
+    )
+    color = forms.ModelChoiceField(
+        queryset=FabricColor.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500'
+        })
+    )
+    
     class Meta:
         model = Fabric
-        fields = ['name', 'color', 'stock_meters', 'price_per_meter', 'description']
+        fields = ['material', 'color', 'stock_meters', 'price_per_meter', 'description']
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
-                'placeholder': 'Fabric Name'
-            }),
-            'color': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
-                'placeholder': 'Color'
-            }),
             'stock_meters': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500',
                 'placeholder': 'Stock (meters)',
@@ -142,6 +148,21 @@ class FabricForm(forms.ModelForm):
                 'rows': 3
             }),
         }
+
+    def clean_color(self):
+        color = self.cleaned_data.get('color')
+        if color:
+            # Check for duplicate colors
+            queryset = Fabric.objects.filter(color=color)
+            
+            # If we are editing an existing record, exclude it from the check
+            if self.instance.pk:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            
+            if queryset.exists():
+                raise forms.ValidationError(f"A fabric with the color '{color.name}' already exists.")
+        
+        return color
 
 
 class AccessoryForm(forms.ModelForm):
@@ -175,6 +196,21 @@ class AccessoryForm(forms.ModelForm):
                 'rows': 3
             }),
         }
+
+    def clean_color(self):
+        color = self.cleaned_data.get('color')
+        if color:
+            # Case-insensitive check for duplicate colors
+            queryset = Fabric.objects.filter(color__iexact=color)
+            
+            # If we are editing an existing record, exclude it from the check
+            if self.instance.pk:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            
+            if queryset.exists():
+                raise forms.ValidationError(f"A fabric with the color '{color}' already exists.")
+        
+        return color
 
 
 class GarmentTypeForm(forms.ModelForm):

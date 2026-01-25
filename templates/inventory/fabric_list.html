@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Fabrics - Tailoring System{% endblock %}
 
@@ -131,7 +131,7 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-green-800">{{ fabric.name }}</div>
+                                    <div class="text-sm font-medium text-green-800">{{ fabric.material.name }}</div>
                                     {% if fabric.description %}
                                     <div class="text-xs text-green-600 truncate max-w-xs">{{ fabric.description|truncatechars:40 }}</div>
                                     {% endif %}
@@ -139,7 +139,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm text-green-700">{{ fabric.color }}</span>
+                            <span class="text-sm text-green-700">{{ fabric.color.name }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium

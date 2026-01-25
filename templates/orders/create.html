@@ -1307,7 +1307,7 @@ function orderForm() {
         selectedFabricColor: '',
         estimatedFabricPerUnit: 0,
         fabricMetersUsed: 0,
-        allFabrics: [{% for fabric in fabrics %}{ id: {{ fabric.pk }}, name: '{{ fabric.name }}', color: '{{ fabric.color }}', stock: {{ fabric.stock_meters }} }{% if not forloop.last %},{% endif %}{% endfor %}],
+        allFabrics: [{% for fabric in fabrics %}{ id: {{ fabric.pk }}, name: '{{ fabric.material.name }}', color: '{{ fabric.color.name }}', stock: {{ fabric.stock_meters }} }{% if not forloop.last %},{% endif %}{% endfor %}],
         filteredFabrics: [],
          allAccessories: [{% for accessory in accessories %}{ id: {{ accessory.pk }}, name: '{{ accessory.name }}', unit: '{{ accessory.unit }}', stock: {{ accessory.stock_quantity }} }{% if not forloop.last %},{% endif %}{% endfor %}],
          selectedAccessories: [],

@@ -50,10 +50,10 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Fabric)
 class FabricAdmin(admin.ModelAdmin):
-    list_display = ('name', 'color', 'stock_meters', 'price_per_meter', 'updated_at')
-    search_fields = ('name', 'color')
-    list_filter = ('color',)
-    ordering = ('name',)
+    list_display = ('material', 'color', 'stock_meters', 'price_per_meter', 'updated_at')
+    search_fields = ('material__name', 'color__name')
+    list_filter = ('color', 'material')
+    ordering = ('material__name', 'color__name')
 
 
 @admin.register(Accessory)
@@ -156,7 +156,7 @@ class InventoryLogAdmin(admin.ModelAdmin):
     
     def get_item_name(self, obj):
         if obj.fabric:
-            return obj.fabric.name
+            return obj.fabric.material.name if obj.fabric.material else 'Unknown'
         elif obj.accessory:
             return obj.accessory.name
         return '-'

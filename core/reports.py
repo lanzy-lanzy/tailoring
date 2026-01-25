@@ -1072,8 +1072,8 @@ def generate_inventory_report(
             for fabric in low_stock_fabrics:
                 data.append(
                     [
-                        fabric.name,
-                        fabric.color or "N/A",
+                        fabric.material.name if fabric.material else "Unknown",
+                        fabric.color.name if fabric.color else "N/A",
                         f"{float(fabric.stock_meters):.2f} m",
                         f"PHP {float(fabric.price_per_meter):,.2f}/m",
                     ]

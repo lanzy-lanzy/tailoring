@@ -46,10 +46,44 @@ class Customer(models.Model):
         return f"{self.name} - {self.contact_number}"
 
 
+class FabricMaterial(models.Model):
+    """Fabric material types"""
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
+class FabricColor(models.Model):
+    """Fabric color options"""
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
 class Fabric(models.Model):
     """Fabric inventory"""
-    name = models.CharField(max_length=200)
-    color = models.CharField(max_length=100, blank=True)
+    material = models.ForeignKey(
+        FabricMaterial,
+        on_delete=models.CASCADE,
+        related_name='fabrics',
+        null=True,
+        blank=True
+    )
+    color = models.ForeignKey(
+        FabricColor,
+        on_delete=models.CASCADE,
+        related_name='fabrics'
+    )
     stock_meters = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
@@ -66,10 +100,11 @@ class Fabric(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['name']
+        ordering = ['material__name', 'color__name']
     
     def __str__(self):
-        return f"{self.name} ({self.color}) - {self.stock_meters}m"
+        material_name = self.material.name if self.material else 'Unknown'
+        return f"{material_name} ({self.color.name}) - {self.stock_meters}m"
     
     def has_sufficient_stock(self, required_meters):
         return self.stock_meters >= Decimal(str(required_meters))

@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Inventory Dashboard - Tailoring System{% endblock %}
 
@@ -106,8 +106,8 @@
                     <div class="flex items-center justify-between bg-white rounded-lg p-3 border border-red-100">
                         <div class="flex items-center">
                             <span class="w-3 h-3 rounded-full bg-green-600 mr-3"></span>
-                            <span class="font-medium text-green-800">{{ fabric.name }}</span>
-                            <span class="text-green-600 ml-2">{{ fabric.color }}</span>
+                            <span class="font-medium text-green-800">{{ fabric.material.name }}</span>
+                            <span class="text-green-600 ml-2">{{ fabric.color.name }}</span>
                         </div>
                         <div class="flex items-center space-x-3">
                             <span class="text-salmon-500 font-semibold">{{ fabric.stock_meters }} m</span>

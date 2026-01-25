@@ -16,6 +16,8 @@ from .models import (
     UserProfile,
     Customer,
     Fabric,
+    FabricColor,
+    FabricMaterial,
     Accessory,
     GarmentType,
     GarmentTypeAccessory,
@@ -576,7 +578,7 @@ def fabric_create(request):
                 created_by=request.user,
             )
 
-            messages.success(request, f'Fabric "{fabric.name}" created successfully.')
+            messages.success(request, f'Fabric "{fabric.material.name if fabric.material else "Unknown"}" created successfully.')
 
             if request.headers.get("HX-Request"):
                 return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
@@ -617,7 +619,7 @@ def fabric_edit(request, pk):
                     created_by=request.user,
                 )
 
-            messages.success(request, f'Fabric "{fabric.name}" updated successfully.')
+            messages.success(request, f'Fabric "{fabric.material.name if fabric.material else "Unknown"}" updated successfully.')
 
             if request.headers.get("HX-Request"):
                 return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
@@ -669,7 +671,7 @@ def fabric_add_stock(request, pk):
                         notes=notes,
                         created_by=request.user,
                     )
-                    messages.success(request, f"Removed {quantity}m from {fabric.name}.")
+                    messages.success(request, f"Removed {quantity}m from {fabric.material.name if fabric.material else 'Unknown'}.")
             else:
                 fabric.stock_meters += quantity
                 fabric.save()
@@ -683,7 +685,7 @@ def fabric_add_stock(request, pk):
                     notes=notes,
                     created_by=request.user,
                 )
-                messages.success(request, f"Added {quantity}m to {fabric.name}.")
+                messages.success(request, f"Added {quantity}m to {fabric.material.name if fabric.material else 'Unknown'}.")
 
             if request.headers.get("HX-Request"):
                 response = render(request, "partials/messages_oob.html")
@@ -714,7 +716,7 @@ def fabric_delete(request, pk):
                 return HttpResponse(status=204, headers={"HX-Redirect": "/inventory/"})
             return redirect("inventory_dashboard")
         except ProtectedError:
-            messages.error(request, f"Cannot delete '{fabric.name}' because it is referenced by existing orders.")
+            messages.error(request, f"Cannot delete '{fabric.material.name if fabric.material else 'Unknown'}' because it is referenced by existing orders.")
             if request.headers.get("HX-Request"):
                 # We return a message OOB but what about the modal? 
                 # The user likely has a delete confirmation modal open.
