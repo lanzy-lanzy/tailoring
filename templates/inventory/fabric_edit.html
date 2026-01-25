@@ -1,6 +1,6 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Edit Fabric - {{ fabric.name }} - Tailoring System{% endblock %}
+{% block title %}Edit Fabric - {{ fabric.material.name }} - Tailoring System{% endblock %}
 
 {% block page_title %}Edit Fabric{% endblock %}
 
@@ -25,7 +25,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </li>
-            <li class="text-green-800 font-medium">{{ fabric.name }}</li>
+            <li class="text-green-800 font-medium">{{ fabric.material.name }}</li>
         </ol>
     </nav>
 
@@ -47,21 +47,30 @@
         <form method="post" action="{% url 'fabric_edit' fabric.pk %}" class="p-6 space-y-6">
             {% csrf_token %}
 
-            <!-- Name -->
+            <!-- Material -->
             <div>
-                <label for="id_name" class="block text-sm font-medium text-green-700 mb-2">
-                    Fabric Name <span class="text-salmon-500">*</span>
+                <label for="id_material" class="block text-sm font-medium text-green-700 mb-2">
+                    Fabric Material <span class="text-salmon-500">*</span>
                 </label>
-                <input type="text"
-                       name="name"
-                       id="id_name"
-                       required
-                       maxlength="200"
-                       value="{{ form.name.value|default:fabric.name }}"
-                       class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
-                       placeholder="e.g., Cotton Twill, Silk Charmeuse">
-                {% if form.name.errors %}
-                <p class="mt-1 text-sm text-salmon-500">{{ form.name.errors.0 }}</p>
+                <div class="flex gap-2">
+                    <select name="material"
+                           id="id_material"
+                           class="flex-1 px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 {% if form.material.errors %}border-salmon-500{% endif %}">
+                        <option value="">-- Select or create material --</option>
+                        {% for choice in form.material.field.queryset %}
+                        <option value="{{ choice.id }}" {% if form.material.value == choice.id|stringformat:"s" %}selected{% endif %}>{{ choice.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button"
+                           class="px-4 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors font-medium"
+                           onclick="showNewMaterialModal()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                    </button>
+                </div>
+                {% if form.material.errors %}
+                <p class="mt-1 text-sm text-salmon-500">{{ form.material.errors.0 }}</p>
                 {% endif %}
             </div>
 
@@ -70,14 +79,24 @@
                 <label for="id_color" class="block text-sm font-medium text-green-700 mb-2">
                     Color <span class="text-salmon-500">*</span>
                 </label>
-                <input type="text"
-                       name="color"
-                       id="id_color"
-                       required
-                       maxlength="100"
-                       value="{{ form.color.value|default:fabric.color }}"
-                       class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 placeholder-brown-400"
-                       placeholder="e.g., Navy Blue, Charcoal Gray">
+                <div class="flex gap-2">
+                    <select name="color"
+                           id="id_color"
+                           required
+                           class="flex-1 px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white text-green-800 {% if form.color.errors %}border-salmon-500{% endif %}">
+                        <option value="">-- Select or create color --</option>
+                        {% for choice in form.color.field.queryset %}
+                        <option value="{{ choice.id }}" {% if form.color.value == choice.id|stringformat:"s" %}selected{% endif %}>{{ choice.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button"
+                           class="px-4 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors font-medium"
+                           onclick="showNewColorModal()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                    </button>
+                </div>
                 {% if form.color.errors %}
                 <p class="mt-1 text-sm text-salmon-500">{{ form.color.errors.0 }}</p>
                 {% endif %}
@@ -96,10 +115,10 @@
                                disabled
                                class="flex-1 px-4 py-2 border border-green-200 rounded-lg bg-cream-500 text-green-600">
                         <button type="button"
-                                class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                hx-get="{% url 'fabric_add_stock' fabric.pk %}"
-                                hx-target="#modal-container"
-                                hx-swap="innerHTML">
+                               class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                               hx-get="{% url 'fabric_add_stock' fabric.pk %}"
+                               hx-target="#modal-container"
+                               hx-swap="innerHTML">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                             </svg>
@@ -172,7 +191,7 @@
                         Cancel
                     </a>
                     <button type="submit"
-                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium">
+                           class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium">
                         <svg class="w-5 h-5 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -183,14 +202,165 @@
         </form>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<!-- New Material Modal -->
+<div id="newMaterialModal" 
+     class="fixed inset-0 z-[60] overflow-y-auto hidden"
+     @keydown.escape.window="document.getElementById('newMaterialModal').classList.add('hidden')">
+    <div class="fixed inset-0 bg-black/50" @click="document.getElementById('newMaterialModal').classList.add('hidden')"></div>
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full">
+            <div class="px-6 py-4 border-b border-green-100 bg-cream-5000">
+                <h3 class="text-lg font-semibold text-green-800">Create New Material</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label for="newMaterialName" class="block text-sm font-medium text-green-700 mb-2">
+                        Material Name <span class="text-salmon-500">*</span>
+                    </label>
+                    <input type="text"
+                           id="newMaterialName"
+                           placeholder="e.g., Cotton, Silk, Polyester"
+                           class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent">
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-green-100 bg-cream-500 flex items-center justify-end space-x-3">
+                <button type="button"
+                        onclick="document.getElementById('newMaterialModal').classList.add('hidden')"
+                        class="px-4 py-2 text-green-600 hover:text-green-800 font-medium">
+                    Cancel
+                </button>
+                <button type="button"
+                        onclick="createNewMaterial()"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    Create Material
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Color Modal -->
+<div id="newColorModal" 
+     class="fixed inset-0 z-[60] overflow-y-auto hidden"
+     @keydown.escape.window="document.getElementById('newColorModal').classList.add('hidden')">
+    <div class="fixed inset-0 bg-black/50" @click="document.getElementById('newColorModal').classList.add('hidden')"></div>
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full">
+            <div class="px-6 py-4 border-b border-green-100 bg-cream-5000">
+                <h3 class="text-lg font-semibold text-green-800">Create New Color</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label for="newColorName" class="block text-sm font-medium text-green-700 mb-2">
+                        Color Name <span class="text-salmon-500">*</span>
+                    </label>
+                    <input type="text"
+                           id="newColorName"
+                           placeholder="e.g., Navy Blue, Charcoal Gray"
+                           class="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent">
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-green-100 bg-cream-500 flex items-center justify-end space-x-3">
+                <button type="button"
+                        onclick="document.getElementById('newColorModal').classList.add('hidden')"
+                        class="px-4 py-2 text-green-600 hover:text-green-800 font-medium">
+                    Cancel
+                </button>
+                <button type="button"
+                        onclick="createNewColor()"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    Create Color
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.getElementById('modal-container').innerHTML = '';
+function showNewMaterialModal() {
+    document.getElementById('newMaterialModal').classList.remove('hidden');
+    document.getElementById('newMaterialName').focus();
+}
+
+function showNewColorModal() {
+    document.getElementById('newColorModal').classList.remove('hidden');
+    document.getElementById('newColorName').focus();
+}
+
+function createNewMaterial() {
+    const name = document.getElementById('newMaterialName').value.trim();
+    if (!name) {
+        alert('Please enter a material name');
+        return;
+    }
+
+    fetch('{% url "create_fabric_material" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({ name: name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById('id_material');
+            const option = document.createElement('option');
+            option.value = data.id;
+            option.textContent = data.name;
+            option.selected = true;
+            select.appendChild(option);
+            
+            document.getElementById('newMaterialName').value = '';
+            document.getElementById('newMaterialModal').classList.add('hidden');
+        } else {
+            alert('Error: ' + data.error);
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to create material');
     });
+}
+
+function createNewColor() {
+    const name = document.getElementById('newColorName').value.trim();
+    if (!name) {
+        alert('Please enter a color name');
+        return;
+    }
+
+    fetch('{% url "create_fabric_color" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({ name: name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById('id_color');
+            const option = document.createElement('option');
+            option.value = data.id;
+            option.textContent = data.name;
+            option.selected = true;
+            select.appendChild(option);
+            
+            document.getElementById('newColorName').value = '';
+            document.getElementById('newColorModal').classList.add('hidden');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to create color');
+    });
+}
 </script>
+
 {% endblock %}

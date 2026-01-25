@@ -31,6 +31,8 @@ urlpatterns = [
     path(
         "inventory/fabrics/<int:pk>/delete/", views.fabric_delete, name="fabric_delete"
     ),
+    path("inventory/fabrics/create-material/", views.create_fabric_material, name="create_fabric_material"),
+    path("inventory/fabrics/create-color/", views.create_fabric_color, name="create_fabric_color"),
     # Accessory
     path("inventory/accessories/", views.accessory_list, name="accessory_list"),
     path(

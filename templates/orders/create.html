@@ -1315,13 +1315,18 @@ function orderForm() {
          accessorySearch: '',
 
          get filteredAccessories() {
-             if (!this.accessorySearch) {
-                 return this.allAccessories;
-             }
-             const search = this.accessorySearch.toLowerCase();
-             return this.allAccessories.filter(accessory =>
-                 accessory.name.toLowerCase().includes(search)
-             );
+              if (!this.accessorySearch) {
+                  return this.allAccessories;
+              }
+              const search = this.accessorySearch.toLowerCase();
+              return this.allAccessories.filter(accessory =>
+                  accessory.name.toLowerCase().includes(search)
+              );
+          },
+
+         get uniqueColors() {
+             const colorSet = new Set(this.allFabrics.map(f => f.color));
+             return Array.from(colorSet).sort();
          },
 
           // Measurement categories

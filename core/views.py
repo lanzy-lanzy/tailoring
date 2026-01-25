@@ -735,6 +735,76 @@ def fabric_delete(request, pk):
     )
 
 
+@login_required
+@admin_required
+def create_fabric_material(request):
+    """Create new fabric material via AJAX"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name', '').strip()
+            
+            if not name:
+                return JsonResponse({'success': False, 'error': 'Material name is required'})
+            
+            # Check if material already exists (case-insensitive)
+            existing = FabricMaterial.objects.filter(name__iexact=name).first()
+            if existing:
+                return JsonResponse({
+                    'success': True,
+                    'id': existing.id,
+                    'name': existing.name,
+                    'message': 'Material already exists'
+                })
+            
+            # Create new material
+            material = FabricMaterial.objects.create(name=name)
+            return JsonResponse({
+                'success': True,
+                'id': material.id,
+                'name': material.name
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'POST request required'})
+
+
+@login_required
+@admin_required
+def create_fabric_color(request):
+    """Create new fabric color via AJAX"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name', '').strip()
+            
+            if not name:
+                return JsonResponse({'success': False, 'error': 'Color name is required'})
+            
+            # Check if color already exists (case-insensitive)
+            existing = FabricColor.objects.filter(name__iexact=name).first()
+            if existing:
+                return JsonResponse({
+                    'success': True,
+                    'id': existing.id,
+                    'name': existing.name,
+                    'message': 'Color already exists'
+                })
+            
+            # Create new color
+            color = FabricColor.objects.create(name=name)
+            return JsonResponse({
+                'success': True,
+                'id': color.id,
+                'name': color.name
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'POST request required'})
+
+
 # Accessory CRUD
 @login_required
 @admin_required
