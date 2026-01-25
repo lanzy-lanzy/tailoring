@@ -125,7 +125,6 @@
                             <tr>
                                 <th class="px-4 py-2 text-left text-green-600">Date</th>
                                 <th class="px-4 py-2 text-left text-green-600">Type</th>
-                                <th class="px-4 py-2 text-left text-green-600">Method</th>
                                 <th class="px-4 py-2 text-right text-green-600">Amount</th>
                             </tr>
                         </thead>
@@ -138,7 +137,6 @@
                                         {{ payment.get_payment_type_display }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-2 text-green-700 capitalize">{{ payment.payment_method }}</td>
                                 <td class="px-4 py-2 text-right font-medium text-green-600">P{{ payment.amount|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}

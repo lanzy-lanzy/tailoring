@@ -111,7 +111,7 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Order</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Customer</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Method</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Order Status</th>
                         <th class="px-6 py-3 text-right text-xs font-semibold text-green-600 uppercase tracking-wider">Amount</th>
                         <th class="px-6 py-3 text-right text-xs font-semibold text-green-600 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -146,8 +146,23 @@
                                 {{ payment.get_payment_type_display }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-green-600 capitalize">
-                            {{ payment.payment_method|default:"Cash" }}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if payment.order.payment_status == 'fully_paid' %}
+                                    bg-green-100 text-green-800
+                                {% elif payment.order.payment_status == 'partial' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% else %}
+                                    bg-red-100 text-red-800
+                                {% endif %}">
+                                {% if payment.order.payment_status == 'fully_paid' %}
+                                    Fully Paid
+                                {% elif payment.order.payment_status == 'partial' %}
+                                    Partial
+                                {% else %}
+                                    Unpaid
+                                {% endif %}
+                            </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <span class="text-green-600 font-bold">{{ payment.amount|floatformat:2 }}</span>

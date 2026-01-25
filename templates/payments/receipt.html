@@ -212,7 +212,7 @@
         <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 text-center mb-3 border-2 border-green-200">
             <p class="text-sm text-green-700 uppercase tracking-wider mb-2 font-semibold">{{ payment.get_payment_type_display }} Payment Received</p>
             <p class="text-4xl font-bold text-green-700">P{{ payment.amount|floatformat:2 }}</p>
-            <p class="text-xs text-green-600 mt-2">{{ payment.get_payment_method_display|default:payment.payment_method|title }} | {{ payment.payment_date|date:"F j, Y - g:i A" }}</p>
+            <p class="text-xs text-green-600 mt-2">{{ payment.payment_date|date:"F j, Y - g:i A" }}</p>
         </div>
         
         <!-- Payment Section - Two Columns -->
@@ -332,7 +332,6 @@
                 <p class="font-bold text-green-700 mb-1">Payment Information:</p>
                 <ul class="list-disc list-inside space-y-0.5">
                     <li>Receipt #{{ payment.payment_number }}</li>
-                    <li>Method: {{ payment.get_payment_method_display|default:payment.payment_method|title }}</li>
                     <li>Keep this receipt for reference</li>
                 </ul>
             </div>
