@@ -66,7 +66,7 @@ Expects: form (AccessoryForm), accessory (optional - for edit mode)
                                id="id_name"
                                required
                                maxlength="200"
-                               value="{{ form.name.value|default:accessory.name|default:'' }}"
+                               value="{{ form.name.value|default:'' }}{% if not form.name.value and accessory %}{{ accessory.name }}{% endif %}"
                                class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-blue-800 placeholder-blue-400 {% if form.name.errors %}border-rose-500{% endif %}"
                                placeholder="e.g., Brass Buttons, Zipper"
                                autofocus>
@@ -85,13 +85,13 @@ Expects: form (AccessoryForm), accessory (optional - for edit mode)
                                 required
                                 class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-blue-800 {% if form.unit.errors %}border-rose-500{% endif %}">
                             <option value="">Select a unit type...</option>
-                            <option value="pcs" {% if accessory.unit == 'pcs' or form.unit.value == 'pcs' %}selected{% endif %}>Pieces</option>
-                            <option value="set" {% if accessory.unit == 'set' or form.unit.value == 'set' %}selected{% endif %}>Sets</option>
-                            <option value="m" {% if accessory.unit == 'm' or form.unit.value == 'm' %}selected{% endif %}>Meters</option>
-                            <option value="yd" {% if accessory.unit == 'yd' or form.unit.value == 'yd' %}selected{% endif %}>Yards</option>
-                            <option value="roll" {% if accessory.unit == 'roll' or form.unit.value == 'roll' %}selected{% endif %}>Rolls</option>
-                            <option value="box" {% if accessory.unit == 'box' or form.unit.value == 'box' %}selected{% endif %}>Boxes</option>
-                            <option value="pack" {% if accessory.unit == 'pack' or form.unit.value == 'pack' %}selected{% endif %}>Packs</option>
+                            <option value="pcs" {% if form.unit.value == 'pcs' or not form.unit.value and accessory.unit == 'pcs' %}selected{% endif %}>Pieces</option>
+                            <option value="set" {% if form.unit.value == 'set' or not form.unit.value and accessory.unit == 'set' %}selected{% endif %}>Sets</option>
+                            <option value="m" {% if form.unit.value == 'm' or not form.unit.value and accessory.unit == 'm' %}selected{% endif %}>Meters</option>
+                            <option value="yd" {% if form.unit.value == 'yd' or not form.unit.value and accessory.unit == 'yd' %}selected{% endif %}>Yards</option>
+                            <option value="roll" {% if form.unit.value == 'roll' or not form.unit.value and accessory.unit == 'roll' %}selected{% endif %}>Rolls</option>
+                            <option value="box" {% if form.unit.value == 'box' or not form.unit.value and accessory.unit == 'box' %}selected{% endif %}>Boxes</option>
+                            <option value="pack" {% if form.unit.value == 'pack' or not form.unit.value and accessory.unit == 'pack' %}selected{% endif %}>Packs</option>
                         </select>
                     </div>
 
@@ -130,7 +130,7 @@ Expects: form (AccessoryForm), accessory (optional - for edit mode)
                                    required
                                    min="0"
                                    step="0.01"
-                                   value="{{ form.price_per_unit.value|default:accessory.price_per_unit|default:'0.00' }}"
+                                   value="{{ form.price_per_unit.value|default:'' }}{% if not form.price_per_unit.value and accessory %}{{ accessory.price_per_unit }}{% elif not form.price_per_unit.value and not accessory %}0.00{% endif %}"
                                    class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-blue-800 {% if form.price_per_unit.errors %}border-rose-500{% endif %}"
                                    placeholder="0.00">
                         </div>
@@ -145,7 +145,7 @@ Expects: form (AccessoryForm), accessory (optional - for edit mode)
                                   id="id_description"
                                   rows="3"
                                   class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white text-blue-800 resize-none"
-                                  placeholder="Additional details...">{{ form.description.value|default:accessory.description|default:'' }}</textarea>
+                                  placeholder="Additional details...">{{ form.description.value|default:'' }}{% if not form.description.value and accessory %}{{ accessory.description }}{% endif %}</textarea>
                     </div>
                 </div>
 

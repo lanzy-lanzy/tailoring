@@ -147,8 +147,8 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
-                                {% if fabric.stock_meters <= 5 %}bg-salmon-100 text-salmon-500
-                                {% elif fabric.stock_meters <= 15 %}bg-pink-100 text-pink-500
+                                {% if fabric.stock_meters <= 20 %}bg-salmon-100 text-salmon-500
+                                {% elif fabric.stock_meters <= 40 %}bg-pink-100 text-pink-500
                                 {% else %}bg-green-100 text-green-800{% endif %}">
                                 {{ fabric.stock_meters }} m
                             </span>

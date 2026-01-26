@@ -60,10 +60,6 @@
     <!-- Alpine.js -->
     <script defer src="{% static 'js/alpine.min.js' %}"></script>
 
-    <!-- Unpoly -->
-    <script src="https://unpkg.com/unpoly@3.10.2/unpoly.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/unpoly@3.10.2/unpoly.min.css">
-
     <style>
         [x-cloak] {
             display: none !important;
@@ -536,6 +532,17 @@
 
         htmx.on('htmx:afterRequest', function (evt) {
             document.body.classList.remove('cursor-wait');
+        });
+
+        // Error logging for HTMX
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            console.error('HTMX Response Error:', evt.detail.xhr.status, evt.detail.xhr.statusText);
+            console.error('Target:', evt.detail.target);
+            console.error('URL:', evt.detail.pathInfo.path);
+        });
+
+        document.body.addEventListener('htmx:sendError', function(evt) {
+            console.error('HTMX Send Error (Network?):', evt.detail);
         });
     </script>
 </body>

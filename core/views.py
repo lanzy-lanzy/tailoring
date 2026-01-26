@@ -208,8 +208,8 @@ def admin_dashboard(request):
     ).order_by("-created_at")[:10]
 
     # Low stock alerts
-    low_stock_fabrics = Fabric.objects.filter(stock_meters__lte=5)
-    low_stock_accessories = Accessory.objects.filter(stock_quantity__lte=10)
+    low_stock_fabrics = Fabric.objects.filter(stock_meters__lte=20)
+    low_stock_accessories = Accessory.objects.filter(stock_quantity__lte=50)
 
     # Tasks awaiting approval
     pending_approvals = TailoringTask.objects.filter(status="completed").select_related(
@@ -476,8 +476,8 @@ def inventory_dashboard(request):
     total_accessories = accessories.count()
     
     # Low stock thresholds
-    low_stock_fabrics = fabrics.filter(stock_meters__lte=5)
-    low_stock_accessories = accessories.filter(stock_quantity__lte=10)
+    low_stock_fabrics = fabrics.filter(stock_meters__lte=20)
+    low_stock_accessories = accessories.filter(stock_quantity__lte=50)
     low_stock_count = low_stock_fabrics.count() + low_stock_accessories.count()
     
     # Calculate total inventory value
@@ -529,7 +529,7 @@ def fabric_list(request):
     # Calculate stats (global or filtered? User didn't specify, but usually global for cards)
     total_fabrics = Fabric.objects.count()
     total_meters = Fabric.objects.aggregate(total=Sum('stock_meters'))['total'] or 0
-    low_stock_count = Fabric.objects.filter(stock_meters__lte=5).count()
+    low_stock_count = Fabric.objects.filter(stock_meters__lte=20).count()
     
     # Pagination
     paginator = Paginator(fabrics, 15)
@@ -586,7 +586,7 @@ def fabric_create(request):
         if request.headers.get("HX-Request")
         else "inventory/fabric_create.html"
     )
-    return render(request, template, {"form": form})
+    return render(request, template, {"form": form, "fabric": None})
 
 
 @login_required
@@ -814,7 +814,7 @@ def accessory_list(request):
     # Calculate stats
     total_accessories = accessories.count()
     total_value = sum(a.stock_quantity * a.price_per_unit for a in accessories)
-    low_stock_count = accessories.filter(stock_quantity__lte=10).count()
+    low_stock_count = accessories.filter(stock_quantity__lte=50).count()
     
     return render(
         request, "inventory/accessory_list.html", {
@@ -861,7 +861,7 @@ def accessory_create(request):
         if request.headers.get("HX-Request")
         else "inventory/accessory_create.html"
     )
-    return render(request, template, {"form": form})
+    return render(request, template, {"form": form, "accessory": None})
 
 
 @login_required
@@ -1090,7 +1090,7 @@ def garment_type_create(request):
         if request.headers.get("HX-Request")
         else "garments/create.html"
     )
-    return render(request, template, {"form": form, "tailors": tailors})
+    return render(request, template, {"form": form, "tailors": tailors, "garment_type": None})
 
 
 @login_required
@@ -2543,10 +2543,10 @@ def reports_dashboard(request):
     recent_activity = recent_activity[:15]
 
     # ===== INVENTORY ALERTS =====
-    low_stock_fabrics = Fabric.objects.filter(stock_meters__lte=5).order_by(
+    low_stock_fabrics = Fabric.objects.filter(stock_meters__lte=20).order_by(
         "stock_meters"
     )[:5]
-    low_stock_accessories = Accessory.objects.filter(stock_quantity__lte=10).order_by(
+    low_stock_accessories = Accessory.objects.filter(stock_quantity__lte=50).order_by(
         "stock_quantity"
     )[:5]
 
@@ -4498,10 +4498,10 @@ def export_inventory_report_pdf(request):
     accessories = Accessory.objects.all().order_by("name")
 
     low_stock_fabrics = list(
-        Fabric.objects.filter(stock_meters__lte=5).order_by("stock_meters")
+        Fabric.objects.filter(stock_meters__lte=20).order_by("stock_meters")
     )
     low_stock_accessories = list(
-        Accessory.objects.filter(stock_quantity__lte=10).order_by("stock_quantity")
+        Accessory.objects.filter(stock_quantity__lte=50).order_by("stock_quantity")
     )
 
     # Get inventory logs for the period

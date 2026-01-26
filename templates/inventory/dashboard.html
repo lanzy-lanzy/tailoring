@@ -170,7 +170,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold {% if fabric.stock_meters <= 5 %}text-salmon-500{% elif fabric.stock_meters <= 15 %}text-pink-500{% else %}text-green-600{% endif %}">
+                            <p class="font-semibold {% if fabric.stock_meters <= 20 %}text-salmon-500{% elif fabric.stock_meters <= 40 %}text-pink-500{% else %}text-green-600{% endif %}">
                                 {{ fabric.stock_meters }} m
                             </p>
                             <p class="text-sm text-green-600">{{ fabric.price_per_meter }}/m</p>
@@ -216,7 +216,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold {% if accessory.stock_quantity <= 10 %}text-salmon-500{% elif accessory.stock_quantity <= 30 %}text-pink-500{% else %}text-green-600{% endif %}">
+                            <p class="font-semibold {% if accessory.stock_quantity <= 50 %}text-salmon-500{% elif accessory.stock_quantity <= 100 %}text-pink-500{% else %}text-green-600{% endif %}">
                                 {{ accessory.stock_quantity }} {{ accessory.unit }}
                             </p>
                             <p class="text-sm text-green-600">{{ accessory.price_per_unit }}/{{ accessory.unit }}</p>

@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Edit Accessory - {{ accessory.name }} - Tailoring System{% endblock %}
 
@@ -37,8 +37,8 @@
                 <p class="text-sm text-green-600 mt-1">Update accessory information</p>
             </div>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
-                {% if accessory.stock_quantity <= 10 %}bg-salmon-100 text-salmon-500
-                {% elif accessory.stock_quantity <= 30 %}bg-pink-100 text-pink-500
+                {% if accessory.stock_quantity <= 50 %}bg-salmon-100 text-salmon-500
+                {% elif accessory.stock_quantity <= 100 %}bg-pink-100 text-pink-500
                 {% else %}bg-green-100 text-green-800{% endif %}">
                 {{ accessory.stock_quantity }} {{ accessory.unit }} in stock
             </span>
