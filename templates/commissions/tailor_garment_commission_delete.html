@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Commission Rate - El Senior Original Tailoring{% endblock %}
+
+{% block page_title %}Delete Commission Rate{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Breadcrumb -->
+    <nav class="mb-4">
+        <ol class="flex items-center space-x-2 text-sm text-slate-500">
+            <li>
+                <a href="{% url 'tailor_garment_commission_list' %}" class="hover:text-emerald-600 transition-colors font-medium">Garment Rates</a>
+            </li>
+            <li>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li class="text-slate-800 font-bold">Delete Rate</li>
+        </ol>
+    </nav>
+
+    {% include 'commissions/partials/tailor_garment_commission_delete.html' %}
+</div>
+{% endblock %}

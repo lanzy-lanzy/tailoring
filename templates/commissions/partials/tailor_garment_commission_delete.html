@@ -51,22 +51,23 @@
 
         <!-- Actions -->
         <form method="post" 
+              action="{% url 'tailor_garment_commission_delete' commission.pk %}"
               up-submit
               up-layer="parent"
               up-accept-location="{% url 'tailor_garment_commission_list' %}">
             {% csrf_token %}
-            <div class="flex items-center justify-end gap-4">
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4">
                 <button type="button"
-                   @click="if (window.up) up.layer.dismiss(); else window.location.href='{% url 'tailor_garment_commission_list' %}'"
-                   class="px-8 py-4 bg-slate-800 text-slate-400 font-bold rounded-2xl hover:bg-slate-700 hover:text-white transition-all duration-300 text-sm">
-                    Cancel
+                   @click="if (window.up && up.layer.current.isModal()) up.layer.dismiss(); else window.location.href='{% url 'tailor_garment_commission_list' %}'"
+                   class="w-full sm:w-auto px-10 py-4 bg-slate-800 text-slate-400 font-extrabold rounded-2xl hover:bg-slate-700 hover:text-white transition-all duration-300 text-sm tracking-widest uppercase">
+                    Abort
                 </button>
                 <button type="submit" 
-                        class="px-10 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-400 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_30px_rgba(244,63,94,0.3)] text-sm flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        class="w-full sm:w-auto px-10 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-[0_0_30px_rgba(244,63,94,0.3)] text-sm tracking-widest uppercase flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    Delete Rate
+                    Confirm Deletion
                 </button>
             </div>
         </form>

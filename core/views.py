@@ -3785,9 +3785,14 @@ def tailor_garment_commission_create(request):
                 "Commission rate already exists for this tailor and garment type.",
             )
 
+    template = (
+        "commissions/partials/tailor_garment_commission_form.html"
+        if request.headers.get("UP-Request") or request.headers.get("HX-Request")
+        else "commissions/tailor_garment_commission_create.html"
+    )
     return render(
         request,
-        "commissions/partials/tailor_garment_commission_form.html",
+        template,
         {
             "tailors": User.objects.filter(profile__role="tailor", is_active=True).order_by(
                 "first_name", "last_name"
@@ -3824,9 +3829,14 @@ def tailor_garment_commission_edit(request, pk):
     else:
         form = TailorGarmentCommissionForm(instance=commission)
 
+    template = (
+        "commissions/partials/tailor_garment_commission_form.html"
+        if request.headers.get("UP-Request") or request.headers.get("HX-Request")
+        else "commissions/tailor_garment_commission_edit.html"
+    )
     return render(
         request,
-        "commissions/partials/tailor_garment_commission_form.html",
+        template,
         {"form": form, "commission": commission},
     )
 
@@ -3852,9 +3862,14 @@ def tailor_garment_commission_delete(request, pk):
             )
         return redirect("tailor_garment_commission_list")
 
+    template = (
+        "commissions/partials/tailor_garment_commission_delete.html"
+        if request.headers.get("UP-Request") or request.headers.get("HX-Request")
+        else "commissions/tailor_garment_commission_delete.html"
+    )
     return render(
         request,
-        "commissions/partials/tailor_garment_commission_delete.html",
+        template,
         {"commission": commission},
     )
 

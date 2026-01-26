@@ -18,8 +18,10 @@
 
         <!-- Form submission: On success, server redirects to accept-location which closes the modal -->
         <form method="post" 
+              action="{% if commission %}{% url 'tailor_garment_commission_edit' commission.pk %}{% else %}{% url 'tailor_garment_commission_create' %}{% endif %}"
               up-submit
               up-layer="parent"
+              up-target="#commission-rate-form-container"
               up-accept-location="{% url 'tailor_garment_commission_list' %}"
               class="space-y-6">
             {% csrf_token %}
@@ -28,31 +30,43 @@
             <input type="hidden" name="tailor" value="{{ commission.tailor.id }}">
             <input type="hidden" name="garment_type" value="{{ commission.garment_type.id }}">
             
-            <div class="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
+            <div class="flex flex-col md:flex-row md:items-center gap-6 p-6 bg-white/5 rounded-3xl border border-white/10 group-hover:border-emerald-500/30 transition-all duration-500">
                 <div class="flex-1">
-                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Target Tailor</p>
-                    <p class="text-lg font-bold text-white">{{ commission.tailor.get_full_name|default:commission.tailor.username }}</p>
+                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1.5 opacity-80">Target Tailor</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-emerald-400 font-bold border border-white/5">
+                            {{ commission.tailor.get_full_name|slice:":1"|upper|default:commission.tailor.username|slice:":1"|upper }}
+                        </div>
+                        <p class="text-xl font-black text-white tracking-tight">{{ commission.tailor.get_full_name|default:commission.tailor.username }}</p>
+                    </div>
                 </div>
-                <div class="w-px h-8 bg-white/10"></div>
+                <div class="hidden md:block w-px h-12 bg-white/10"></div>
                 <div class="flex-1">
-                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Garment Type</p>
-                    <p class="text-lg font-bold text-white">{{ commission.garment_type.name }}</p>
+                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1.5 opacity-80">Garment Type</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xl font-black text-white tracking-tight">{{ commission.garment_type.name }}</p>
+                    </div>
                 </div>
             </div>
             {% else %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Tailor Selection -->
                 <div class="group">
-                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1">Select Master Tailor</label>
+                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1 opacity-80">Select Master Tailor</label>
                     <div class="relative">
                         <select name="tailor" required
-                                class="w-full bg-slate-800/80 border border-slate-700 text-white rounded-2xl px-5 py-4 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none appearance-none hover:bg-slate-800 cursor-pointer">
+                                class="w-full bg-slate-800/80 border border-slate-700 text-white rounded-2xl px-5 py-4 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none appearance-none hover:bg-slate-700 cursor-pointer shadow-lg">
                             <option value="" disabled selected>Choose Tailor...</option>
                             {% for t in tailors %}
                             <option value="{{ t.id }}">{{ t.get_full_name|default:t.username }}</option>
                             {% endfor %}
                         </select>
-                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover:text-emerald-400 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                             </svg>
@@ -62,16 +76,16 @@
                 
                 <!-- Garment Type Selection -->
                 <div class="group">
-                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1">Garment Specialist</label>
+                    <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1 opacity-80">Garment Specialist</label>
                     <div class="relative">
                         <select name="garment_type" required
-                                class="w-full bg-slate-800/80 border border-slate-700 text-white rounded-2xl px-5 py-4 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none appearance-none hover:bg-slate-800 cursor-pointer">
+                                class="w-full bg-slate-800/80 border border-slate-700 text-white rounded-2xl px-5 py-4 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none appearance-none hover:bg-slate-700 cursor-pointer shadow-lg">
                             <option value="" disabled selected>Select Garment...</option>
                             {% for g in garment_types %}
                             <option value="{{ g.id }}">{{ g.name }}</option>
                             {% endfor %}
                         </select>
-                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover:text-emerald-400 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                             </svg>
@@ -83,64 +97,69 @@
             
             <!-- Rate Input -->
             <div class="relative group">
-                <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1">Commission Percentage</label>
+                <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1 opacity-80">Commission Percentage</label>
                 <div class="relative">
                     <input type="number" 
                            name="commission_rate" 
-                           value="{% if commission %}{{ commission.commission_rate }}{% else %}15.00{% endif %}"
+                           value="{% if commission %}{{ commission.commission_rate|floatformat:2 }}{% else %}15.00{% endif %}"
                            min="0" max="100" step="0.01" required
-                           class="w-full bg-slate-800/80 border border-slate-700 text-white text-2xl font-black rounded-2xl px-6 py-6 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none placeholder-slate-600"
+                           class="w-full bg-slate-800/80 border border-slate-700 text-white text-3xl font-black rounded-3xl px-8 py-8 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none placeholder-slate-600 shadow-inner group-hover:bg-slate-800/90"
                            placeholder="0.00">
-                    <div class="absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-black text-emerald-500/50">
+                    <div class="absolute right-8 top-1/2 -translate-y-1/2 text-4xl font-black text-emerald-500/30 group-focus-within:text-emerald-500/60 transition-colors">
                         %
                     </div>
                 </div>
                 {% if form.commission_rate.errors %}
-                <p class="text-rose-500 text-xs mt-2 ml-1 font-bold">{{ form.commission_rate.errors.0 }}</p>
+                <p class="text-rose-500 text-xs mt-3 ml-1 font-bold flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ form.commission_rate.errors.0 }}
+                </p>
                 {% endif %}
-                <p class="text-slate-500 text-[10px] mt-2 ml-1 font-medium italic">Defined percentage of the total order value paid to the tailor.</p>
+                <p class="text-slate-500 text-[10px] mt-3 ml-1 font-medium italic opacity-70">Define the percentage share computed from the total garment labor value.</p>
             </div>
             
             <!-- Active Toggle -->
-            <div class="flex items-center justify-between p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10">
+            <div class="flex items-center justify-between p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <p class="text-white font-bold leading-none">Active Status</p>
-                        <p class="text-emerald-500/60 text-xs mt-1">Enable or disable this commission rule.</p>
+                        <p class="text-white font-black tracking-tight leading-none text-lg">Active Policy</p>
+                        <p class="text-emerald-500/60 text-xs mt-1 font-medium">Toggle to immediately enable/disable this rate.</p>
                     </div>
                 </div>
                 
                 <label class="relative inline-flex items-center cursor-pointer group">
                     <input type="checkbox" name="is_active" class="sr-only peer" {% if commission.is_active|default:True %}checked{% endif %}>
-                    <div class="w-14 h-8 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 shadow-inner transition-all duration-300"></div>
+                    <div class="w-16 h-9 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-600 peer-checked:to-emerald-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] transition-all duration-300"></div>
                 </label>
             </div>
             
             <!-- Actions -->
-            <div class="flex items-center justify-end gap-4 pt-6">
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-8 border-t border-white/5">
                 <!-- If inside a layer, up-dismiss will close it -->
                 <button type="button"
-                   @click="if (window.up) up.layer.dismiss(); else window.location.href='{% url 'tailor_garment_commission_list' %}'"
-                   class="px-8 py-4 bg-slate-800 text-slate-400 font-bold rounded-2xl hover:bg-slate-700 hover:text-white transition-all duration-300 text-sm">
-                    Discard Changes
+                   @click="if (window.up && up.layer.current.isModal()) up.layer.dismiss(); else window.location.href='{% url 'tailor_garment_commission_list' %}'"
+                   class="w-full sm:w-auto px-10 py-4 bg-slate-800 text-slate-400 font-black rounded-2xl hover:bg-slate-700 hover:text-white transition-all duration-300 text-sm tracking-widest uppercase">
+                    Abort
                 </button>
                 <button type="submit" 
-                        class="px-10 py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_30px_rgba(16,185,129,0.3)] text-sm flex items-center">
+                        class="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-black rounded-2xl hover:from-emerald-500 hover:to-teal-400 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] active:scale-[0.98] transition-all duration-300 text-sm tracking-widest uppercase flex items-center justify-center">
                     {% if commission %}
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Update Commission
+                    Confirm Update
                     {% else %}
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Create New Rule
+                    Deploy Rate
                     {% endif %}
                 </button>
             </div>
