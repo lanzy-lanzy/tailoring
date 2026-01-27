@@ -4509,7 +4509,7 @@ def export_inventory_report_pdf(request):
         end_date = today
 
     # Get inventory data
-    fabrics = Fabric.objects.all().order_by("name")
+    fabrics = Fabric.objects.all().order_by("material__name", "color__name")
     accessories = Accessory.objects.all().order_by("name")
 
     low_stock_fabrics = list(

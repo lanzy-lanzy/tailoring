@@ -1115,12 +1115,14 @@ def generate_inventory_report(
         data = []
         for fabric in fabrics:
             total_val = fabric.stock_meters * fabric.price_per_meter
+            material_name = fabric.material.name if fabric.material else "Unknown"
+            color_name = fabric.color.name if fabric.color else "N/A"
             data.append(
                 [
-                    fabric.name[:25] + "..." if len(fabric.name) > 25 else fabric.name,
-                    fabric.color[:15] + "..."
-                    if len(fabric.color) > 15
-                    else fabric.color or "N/A",
+                    material_name[:25] + "..." if len(material_name) > 25 else material_name,
+                    color_name[:15] + "..."
+                    if len(color_name) > 15
+                    else color_name,
                     f"{float(fabric.stock_meters):.2f}",
                     f"P{float(fabric.price_per_meter):,.0f}",
                     f"P{float(total_val):,.0f}",
@@ -1176,7 +1178,8 @@ def generate_inventory_report(
         for log in inventory_logs[:50]:
             item_name = ""
             if log.fabric:
-                item_name = f"[F] {log.fabric.name[:15]}"
+                fabric_name = log.fabric.material.name if log.fabric.material else "Unknown"
+                item_name = f"[F] {fabric_name[:15]}"
             elif log.accessory:
                 item_name = f"[A] {log.accessory.name[:15]}"
             data.append(
