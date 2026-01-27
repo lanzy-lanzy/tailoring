@@ -2869,7 +2869,7 @@ def rework_create(request, order_pk):
 
         # Set choices for fabric and tailor
         form.fields["fabric_used"].choices = [("", "---------")] + [
-            (f.pk, f.name) for f in Fabric.objects.all()
+            (f.pk, str(f)) for f in Fabric.objects.all()
         ]
         form.fields["assigned_to"].choices = [("", "---------")] + [
             (u.pk, u.get_full_name() or u.username)

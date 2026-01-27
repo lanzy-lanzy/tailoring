@@ -106,8 +106,8 @@ Expects: orders (queryset), page_obj (pagination object), search_query (string),
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">
                 <p class="text-green-800 font-medium">{{ order.total_price }}</p>
-                {% if order.balance_amount > 0 %}
-                <p class="text-xs text-salmon-500">Bal: {{ order.balance_amount }}</p>
+                {% if order.remaining_balance > 0 %}
+                <p class="text-xs text-salmon-500">Bal: {{ order.remaining_balance }}</p>
                 {% endif %}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">
